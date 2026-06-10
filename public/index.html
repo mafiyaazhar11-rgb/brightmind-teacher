@@ -1775,7 +1775,7 @@ async function sendMsg(){
   try{
     const boardFull={CBSE:'CBSE',TN:'Tamil Nadu State Board',MH:'Maharashtra State Board',KA:'Karnataka Board',KL:'Kerala Board',AP:'AP Board',TS:'Telangana Board',UP:'UP Board',WB:'WB Board',GJ:'Gujarat Board',RJ:'Rajasthan Board'}[SYL.board]||SYL.board+' Board';
     const sys=LANG_SYS[S.lang]+` You are teaching: Subject: ${SYL.subject||S.sub?.name}. Board: ${boardFull||'CBSE'}. Class: ${S.user?.class||11}. Chapter: ${SYL.chapter||'General'}. Topic: ${SYL.topic||'General'}. Student is from ${S.user?.state||'India'}. Always follow the exact ${boardFull} syllabus. Use textbook examples. Keep explanations aligned to board exam patterns.`;
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+    const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:S.chatHist})});
     const d=await r.json();const rep=d.content?.[0]?.text||'Sorry, please try again!';
     S.chatHist.push({role:'assistant',content:rep});
@@ -1790,7 +1790,7 @@ async function sendMsg(){
 async function assignHW(topic){
   addMsg('ai','📝 **Homework Time!** Generating your homework...');
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+    const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,
         messages:[{role:'user',content:`Create 2 short homework questions for Class ${S.user?.class} student about: "${topic}" in ${S.sub?.name}. Numbered list, concise and clear.`}]})});
     const d=await r.json();const hw=d.content?.[0]?.text||'';
@@ -1813,7 +1813,7 @@ async function startExam(){
   document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">🧠 Generating exam questions...<br><br>Please wait...</div>';
   try{
     const topics=S.chatHist.filter(m=>m.role==='user').map(m=>m.content).join(', ').substring(0,300);
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+    const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,
         messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name}. Topics: ${topics||'general chapter concepts'}. Make questions TOUGH — test deep understanding. Return ONLY a JSON array, no other text:
 [{"q":"question","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"brief explanation"}]`}]})});
@@ -1907,7 +1907,7 @@ async function submitHWAnswer(idx){
   const btn=document.getElementById('hw-sbtn-'+idx);
   if(btn){btn.textContent='Checking... ⏳';btn.disabled=true;}
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+    const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,
         messages:[{role:'user',content:`You are a tough but fair teacher. 
 Question: "${hw.q}"
