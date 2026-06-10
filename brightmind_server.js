@@ -69,13 +69,22 @@ async function initDB() {
 }
 
 // ── HELPERS ───────────────────────────────────────
-function resetDailyIfNeeded(student) {
-  const today = new Date().toDateString();
-  if (student.last_login_date !== today) {
-    student.questions_today = 0;
-    student.last_login_date = today;
-  }
-  return student;
+function sanitize(s) {
+  return {
+    id: s.id, name: s.name, board: s.board || 'CBSE',
+    class: s.class, state: s.state,
+    is_paid: s.is_paid || false, plan: s.plan || 'free',
+    xp: s.xp || 0, streak: s.streak || 0, stars: s.stars || 0,
+    total_questions: s.total_questions || 0,
+    questions_today: s.questions_today || 0,
+    last_study_day: s.last_study_day || null,
+    parent_pin: s.parent_pin || '1234',
+    reg_on: s.reg_on,
+    subjects: s.subjects || {},
+    homework: s.homework || [],
+    exam_hist: s.exam_hist || [],
+    badges: s.badges || []
+  };
 }
 
 // ══════════════════════════════════════════════════
@@ -229,6 +238,20 @@ app.post('/api/parent-login', async (req, res) => {
 // ADMIN ROUTES
 // ══════════════════════════════════════════════════
 
+// ADMIN — Reset any student password
+app.post('/api/admin/reset-password', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== process.env.ADMIN_KEY) return res.status(401).json({ ok: false });
+    const { name, new_password } = req.body;
+    await pool.query('UPDATE bmt_students SET password=$1 WHERE LOWER(name)=LOWER($2)', [new_password, name]);
+    console.log(`🛡️ ADMIN RESET PASSWORD: ${name}`);
+    res.json({ ok: true });
+  } catch (e) {
+    res.json({ ok: false });
+  }
+});
+
 // ADMIN — All students
 app.get('/api/admin/students', async (req, res) => {
   try {
@@ -287,6 +310,23 @@ app.post('/api/payment/verify', async (req, res) => {
     res.json({ ok: true });
   } catch (e) {
     res.json({ ok: false });
+  }
+});
+
+// RESET PASSWORD
+app.post('/api/reset-password', async (req, res) => {
+  try {
+    const { name, new_password } = req.body;
+    if (!name || !new_password) return res.json({ ok: false, msg: 'Name and new password required!' });
+    if (new_password.length < 4) return res.json({ ok: false, msg: 'Password too short!' });
+    const exists = await pool.query('SELECT id FROM bmt_students WHERE LOWER(name)=LOWER($1)', [name]);
+    if (!exists.rows.length) return res.json({ ok: false, msg: 'No student found with that name. Check spelling!' });
+    await pool.query('UPDATE bmt_students SET password=$1 WHERE LOWER(name)=LOWER($2)', [new_password, name]);
+    console.log(`🔑 PASSWORD RESET: ${name}`);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.json({ ok: false, msg: 'Server error. Try again.' });
   }
 });
 
