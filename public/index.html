@@ -1776,8 +1776,10 @@ async function sendMsg(){
     const boardFull={CBSE:'CBSE',TN:'Tamil Nadu State Board',MH:'Maharashtra State Board',KA:'Karnataka Board',KL:'Kerala Board',AP:'AP Board',TS:'Telangana Board',UP:'UP Board',WB:'WB Board',GJ:'Gujarat Board',RJ:'Rajasthan Board'}[SYL.board]||SYL.board+' Board';
     const sys=LANG_SYS[S.lang]+` You are teaching: Subject: ${SYL.subject||S.sub?.name}. Board: ${boardFull||'CBSE'}. Class: ${S.user?.class||11}. Chapter: ${SYL.chapter||'General'}. Topic: ${SYL.topic||'General'}. Student is from ${S.user?.state||'India'}. Always follow the exact ${boardFull} syllabus. Use textbook examples. Keep explanations aligned to board exam patterns.`;
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:S.chatHist})});
-    const d=await r.json();const rep=d.content?.[0]?.text||'Sorry, please try again!';
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sys,messages:S.chatHist})});
+    const d=await r.json();
+    const rep=d.content?.[0]?.text||(d.error?.message)||'Sorry, please try again!';
+    if(d.error){console.error('AI error:',d.error);}
     S.chatHist.push({role:'assistant',content:rep});
     ty.classList.remove('show');addMsg('ai',rep);
     speakText(rep);
@@ -1791,7 +1793,7 @@ async function assignHW(topic){
   addMsg('ai','📝 **Homework Time!** Generating your homework...');
   try{
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:400,
         messages:[{role:'user',content:`Create 2 short homework questions for Class ${S.user?.class} student about: "${topic}" in ${S.sub?.name}. Numbered list, concise and clear.`}]})});
     const d=await r.json();const hw=d.content?.[0]?.text||'';
     if(S.user){if(!S.user.homework)S.user.homework=[];
@@ -1814,7 +1816,7 @@ async function startExam(){
   try{
     const topics=S.chatHist.filter(m=>m.role==='user').map(m=>m.content).join(', ').substring(0,300);
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,
         messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name}. Topics: ${topics||'general chapter concepts'}. Make questions TOUGH — test deep understanding. Return ONLY a JSON array, no other text:
 [{"q":"question","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"brief explanation"}]`}]})});
     const d=await r.json();let raw=d.content?.[0]?.text||'[]';
@@ -1908,7 +1910,7 @@ async function submitHWAnswer(idx){
   if(btn){btn.textContent='Checking... ⏳';btn.disabled=true;}
   try{
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:500,
         messages:[{role:'user',content:`You are a tough but fair teacher. 
 Question: "${hw.q}"
 Student Answer: "${answer}"
