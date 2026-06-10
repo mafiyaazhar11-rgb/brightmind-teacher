@@ -2,7 +2,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const path = require('path');
-const fetch = require('node-fetch');
+// Node 18+ has built-in fetch — no import needed
 
 const app = express();
 app.use(cors());
