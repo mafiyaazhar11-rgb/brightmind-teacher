@@ -319,6 +319,10 @@ app.post('/api/payment/verify', async (req, res) => {
 // ══════════════════════════════════════════════════
 app.post('/api/ai', async (req, res) => {
   try {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error('❌ ANTHROPIC_API_KEY not set!');
+      return res.status(500).json({ error: { message: 'API key not configured on server' } });
+    }
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -329,10 +333,11 @@ app.post('/api/ai', async (req, res) => {
       body: JSON.stringify(req.body)
     });
     const data = await response.json();
+    if (data.error) console.error('Anthropic error:', data.error);
     res.json(data);
   } catch (e) {
     console.error('AI proxy error:', e);
-    res.status(500).json({ error: 'AI service error' });
+    res.status(500).json({ error: { message: 'AI service error: ' + e.message } });
   }
 });
 
