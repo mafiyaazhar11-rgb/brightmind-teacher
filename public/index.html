@@ -521,11 +521,11 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
   </div>
   <div class="splash-title">BrightMind<br><span>Teacher</span></div>
   <div class="splash-tag">Your AI Teacher, Always There</div>
-  <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:14px;animation:fadeUp .7s .25s both;">Supported Languages</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:18px;margin-bottom:8px;font-weight:600;letter-spacing:1px;">SELECT YOUR LANGUAGE</div>
   <div class="splash-langs">
-    <span class="lang-badge">🇬🇧 English</span>
-    <span class="lang-badge">🇮🇳 हिंदी</span>
-    <span class="lang-badge">🇮🇳 தமிழ்</span>
+    <span class="lang-badge" id="lang-en" onclick="setSplashLang('en',this)" style="cursor:pointer;background:var(--gold);color:var(--blue-dark);border-color:var(--gold);">🇬🇧 English</span>
+    <span class="lang-badge" id="lang-hi" onclick="setSplashLang('hi',this)" style="cursor:pointer;">🇮🇳 हिंदी</span>
+    <span class="lang-badge" id="lang-ta" onclick="setSplashLang('ta',this)" style="cursor:pointer;">🇮🇳 தமிழ்</span>
   </div>
   <button class="splash-btn" onclick="go('auth')">Get Started 🚀</button>
   <div class="splash-login" onclick="go('auth')">Already registered? Login</div>
@@ -544,7 +544,26 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
       <div class="fg"><label>Your Name</label><input id="ln" placeholder="Enter your name"/></div>
       <div class="fg"><label>Password</label><input id="lp" type="password" placeholder="Enter password"/></div>
       <button class="btn-main" onclick="doLogin()">Login →</button>
+      <div style="text-align:center;margin-top:4px;">
+        <span onclick="showForgotPassword()" style="font-size:12px;color:var(--blue-bright);cursor:pointer;font-weight:600;">Forgot Password?</span>
+      </div>
       <div class="auth-hint">New student? Click <b>Register</b> to create your account!</div>
+    </div>
+
+    <!-- FORGOT PASSWORD FORM -->
+    <div id="forgot-form" class="auth-form" style="display:none;">
+      <div style="background:#e8eaf6;border-radius:12px;padding:12px 14px;margin-bottom:4px;">
+        <div style="font-size:13px;font-weight:700;color:var(--blue-dark);margin-bottom:3px;">🔑 Reset Password</div>
+        <div style="font-size:12px;color:var(--gray-text);line-height:1.5;">Enter your registered name and create a new password.</div>
+      </div>
+      <div class="fg"><label>Your Registered Name</label><input id="fp-name" placeholder="Enter your name"/></div>
+      <div class="fg"><label>New Password</label><input id="fp-new" type="password" placeholder="Enter new password"/></div>
+      <div class="fg"><label>Confirm New Password</label><input id="fp-confirm" type="password" placeholder="Confirm new password"/></div>
+      <div style="background:#fff3e0;border-radius:10px;padding:10px 12px;font-size:12px;color:#e65100;line-height:1.5;">
+        ⚠️ Make sure you remember your registered name exactly as you typed it during signup.
+      </div>
+      <button class="btn-main" onclick="doResetPassword()">Reset Password →</button>
+      <button onclick="showLoginForm()" style="background:none;border:none;font-size:13px;color:var(--gray-text);cursor:pointer;padding:8px;width:100%;text-align:center;">← Back to Login</button>
     </div>
     <div id="register-form" class="auth-form" style="display:none;">
       <div class="fg"><label>Full Name</label><input id="rn" placeholder="Enter your full name"/></div>
@@ -1251,6 +1270,54 @@ function switchTab(t,el){
   document.getElementById('login-form').style.display=t==='login'?'flex':'none';
   document.getElementById('register-form').style.display=t==='register'?'flex':'none';
   document.getElementById('parent-form').style.display=t==='parent'?'flex':'none';
+  document.getElementById('forgot-form').style.display='none';
+}
+
+// LANGUAGE SELECTION ON SPLASH
+function setSplashLang(lang, el){
+  S.lang=lang;
+  document.querySelectorAll('.lang-badge').forEach(b=>{
+    b.style.background='rgba(255,255,255,.12)';
+    b.style.color='#fff';
+    b.style.borderColor='rgba(255,255,255,.2)';
+  });
+  el.style.background='var(--gold)';
+  el.style.color='var(--blue-dark)';
+  el.style.borderColor='var(--gold)';
+  // Update lang selector in chat too
+  const sel=document.getElementById('lang-sel');
+  if(sel)sel.value=lang;
+}
+
+// FORGOT PASSWORD
+function showForgotPassword(){
+  document.getElementById('login-form').style.display='none';
+  document.getElementById('forgot-form').style.display='flex';
+  document.querySelectorAll('.auth-tab').forEach(x=>x.classList.remove('active'));
+}
+function showLoginForm(){
+  document.getElementById('forgot-form').style.display='none';
+  document.getElementById('login-form').style.display='flex';
+  document.querySelectorAll('.auth-tab')[0].classList.add('active');
+}
+async function doResetPassword(){
+  const name=document.getElementById('fp-name').value.trim();
+  const newPass=document.getElementById('fp-new').value;
+  const confirm=document.getElementById('fp-confirm').value;
+  if(!name||!newPass||!confirm){alert('Please fill all fields!');return;}
+  if(newPass!==confirm){alert('Passwords do not match!');return;}
+  if(newPass.length<4){alert('Password must be at least 4 characters!');return;}
+  const btn=document.querySelector('#forgot-form .btn-main');
+  if(btn){btn.textContent='Resetting...';btn.disabled=true;}
+  const res=await apiPost('/api/reset-password',{name,new_password:newPass});
+  if(btn){btn.textContent='Reset Password →';btn.disabled=false;}
+  if(res.ok){
+    alert('✅ Password reset successfully! Please login with your new password.');
+    showLoginForm();
+    document.getElementById('ln').value=name;
+  } else {
+    alert(res.msg||'Reset failed. Please check your name and try again.');
+  }
 }
 async function doRegister(){
   const n=document.getElementById('rn').value.trim(),
@@ -2105,6 +2172,7 @@ async function renderAdmin(){
         <div class="asr-stat"><div class="sv">${Math.max(0,...(u.examHist||[]).map(e=>e.score))||'—'}</div><div class="sl">Best</div></div>
         <div class="asr-stat"><div class="sv">${(u.homework||[]).filter(h=>h.done).length}/${(u.homework||[]).length}</div><div class="sl">HW Done</div></div>
       </div>
+      <button onclick="adminResetPwd('${u.name}')" style="margin-top:8px;background:#e8eaf6;color:var(--blue-mid);border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">🔑 Reset Password</button>
     </div>`).join('');
 }
 
@@ -2127,6 +2195,16 @@ function changeParentPIN(){
   const newPin=prompt('Enter new 4-digit Parent PIN:');
   if(!newPin||newPin.length!==4||isNaN(newPin)){alert('PIN must be exactly 4 digits!');return;}
   if(S.user){S.user.parentPin=newPin;saveUser();renderProfile();alert('✅ Parent PIN updated to: '+newPin);}
+}
+async function adminResetPwd(name){
+  const newPass=prompt(`Reset password for ${name}:\nEnter new password:`);
+  if(!newPass||newPass.length<4){alert('Password must be at least 4 characters!');return;}
+  const res=await fetch(API_URL+'/api/admin/reset-password',{
+    method:'POST',headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},
+    body:JSON.stringify({name,new_password:newPass})});
+  const d=await res.json();
+  if(d.ok){alert(`✅ Password for ${name} reset successfully!`);}
+  else{alert('Reset failed!');}
 }
 function saveUser(){
   if(!S.user)return;
