@@ -25,6 +25,8 @@ async function initDB() {
       board VARCHAR(20) DEFAULT 'CBSE',
       class VARCHAR(5) NOT NULL,
       state VARCHAR(50) NOT NULL,
+      email VARCHAR(150) UNIQUE,
+      mobile VARCHAR(15),
       is_paid BOOLEAN DEFAULT FALSE,
       plan VARCHAR(20) DEFAULT 'free',
       subscription_type VARCHAR(20) DEFAULT 'monthly',
@@ -45,6 +47,22 @@ async function initDB() {
       homework JSONB DEFAULT '[]',
       exam_hist JSONB DEFAULT '[]',
       badges JSONB DEFAULT '[]'
+    );
+
+    -- Add columns if not exists (for existing deployments)
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS mobile VARCHAR(15);
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS email VARCHAR(150) UNIQUE;
+
+    CREATE TABLE IF NOT EXISTS bmt_support (
+      id BIGSERIAL PRIMARY KEY,
+      student_id BIGINT,
+      student_name VARCHAR(100),
+      email VARCHAR(150),
+      plan VARCHAR(20),
+      issue_type VARCHAR(50),
+      message TEXT,
+      status VARCHAR(20) DEFAULT 'open',
+      created_at TIMESTAMP DEFAULT NOW()
     );
 
     CREATE TABLE IF NOT EXISTS bmt_leaderboard (
@@ -99,7 +117,7 @@ async function initDB() {
 // ── HELPERS ───────────────────────────────────────
 function sanitize(s) {
   return {
-    id: s.id, name: s.name, board: s.board || 'CBSE',
+    id: s.id, name: s.name, email: s.email||null, board: s.board || 'CBSE',
     class: s.class, state: s.state,
     is_paid: s.is_paid || false, plan: s.plan || 'free',
     xp: s.xp || 0, streak: s.streak || 0, stars: s.stars || 0,
@@ -122,18 +140,35 @@ function sanitize(s) {
 // REGISTER
 app.post('/api/register', async (req, res) => {
   try {
-    const { name, password, board, class: cls, state } = req.body;
+    const { name, password, board, class: cls, state, mobile, email } = req.body;
     if (!name || !password || !cls || !state) return res.json({ ok: false, msg: 'Please fill all fields!' });
 
+    // Check name taken
     const exists = await pool.query('SELECT id FROM bmt_students WHERE LOWER(name)=LOWER($1)', [name]);
-    if (exists.rows.length > 0) return res.json({ ok: false, msg: 'Name already taken! Try another.' });
+    if (exists.rows.length > 0) return res.json({ ok: false, msg: 'Name already taken! Try a different name.' });
 
-    const result = await pool.query(
-      `INSERT INTO bmt_students (name, password, board, class, state, reg_on)
-       VALUES ($1,$2,$3,$4,$5,NOW()) RETURNING *`,
-      [name, password, board || 'CBSE', cls, state]
+    // Check email already used — prevents free trial abuse
+    if (email) {
+      const emailExists = await pool.query('SELECT id, name FROM bmt_students WHERE LOWER(email)=LOWER($1)', [email]);
+      if (emailExists.rows.length > 0) {
+        return res.json({ ok: false, msg: `This email already has an account (${emailExists.rows[0].name}). Each email gets one free trial. Please login to your existing account!` });
+      }
+    }
+
+    await pool.query(
+      `INSERT INTO bmt_students (name, password, board, class, state, email, mobile, reg_on)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())`,
+      [name, password, board || 'CBSE', cls, state, email || null, mobile || null]
     );
-    console.log(`📝 NEW STUDENT: ${name} | Class ${cls} | ${state} | ${board}`);
+
+    // Audit log
+    await pool.query(
+      `INSERT INTO bmt_audit_log (student_name, action, details)
+       VALUES ($1,'REGISTER',$2)`,
+      [name, JSON.stringify({ class: cls, state, board, mobile: mobile ? mobile.substring(0,6)+'****' : 'not provided' })]
+    ).catch(()=>{});
+
+    console.log(`📝 NEW STUDENT: ${name} | Class ${cls} | ${state} | Mobile: ${mobile||'not given'}`);
     res.json({ ok: true, msg: 'Account created! Please login.' });
   } catch (e) {
     console.error(e);
@@ -144,11 +179,14 @@ app.post('/api/register', async (req, res) => {
 // LOGIN
 app.post('/api/login', async (req, res) => {
   try {
-    const { name, password } = req.body;
-    const result = await pool.query(
-      'SELECT * FROM bmt_students WHERE LOWER(name)=LOWER($1)', [name]
-    );
-    if (!result.rows.length) return res.json({ ok: false, msg: 'Name not found!' });
+    const { email, password, name } = req.body;
+    // Support login by email or name
+    const query = email 
+      ? 'SELECT * FROM bmt_students WHERE LOWER(email)=LOWER($1)'
+      : 'SELECT * FROM bmt_students WHERE LOWER(name)=LOWER($1)';
+    const identifier = email || name;
+    const result = await pool.query(query, [identifier]);
+    if (!result.rows.length) return res.json({ ok: false, msg: email ? 'Email not found! Please check your email or register.' : 'Name not found!' });
     const student = result.rows[0];
     if (student.password !== password) return res.json({ ok: false, msg: 'Wrong password!' });
 
@@ -163,14 +201,16 @@ app.post('/api/login', async (req, res) => {
       student.last_login_date = today;
     }
 
-    console.log(`🔑 LOGIN: ${student.name} | Class ${student.class} | ${student.state}`);
+    console.log(`🔑 LOGIN: ${student.name} | ${student.email||'no email'} | Class ${student.class} | ${student.state}`);
 
     // Log to audit
     await pool.query(
       `INSERT INTO bmt_audit_log (student_id, student_name, action, details)
        VALUES ($1, $2, 'LOGIN', $3)`,
       [student.id, student.name, JSON.stringify({
+        email: student.email||'not provided',
         class: student.class, state: student.state,
+        plan: student.is_paid ? 'PAID' : 'FREE',
         ip: req.ip, time: new Date().toISOString()
       })]
     ).catch(()=>{});
@@ -336,6 +376,34 @@ app.get('/api/admin/stats', async (req, res) => {
     });
   } catch (e) {
     res.json({ ok: false });
+  }
+});
+
+// CREATE RAZORPAY ORDER (proper integration)
+app.post('/api/payment/create-order', async (req, res) => {
+  try {
+    const { amount, plan, student_id, student_name, subscription_type } = req.body;
+    const orderRes = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic ' + Buffer.from(
+          process.env.RAZORPAY_KEY_ID + ':' + process.env.RAZORPAY_KEY_SECRET
+        ).toString('base64')
+      },
+      body: JSON.stringify({
+        amount: amount * 100, // paise
+        currency: 'INR',
+        receipt: `bmt_${student_id}_${Date.now()}`,
+        notes: { student_id, student_name, plan, subscription_type }
+      })
+    });
+    const order = await orderRes.json();
+    console.log(`📋 ORDER CREATED: ${order.id} | ₹${amount} | ${student_name}`);
+    res.json({ ok: true, order_id: order.id, amount: order.amount });
+  } catch (e) {
+    console.error('Order creation error:', e);
+    res.json({ ok: false, msg: 'Could not create order' });
   }
 });
 
@@ -547,6 +615,42 @@ app.get('/api/admin/revenue', async (req, res) => {
     const total = payments.rows.reduce((s, p) => s + (p.amount || 0), 0);
     res.json({ ok: true, payments: payments.rows, total });
   } catch (e) { res.json({ ok: false, payments: [], total: 0 }); }
+});
+
+// STUDENT SUPPORT MESSAGE
+app.post('/api/support', async (req, res) => {
+  try {
+    const { student_id, student_name, email, plan, issue_type, message } = req.body;
+    await pool.query(
+      `INSERT INTO bmt_support (student_id, student_name, email, plan, issue_type, message)
+       VALUES ($1,$2,$3,$4,$5,$6)`,
+      [student_id, student_name, email, plan, issue_type, message]
+    );
+    // Also log to audit
+    await pool.query(
+      `INSERT INTO bmt_audit_log (student_id, student_name, action, details)
+       VALUES ($1,$2,'SUPPORT',$3)`,
+      [student_id, student_name, JSON.stringify({issue_type, message: message.substring(0,100)})]
+    ).catch(()=>{});
+    console.log(`💬 SUPPORT: ${student_name} | ${issue_type} | ${message.substring(0,50)}`);
+    res.json({ ok: true });
+  } catch (e) {
+    res.json({ ok: false });
+  }
+});
+
+// ADMIN — Support Messages
+app.get('/api/admin/support', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== process.env.ADMIN_KEY) return res.status(401).json({ ok: false });
+    const msgs = await pool.query(
+      `SELECT * FROM bmt_support ORDER BY created_at DESC LIMIT 100`
+    );
+    res.json({ ok: true, messages: msgs.rows });
+  } catch (e) {
+    res.json({ ok: false, messages: [] });
+  }
 });
 
 // HEALTH CHECK
