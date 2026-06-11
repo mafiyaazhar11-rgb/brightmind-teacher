@@ -1614,7 +1614,6 @@ async function doResetPassword(){
 async function doRegister(){
   const n=document.getElementById('rn').value.trim(),
         email=document.getElementById('remail').value.trim(),
-        mobile=document.getElementById('rmobile')?.value?.trim()||'',
         board=document.getElementById('rboard').value,
         c=document.getElementById('rc').value,
         st=document.getElementById('rs').value,
@@ -1623,7 +1622,7 @@ async function doRegister(){
   if(!email.includes('@')||!email.includes('.')){alert('Please enter a valid email address!');return;}
   const btn=document.querySelector('#register-form .btn-gold');
   if(btn){btn.textContent='Creating...';btn.disabled=true;}
-  const res=await apiPost('/api/register',{name:n,password:p,board,class:c,state:st,email,mobile});
+  const res=await apiPost('/api/register',{name:n,password:p,board,class:c,state:st,email});
   if(btn){btn.textContent='Create Account ✨';btn.disabled=false;}
   if(res.ok){alert('✅ Account created! Please login with your email.');}
   else{alert(res.msg||'Registration failed. Please try again.');}
@@ -3273,15 +3272,7 @@ async function verifyPayment(response, amount, plan, subscription_type='monthly'
     renderLimitBar();
     renderTrialBanner(S.user);
 
-    // Try server activation (best effort)
-    apiPost('/api/payment/verify',{
-      student_id:S.user.id,
-      student_name:S.user.name,
-      amount:amount,
-      plan:plan,
-      subscription_type:subscription_type,
-      razorpay_id:response.razorpay_payment_id
-    }).catch(()=>{});
+    // Server already called above — payment saved
 
     // Close paywall
     document.getElementById('paywall-overlay').classList.remove('open');
