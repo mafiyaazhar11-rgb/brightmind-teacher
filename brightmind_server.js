@@ -617,6 +617,19 @@ app.get('/api/admin/revenue', async (req, res) => {
   } catch (e) { res.json({ ok: false, payments: [], total: 0 }); }
 });
 
+// ADMIN — Get single student for admin view
+app.get('/api/admin/get-student/:id', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== process.env.ADMIN_KEY) return res.status(401).json({ ok: false });
+    const result = await pool.query('SELECT * FROM bmt_students WHERE id=$1', [req.params.id]);
+    if (!result.rows.length) return res.json({ ok: false });
+    res.json({ ok: true, student: sanitize(result.rows[0]) });
+  } catch (e) {
+    res.json({ ok: false });
+  }
+});
+
 // ADMIN — Extend student access
 app.post('/api/admin/extend-access', async (req, res) => {
   try {
