@@ -343,6 +343,25 @@ app.get('/api/admin/stats', async (req, res) => {
 app.post('/api/payment/verify', async (req, res) => {
   try {
     const { student_id, student_name, amount, plan, razorpay_id, subscription_type } = req.body;
+
+    // Capture the payment via Razorpay API to prevent auto-refund
+    if (razorpay_id && process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+      try {
+        const captureRes = await fetch(`https://api.razorpay.com/v1/payments/${razorpay_id}/capture`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + Buffer.from(process.env.RAZORPAY_KEY_ID + ':' + process.env.RAZORPAY_KEY_SECRET).toString('base64')
+          },
+          body: JSON.stringify({ amount: amount * 100, currency: 'INR' })
+        });
+        const captureData = await captureRes.json();
+        console.log(`💳 CAPTURE: ${razorpay_id} | Status: ${captureData.status}`);
+      } catch (captureErr) {
+        console.log('Capture note:', captureErr.message);
+        // Continue even if capture fails — payment may already be captured
+      }
+    }
     const now = new Date();
     let subEnd = new Date(now);
     let nextDue = new Date(now);
