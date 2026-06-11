@@ -676,8 +676,8 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
       </div>
       <div id="trial-banner-wrap"></div>
       <div class="upgrade-banner" onclick="showModal('sub-modal')">
-        <div class="ub-left"><div class="t">🚀 Unlock Everything</div><div class="s">Unlimited · All subjects · Exams · History</div></div>
-        <div class="ub-price">₹99<small>/mo</small></div>
+        <div class="ub-left"><div class="t">🎉 Launch Offer — Till Aug 31!</div><div class="s">All subjects · Unlimited · Exams · ₹399 → ₹199</div></div>
+        <div class="ub-price">₹199<small>/mo</small></div>
       </div>
       <div class="sec-title">📚 Choose Your Subject</div>
       <div class="subj-grid" id="subj-grid"></div>
@@ -1008,7 +1008,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
     <div class="revenue-card">
       <div class="rc-label">💰 Total Monthly Revenue</div>
       <div class="rc-amount" id="adm-rev">₹0</div>
-      <div class="rc-sub" id="adm-rev-sub">0 paid × ₹99/month</div>
+      <div class="rc-sub" id="adm-rev-sub">0 paid × ₹199/month</div>
     </div>
     <div class="admin-stats">
       <div class="asc"><div class="asc-label">Total Students</div><div class="asc-val blue" id="adm-total">0</div></div>
@@ -1029,14 +1029,32 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
     <div class="paywall-icon">🔒</div>
     <div class="paywall-title">Your Free Trial Ended!</div>
     <div class="paywall-sub">You have used your free day. Subscribe now to continue learning with your AI teacher — cheaper than one tuition class!</div>
+    <div style="background:linear-gradient(135deg,#ff6f00,#ff8f00);border-radius:12px;padding:10px 14px;text-align:center;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:800;color:#fff;">🎉 LAUNCH OFFER — Valid till 31st August 2026!</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.9);margin-top:2px;">Founding member price — Limited time only!</div>
+    </div>
     <div class="paywall-plans">
       <div class="paywall-plan" onclick="selPaywallPlan(this,'single')">
-        <div><div class="pn">Single Subject</div><div class="pd">1 subject · Unlimited · AI tutor</div></div>
-        <div class="pp">₹120<small>/mo</small></div>
+        <div>
+          <div class="pn">Single Subject</div>
+          <div class="pd">1 subject · Unlimited · AI tutor</div>
+          <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Was ₹249 · Save 52%!</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹249</div>
+          <div class="pp">₹120<small>/mo</small></div>
+        </div>
       </div>
       <div class="paywall-plan hot" onclick="selPaywallPlan(this,'all')">
-        <div><div class="pn">All Subjects <span class="hot-tag">BEST</span></div><div class="pd">All subjects · Exams · Leaderboard · Rank Card</div></div>
-        <div class="pp">₹199<small>/mo</small></div>
+        <div>
+          <div class="pn">All Subjects <span class="hot-tag">BEST</span></div>
+          <div class="pd">All subjects · Exams · Leaderboard · Rank Card</div>
+          <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Was ₹399 · Save 50%!</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹399</div>
+          <div class="pp">₹199<small>/mo</small></div>
+        </div>
       </div>
     </div>
     <div class="paywall-features">
@@ -1085,13 +1103,31 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
     <div class="modal-title">Choose Your Plan 🎓</div>
     <div class="modal-sub">Unlock the full BrightMind Teacher experience</div>
     <div class="plan-opts">
+      <div style="background:linear-gradient(135deg,#ff6f00,#ff8f00);border-radius:12px;padding:10px 14px;text-align:center;margin-bottom:4px;">
+        <div style="font-size:13px;font-weight:800;color:#fff;">🎉 LAUNCH OFFER — Valid till 31st August 2026!</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.9);margin-top:2px;">Special founding member price — Save up to 50%!</div>
+      </div>
       <div class="plan-opt" onclick="selPlan(this)">
-        <div><div class="pn">Single Subject</div><div class="pd">One subject · Unlimited · History</div></div>
-        <div class="pp">₹49<small>/mo</small></div>
+        <div>
+          <div class="pn">Single Subject</div>
+          <div class="pd">One subject · Unlimited · History</div>
+          <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Regular price ₹249 · Save ₹129!</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;color:var(--gray-text);text-decoration:line-through;">₹249</div>
+          <div class="pp">₹120<small>/mo</small></div>
+        </div>
       </div>
       <div class="plan-opt sel" onclick="selPlan(this)">
-        <div><div class="pn">All Subjects <span class="best-val">BEST VALUE</span></div><div class="pd">All subjects · Homework · Exams · Leaderboard</div></div>
-        <div class="pp">₹99<small>/mo</small></div>
+        <div>
+          <div class="pn">All Subjects <span class="best-val">BEST VALUE</span></div>
+          <div class="pd">All subjects · Homework · Exams · Leaderboard</div>
+          <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Regular price ₹399 · Save ₹200!</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;color:var(--gray-text);text-decoration:line-through;">₹399</div>
+          <div class="pp">₹199<small>/mo</small></div>
+        </div>
       </div>
     </div>
     <button class="btn-main" onclick="subscribePlan()">Subscribe with Razorpay →</button>
@@ -2407,7 +2443,7 @@ function renderParentView(u){
   const passedExams=(u.examHist||[]).filter(e=>e.passed&&new Date(e.date)>thisWeek);
   if(passedExams.length>0)alerts.push({type:'good',icon:'🎉',title:'Exam Passed!',msg:`${u.name} passed ${passedExams.map(e=>e.subject).join(', ')}! Great progress this week.`});
   if(u.totalQ>10)alerts.push({type:'info',icon:'📖',title:'Active Learner',msg:`${u.name} has asked ${u.totalQ} questions to the AI teacher. They are studying regularly!`});
-  if(!u.isPaid)alerts.push({type:'info',icon:'🚀',title:'Upgrade Available',msg:`${u.name} is on the free plan (5 questions/day). Upgrade to Premium for ₹99/month to unlock unlimited access.`});
+  if(!u.isPaid)alerts.push({type:'info',icon:'🚀',title:'Upgrade Available',msg:`${u.name} is on the free plan (5 questions/day). Upgrade to Premium for ₹199/month to unlock unlimited access.`});
   if(alerts.length===0)alerts.push({type:'info',icon:'✅',title:'All Good!',msg:`No alerts right now. ${u.name} is doing well!`});
   document.getElementById('p-alerts').innerHTML=alerts.map(a=>`
     <div class="alert-card ${a.type}"><div class="alert-icon">${a.icon}</div>
@@ -2462,7 +2498,7 @@ async function renderAdmin(){
   const st=students; const paid=students.filter(x=>x.is_paid);
   const unused_rev=rev; // suppress lint
   document.getElementById('adm-rev').textContent='₹'+rev.toLocaleString('en-IN');
-  document.getElementById('adm-rev-sub').textContent=paid.length+' paid × ₹99/month';
+  document.getElementById('adm-rev-sub').textContent=paid.length+' paid × ₹199/month';
   document.getElementById('adm-total').textContent=st.length;
   document.getElementById('adm-paid').textContent=paid.length;
   document.getElementById('adm-free').textContent=st.length-paid.length;
@@ -2496,7 +2532,7 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
 function selPlan(el){document.querySelectorAll('.plan-opt').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');}
 function subscribePlan(){
   const sel=document.querySelector('.plan-opt.sel');
-  const amount=sel?.querySelector('.pp')?.textContent?.includes('99')?199:120;
+  const amount=sel?.querySelector('.pp')?.textContent?.includes('199')?199:120;
   const plan=amount===199?'all':'single';
   closeModal('sub-modal');
   openRazorpay(amount,plan);
