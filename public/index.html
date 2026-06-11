@@ -562,8 +562,11 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
   <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:18px;margin-bottom:8px;font-weight:600;letter-spacing:1px;">SELECT YOUR LANGUAGE</div>
   <div class="splash-langs">
     <span class="lang-badge" id="lang-en" onclick="setSplashLang('en',this)" style="cursor:pointer;background:var(--gold);color:var(--blue-dark);border-color:var(--gold);">🇬🇧 English</span>
-    <span class="lang-badge" id="lang-hi" onclick="setSplashLang('hi',this)" style="cursor:pointer;">🇮🇳 हिंदी</span>
-    <span class="lang-badge" id="lang-ta" onclick="setSplashLang('ta',this)" style="cursor:pointer;">🇮🇳 தமிழ்</span>
+    <span class="lang-badge" id="lang-hi" onclick="setSplashLang('hi',this)" style="cursor:pointer;">हिंदी</span>
+    <span class="lang-badge" id="lang-ta" onclick="setSplashLang('ta',this)" style="cursor:pointer;">தமிழ்</span>
+    <span class="lang-badge" id="lang-ml" onclick="setSplashLang('ml',this)" style="cursor:pointer;">മലയാളം</span>
+    <span class="lang-badge" id="lang-kn" onclick="setSplashLang('kn',this)" style="cursor:pointer;">ಕನ್ನಡ</span>
+    <span class="lang-badge" id="lang-te" onclick="setSplashLang('te',this)" style="cursor:pointer;">తెలుగు</span>
   </div>
   <button class="splash-btn" onclick="go('auth')">Get Started 🚀</button>
   <div class="splash-login" onclick="go('auth')">Already registered? Login</div>
@@ -608,18 +611,25 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
       <div class="fg"><label>Board</label>
         <select id="rboard" onchange="onBoardChange()">
           <option value="">Select Board</option>
-          <option value="CBSE">CBSE</option>
-          <option value="TN">Tamil Nadu State Board</option>
-          <option value="MH">Maharashtra State Board</option>
-          <option value="KA">Karnataka State Board</option>
-          <option value="KL">Kerala State Board</option>
-          <option value="AP">Andhra Pradesh State Board</option>
-          <option value="TS">Telangana State Board</option>
-          <option value="UP">Uttar Pradesh State Board</option>
-          <option value="WB">West Bengal State Board</option>
-          <option value="GJ">Gujarat State Board</option>
-          <option value="RJ">Rajasthan State Board</option>
-          <option value="OTHER">Other State Board</option>
+          <optgroup label="🌟 All India">
+            <option value="CBSE">CBSE (All India)</option>
+            <option value="ICSE">ICSE (All India)</option>
+          </optgroup>
+          <optgroup label="🌴 South India">
+            <option value="TN">Tamil Nadu State Board</option>
+            <option value="KL">Kerala State Board (SCERT)</option>
+            <option value="KA">Karnataka State Board (KSEEB)</option>
+            <option value="AP">Andhra Pradesh State Board (BSEAP)</option>
+            <option value="TS">Telangana State Board (BSETS)</option>
+          </optgroup>
+          <optgroup label="🗺️ Other States">
+            <option value="MH">Maharashtra State Board</option>
+            <option value="UP">Uttar Pradesh State Board</option>
+            <option value="WB">West Bengal State Board</option>
+            <option value="GJ">Gujarat State Board</option>
+            <option value="RJ">Rajasthan State Board</option>
+            <option value="OTHER">Other State Board</option>
+          </optgroup>
         </select>
       </div>
       <div class="fg"><label>Class</label>
@@ -781,7 +791,12 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
     <div class="chat-subj-icon" id="chat-icon">📐</div>
     <div class="chat-subj-info"><div class="n" id="chat-sname">Mathematics</div><div class="s" id="chat-ssub">Class 11 · Ask anything!</div></div>
     <select class="chat-lang" id="lang-sel" onchange="changeLang()">
-      <option value="en">English</option><option value="hi">हिंदी</option><option value="ta">தமிழ்</option>
+      <option value="en">English</option>
+      <option value="hi">हिंदी</option>
+      <option value="ta">தமிழ்</option>
+      <option value="ml">മലയാളം</option>
+      <option value="kn">ಕನ್ನಡ</option>
+      <option value="te">తెలుగు</option>
     </select>
   </div>
 
@@ -883,22 +898,24 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 <!-- ══ BLACKBOARD OVERLAY ══ -->
 <div id="blackboard-overlay">
   <div class="bb-hdr">
-    <span style="font-size:20px;">🖊️</span>
-    <div class="bb-title" id="bb-title">Miss BrightMind's Blackboard</div>
+    <span style="font-size:18px;">✏️</span>
+    <div class="bb-title" id="bb-title">📐 Miss BrightMind's Blackboard</div>
     <button class="bb-close" onclick="closeBlackboard()">✕</button>
   </div>
   <div class="bb-tools">
     <button class="bb-tool active" onclick="bbMode(this,'solve')">🔢 Solve Step by Step</button>
     <button class="bb-tool" onclick="bbMode(this,'explain')">📖 Explain Concept</button>
-    <button class="bb-tool" onclick="bbMode(this,'formula')">📐 Show Formula</button>
+    <button class="bb-tool" onclick="bbMode(this,'formula')">📐 Show Formulas</button>
     <button class="bb-tool" onclick="bbMode(this,'example')">✏️ Worked Example</button>
     <button class="bb-tool" onclick="bbMode(this,'diagram')">🔬 Diagram</button>
   </div>
-  <div class="bb-canvas-wrap" id="bb-canvas"></div>
+  <div class="bb-board" id="bb-canvas">
+    <!-- Blackboard content renders here -->
+  </div>
   <div class="bb-footer">
-    <input class="bb-ask-inp" id="bb-inp" placeholder="Type problem or question for blackboard..." 
+    <input class="bb-ask-inp" id="bb-inp" placeholder="Write your question on the board..." 
       onkeydown="if(event.key==='Enter')sendToBlackboard()"/>
-    <button class="bb-send" onclick="sendToBlackboard()">➤</button>
+    <button class="bb-send" onclick="sendToBlackboard()">✏</button>
   </div>
 </div>
 
@@ -1246,8 +1263,11 @@ const SUBJECTS=[
 ];
 const LANG_SYS={
   en:'You are BrightMind Teacher, an expert AI tutor for Indian Class 9-12 students. Explain concepts clearly step by step. Use simple English. Give Indian context examples. Be warm, encouraging and supportive like a good teacher.',
-  hi:'आप BrightMind Teacher हैं, कक्षा 9-12 के भारतीय छात्रों के लिए AI शिक्षक। हिंदी में सरल भाषा में कदम दर कदम समझाएं।',
-  ta:'நீங்கள் BrightMind Teacher, வகுப்பு 9-12 மாணவர்களுக்கான AI ஆசிரியர். தமிழில் எளிமையாக படிப்படியாக விளக்கவும்.'
+  hi:'आप BrightMind Teacher हैं, कक्षा 9-12 के भारतीय छात्रों के लिए AI शिक्षक। हिंदी में सरल भाषा में कदम दर कदम समझाएं। भारतीय उदाहरण दें। प्रोत्साहित करें।',
+  ta:'நீங்கள் BrightMind Teacher, வகுப்பு 9-12 மாணவர்களுக்கான AI ஆசிரியர். தமிழில் எளிமையாக படிப்படியாக விளக்கவும். இந்திய உதாரணங்கள் கொடுங்கள். ஊக்கமளியுங்கள்.',
+  ml:'നിങ്ങൾ BrightMind Teacher ആണ്, ക്ലാസ് 9-12 വിദ്യാർഥികൾക്കുള്ള AI അദ്ധ്യാപകൻ. മലയാളത്തിൽ ലളിതമായി ഘട്ടം ഘട്ടമായി വിശദീകരിക്കുക. ഇന്ത്യൻ ഉദാഹരണങ്ങൾ നൽകുക. പ്രോത്സാഹിപ്പിക്കുക.',
+  kn:'ನೀವು BrightMind Teacher, ತರಗತಿ 9-12 ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ AI ಶಿಕ್ಷಕ. ಕನ್ನಡದಲ್ಲಿ ಸರಳವಾಗಿ ಹಂತ ಹಂತವಾಗಿ ವಿವರಿಸಿ. ಭಾರತೀಯ ಉದಾಹರಣೆಗಳನ್ನು ನೀಡಿ. ಪ್ರೋತ್ಸಾಹಿಸಿ.',
+  te:'మీరు BrightMind Teacher, తరగతి 9-12 విద్యార్థులకు AI ఉపాధ్యాయుడు. తెలుగులో సరళంగా దశలవారీగా వివరించండి. భారతీయ ఉదాహరణలు ఇవ్వండి. ప్రోత్సహించండి.'
 };
 const DEMO_LB=[
   {name:'Arjun Kumar',state:'Tamil Nadu',score:98,stars:5,class:'11'},
@@ -1642,6 +1662,36 @@ const SYLLABUS={
     12:{Mathematics:{icon:'📐',chapters:['Mathematical Logic','Matrices','Trigonometric Functions','Pairs of Straight Lines','Vectors','Line and Plane','Linear Programming','Differentiation','Applications of Derivatives','Integration','Applications of Integrals','Differential Equations','Probability Distributions','Binomial Distribution']},Physics:{icon:'⚛️',chapters:['Rotational Dynamics','Mechanical Properties of Fluids','Kinetic Theory','Thermodynamics','Oscillations','Superposition of Waves','Wave Optics','Electrostatics','Current Electricity','Magnetic Fields','Electromagnetic Induction','AC Circuits','Dual Nature','Structure of Atoms','Nuclei','Semiconductors']},Chemistry:{icon:'🧪',chapters:['Solid State','Solutions','Ionic Equilibria','Chemical Thermodynamics','Electrochemistry','Chemical Kinetics','Elements of Groups 16 17 18','Transition and Inner Transition','Coordination Compounds','Halogen Derivatives','Aldehydes Ketones Carboxylic Acids','Amines','Biomolecules','Introduction to Polymer Chemistry','Chemistry in Everyday Life']}}
   }
 };
+// ── SOUTH INDIA ADDITIONAL BOARDS ────────────────
+const SOUTH_SYLLABUS={
+  KL:{
+    9:{Mathematics:{icon:'📐',chapters:['Real Numbers','Polynomials','Pair of Linear Equations','Similar Triangles','Trigonometry','Circles','Mensuration','Statistics','Probability','Coordinate Geometry']},Science:{icon:'🔬',chapters:['Matter in Our Surroundings','Is Matter Around Us Pure','Atoms and Molecules','Structure of Atom','The Living World','Tissues','Motion','Force and Laws of Motion','Gravitation','Work and Energy','Sound','Natural Resources']},English:{icon:'📖',chapters:['Prose','Poetry','Grammar','Writing Skills','Comprehension']},Malayalam:{icon:'📜',chapters:['ഗദ്യം','പദ്യം','വ്യാകരണം','രചന','ഭാഷാപഠനം']}},
+    10:{Mathematics:{icon:'📐',chapters:['Real Numbers','Polynomials','Pair of Linear Equations','Quadratic Equations','AP','Triangles','Coordinate Geometry','Trigonometry','Applications of Trigonometry','Circles','Constructions','Areas','Surface Areas','Statistics','Probability']},Science:{icon:'🔬',chapters:['Chemical Reactions','Acids Bases Salts','Metals Non-metals','Carbon Compounds','Periodic Table','Life Processes','Control Coordination','Reproduction','Heredity Evolution','Light','Human Eye','Electricity','Magnetic Effects','Energy Sources','Environment']},Malayalam:{icon:'📜',chapters:['ഗദ്യം','പദ്യം','നോവൽ','നാടകം','വ്യാകരണം','ഉപന്യാസം','കത്ത്']}},
+    11:{Mathematics:{icon:'📐',chapters:['Sets','Relations Functions','Trigonometric Functions','Principle of Induction','Complex Numbers','Linear Inequalities','Permutations Combinations','Binomial Theorem','Sequences Series','Straight Lines','Conic Sections','3D Geometry','Limits Derivatives','Statistics','Probability']},Physics:{icon:'⚛️',chapters:['Physical World','Units Measurements','Motion Straight Line','Motion in Plane','Laws of Motion','Work Energy Power','Systems of Particles','Gravitation','Mechanical Properties Solids','Mechanical Properties Fluids','Thermal Properties','Thermodynamics','Kinetic Theory','Oscillations','Waves']},Chemistry:{icon:'🧪',chapters:['Basic Concepts','Structure of Atom','Classification of Elements','Chemical Bonding','States of Matter','Thermodynamics','Equilibrium','Redox Reactions','Hydrogen','s-Block','p-Block','Organic Chemistry Basics','Hydrocarbons','Environmental Chemistry']},Biology:{icon:'🌱',chapters:['The Living World','Biological Classification','Plant Kingdom','Animal Kingdom','Morphology','Anatomy','Structural Organisation','Cell','Biomolecules','Cell Cycle','Transport in Plants','Mineral Nutrition','Photosynthesis','Respiration','Plant Growth']},Malayalam:{icon:'📜',chapters:['ആധുനിക ഗദ്യം','കവിത','ചെറുകഥ','നോവൽ','നാടകം','ഭാഷാശാസ്ത്രം','ഉപന്യാസം']}},
+    12:{Mathematics:{icon:'📐',chapters:['Relations Functions','Inverse Trigonometry','Matrices','Determinants','Continuity Differentiability','Application of Derivatives','Integrals','Application of Integrals','Differential Equations','Vector Algebra','3D Geometry','Linear Programming','Probability']},Physics:{icon:'⚛️',chapters:['Electric Charges Fields','Electrostatic Potential','Current Electricity','Moving Charges','Magnetism','Electromagnetic Induction','Alternating Current','EM Waves','Ray Optics','Wave Optics','Dual Nature','Atoms','Nuclei','Semiconductors','Communication']},Chemistry:{icon:'🧪',chapters:['Solid State','Solutions','Electrochemistry','Chemical Kinetics','Surface Chemistry','General Principles','p-Block','d-f Block','Coordination Compounds','Haloalkanes','Alcohols Phenols','Aldehydes Ketones','Carboxylic Acids','Amines','Biomolecules','Polymers','Chemistry in Everyday Life']},Biology:{icon:'🌱',chapters:['Reproduction in Organisms','Sexual Reproduction','Human Reproduction','Reproductive Health','Principles of Inheritance','Molecular Genetics','Evolution','Human Health','Food Production','Microbes','Biotechnology Principles','Biotechnology Applications','Organisms Populations','Ecosystem','Biodiversity','Environmental Issues']}}
+  },
+  KA:{
+    9:{Mathematics:{icon:'📐',chapters:['Number Systems','Polynomials','Linear Equations','Lines and Angles','Triangles','Quadrilaterals','Circles','Areas','Surface Areas','Statistics','Probability','Coordinate Geometry','Euclids Geometry']},Science:{icon:'🔬',chapters:['Matter','Atoms Molecules','Structure of Atom','Cell','Tissues','Motion','Force Laws','Gravitation','Work Energy','Sound','Natural Resources','Food Production']},Kannada:{icon:'📜',chapters:['ಗದ್ಯ','ಪದ್ಯ','ವ್ಯಾಕರಣ','ಪ್ರಬಂಧ','ಪತ್ರ ಲೇಖನ']}},
+    10:{Mathematics:{icon:'📐',chapters:['Real Numbers','Polynomials','Linear Equations','Quadratic Equations','AP','Triangles','Coordinate Geometry','Trigonometry','Circles','Areas','Surface Areas','Statistics','Probability']},Science:{icon:'🔬',chapters:['Chemical Reactions','Acids Bases Salts','Metals Non-metals','Carbon Compounds','Periodic Table','Life Processes','Control Coordination','Reproduction','Heredity','Light','Electricity','Magnetic Effects','Energy']},Kannada:{icon:'📜',chapters:['ಗದ್ಯ','ಪದ್ಯ','ನಾಟಕ','ಕಾದಂಬರಿ','ವ್ಯಾಕರಣ','ಪ್ರಬಂಧ','ಪತ್ರ']}},
+    11:{Mathematics:{icon:'📐',chapters:['Sets','Relations Functions','Trigonometry','Induction','Complex Numbers','Inequalities','Permutations','Binomial','Sequences','Lines','Conics','3D Geometry','Limits','Statistics','Probability']},Physics:{icon:'⚛️',chapters:['Physical World','Units','Motion 1D','Motion 2D','Laws of Motion','Work Energy','Rotation','Gravitation','Properties of Matter','Thermal Properties','Thermodynamics','Kinetic Theory','Oscillations','Waves']},Chemistry:{icon:'🧪',chapters:['Basic Concepts','Atomic Structure','Periodic Table','Bonding','States of Matter','Thermodynamics','Equilibrium','Redox','Hydrogen','s-Block','Organic Basics','Hydrocarbons']},Biology:{icon:'🌱',chapters:['Living World','Classification','Plant Kingdom','Animal Kingdom','Cell','Cell Division','Transport','Photosynthesis','Respiration']},Kannada:{icon:'📜',chapters:['ಆಧುನಿಕ ಗದ್ಯ','ಕಾವ್ಯ','ಕಥೆ','ನಾಟಕ','ಭಾಷಾ ಶಾಸ್ತ್ರ','ಛಂದಸ್ಸು']}},
+    12:{Mathematics:{icon:'📐',chapters:['Relations Functions','Inverse Trig','Matrices','Determinants','Calculus','Derivatives','Integrals','DEs','Vectors','3D','Linear Programming','Probability']},Physics:{icon:'⚛️',chapters:['Electrostatics','Current','Magnetism','EMI','AC','EM Waves','Optics','Modern Physics','Semiconductors','Communication']},Chemistry:{icon:'🧪',chapters:['Solid State','Solutions','Electrochemistry','Kinetics','Surface Chemistry','Metallurgy','p-Block','d-Block','Coordination','Organic Reactions','Biomolecules']},Biology:{icon:'🌱',chapters:['Reproduction','Genetics','Evolution','Health Disease','Biotechnology','Ecology','Biodiversity']},Kannada:{icon:'📜',chapters:['ಗದ್ಯ ವಿಭಾಗ','ಪದ್ಯ ವಿಭಾಗ','ನಾಟಕ','ಕಾದಂಬರಿ','ಪ್ರಬಂಧ','ಅಪಠಿತ ಗದ್ಯ']}}
+  },
+  AP:{
+    9:{Mathematics:{icon:'📐',chapters:['Real Numbers','Polynomials','Linear Equations','Lines Angles','Triangles','Quadrilaterals','Triangles Area','Circles','Constructions','Surface Areas','Statistics','Probability']},Science:{icon:'🔬',chapters:['Matter','Is Matter Pure','Atoms Molecules','Structure of Atom','Cell','Tissues','Motion','Force','Gravitation','Work Energy','Sound','Natural Resources']},Telugu:{icon:'📜',chapters:['గద్యం','పద్యం','వ్యాకరణం','వ్యాస రచన','పత్ర రచన']}},
+    10:{Mathematics:{icon:'📐',chapters:['Real Numbers','Sets','Polynomials','Pair of Equations','Quadratic Equations','Progressions','Coordinate Geometry','Similar Triangles','Tangents','Mensuration','Trigonometry','Applications','Probability','Statistics']},Science:{icon:'🔬',chapters:['Chemical Reactions','Acids Bases','Metals Non-metals','Carbon Compounds','Periodic Table','Life Processes','Reproduction','Heredity','Light Reflection','Light Refraction','Electric Current','Magnetic Effects','Source of Energy']},Telugu:{icon:'📜',chapters:['గద్యం','పద్యం','నాటకం','నవల','వ్యాకరణం','వ్యాస రచన','సారాంశం']}},
+    11:{Mathematics:{icon:'📐',chapters:['Functions','Mathematical Induction','Matrices','Vector Algebra','Trigonometry','Hyperbolic Functions','Complex Numbers','De Moivres Theorem','Quadratic Expressions','Permutations','Binomial','Partial Fractions','Measures of Dispersion','Probability','Random Variables']},Physics:{icon:'⚛️',chapters:['Units Dimensions','Motion in Straight Line','Motion in Plane','Laws of Motion','Work Energy','Systems of Particles','Oscillations','Gravitation','Mechanical Properties','Thermal Properties','Thermodynamics','Kinetic Theory','Waves']},Chemistry:{icon:'🧪',chapters:['Atomic Structure','Classification of Elements','Chemical Bonding','States of Matter','Stoichiometry','Thermodynamics','Chemical Equilibrium','Hydrogen','s-Block','p-Block','Organic Chemistry','Hydrocarbons','Environmental Chemistry']},Biology:{icon:'🌱',chapters:['Living World','Classification','Plant Kingdom','Animal Kingdom','Cell','Cell Division','Biomolecules','Photosynthesis','Respiration','Plant Growth','Transport','Mineral Nutrition','Digestion','Breathing','Circulation','Excretion','Locomotion','Neural Control','Endocrine']},Telugu:{icon:'📜',chapters:['ఆధునిక గద్యం','కవిత','కథ','నాటకం','నవల','భాషాశాస్త్రం','వ్యాకరణం']}},
+    12:{Mathematics:{icon:'📐',chapters:['Circles','System of Circles','Parabola','Ellipse','Hyperbola','Integration','Definite Integrals','Differential Equations','3D Geometry','Probability','Random Variables']},Physics:{icon:'⚛️',chapters:['Waves','Ray Optics','Wave Optics','Electrostatics','Current Electricity','Moving Charges','Magnetism','EMI','AC Circuits','Atomic Physics','Nuclear Physics','Semiconductors','Communication']},Chemistry:{icon:'🧪',chapters:['Solid State','Solutions','Electrochemistry','Kinetics','Surface Chemistry','General Principles','d-Block','Coordination','Haloalkanes','Alcohols','Aldehydes','Acids','Amines','Biomolecules','Polymers']},Biology:{icon:'🌱',chapters:['Reproduction','Genetics','Evolution','Health','Food Production','Microbes','Biotechnology','Ecology','Biodiversity']},Telugu:{icon:'📜',chapters:['గద్యం','పద్యం','నాటకం','నవల','అపఠిత గద్యం','వ్యాస రచన']}}
+  },
+  TS:{
+    9:{Mathematics:{icon:'📐',chapters:['Real Numbers','Polynomials','Linear Equations','Lines Angles','Triangles','Quadrilaterals','Circles','Areas','Surface Areas','Statistics','Probability']},Science:{icon:'🔬',chapters:['Matter','Atoms','Structure of Atom','Cell','Tissues','Motion','Force','Gravitation','Work Energy','Sound','Natural Resources']},Telugu:{icon:'📜',chapters:['గద్యం','పద్యం','వ్యాకరణం','రచన','పఠనం']}},
+    10:{Mathematics:{icon:'📐',chapters:['Real Numbers','Sets','Polynomials','Linear Equations','Quadratic Equations','Progressions','Coordinate Geometry','Similar Triangles','Tangents','Mensuration','Trigonometry','Probability','Statistics']},Science:{icon:'🔬',chapters:['Chemical Reactions','Acids Bases','Metals','Carbon Compounds','Periodic Table','Life Processes','Reproduction','Heredity','Light','Electricity','Magnetic Effects','Energy']},Telugu:{icon:'📜',chapters:['గద్యం','పద్యం','నాటకం','వ్యాకరణం','వ్యాస రచన','పత్ర రచన']}},
+    11:{Mathematics:{icon:'📐',chapters:['Functions','Induction','Matrices','Trigonometry','Vectors','Complex Numbers','Quadratic','Permutations','Binomial','Partial Fractions','Statistics','Probability']},Physics:{icon:'⚛️',chapters:['Units','Motion 1D','Motion 2D','Laws of Motion','Work Energy','Particles','Oscillations','Gravitation','Mechanical Properties','Thermal Properties','Thermodynamics','Waves']},Chemistry:{icon:'🧪',chapters:['Atomic Structure','Periodic Table','Bonding','States of Matter','Stoichiometry','Thermodynamics','Equilibrium','Hydrogen','s-Block','p-Block','Organic Basics','Hydrocarbons']},Biology:{icon:'🌱',chapters:['Living World','Classification','Plant Kingdom','Animal Kingdom','Cell','Biomolecules','Photosynthesis','Respiration','Plant Growth','Transport','Digestion','Breathing','Circulation','Excretion','Neural Control']},Telugu:{icon:'📜',chapters:['గద్యం','పద్యం','కథ','నాటకం','వ్యాకరణం','రచన']}},
+    12:{Mathematics:{icon:'📐',chapters:['Circles','Conics','Integration','DEs','3D Geometry','Probability']},Physics:{icon:'⚛️',chapters:['Optics','Electrostatics','Current Electricity','Magnetism','EMI','AC','Modern Physics','Semiconductors']},Chemistry:{icon:'🧪',chapters:['Solid State','Solutions','Electrochemistry','Kinetics','d-Block','Coordination','Organic','Biomolecules']},Biology:{icon:'🌱',chapters:['Reproduction','Genetics','Evolution','Health','Biotechnology','Ecology']},Telugu:{icon:'📜',chapters:['గద్యం','పద్యం','నాటకం','నవల','అపఠిత','వ్యాస రచన']}}
+  }
+};
+// Merge into main SYLLABUS
+Object.assign(SYLLABUS, SOUTH_SYLLABUS);
+
 // Topics for each chapter (AI generates these dynamically, but we seed common ones)
 const CHAPTER_TOPICS={
   'Quadratic Equations':['Standard Form ax²+bx+c=0','Factorisation Method','Completing the Square','Quadratic Formula','Nature of Roots (Discriminant)','Sum and Product of Roots','Word Problems'],
@@ -1726,7 +1776,7 @@ function renderSyllabusStep(){
   else if(SYL.step===4){
     // Confirm and start
     title.textContent='✅ Ready to Learn!';
-    const boardFull={CBSE:'CBSE',TN:'Tamil Nadu Board',MH:'Maharashtra Board',KA:'Karnataka Board',KL:'Kerala Board',AP:'AP Board',TS:'Telangana Board',UP:'UP Board',WB:'WB Board',GJ:'Gujarat Board',RJ:'Rajasthan Board',OTHER:'State Board'}[SYL.board]||SYL.board;
+    const boardFull={CBSE:'CBSE',ICSE:'ICSE',TN:'Tamil Nadu Board',KL:'Kerala Board (SCERT)',KA:'Karnataka Board (KSEEB)',AP:'AP State Board',TS:'Telangana Board',MH:'Maharashtra Board',UP:'UP Board',WB:'WB Board',GJ:'Gujarat Board',RJ:'Rajasthan Board',OTHER:'State Board'}[SYL.board]||SYL.board;
     body.innerHTML=`
       <div style="background:linear-gradient(135deg,var(--blue-dark),var(--blue-bright));border-radius:18px;padding:24px;color:#fff;text-align:center;margin-bottom:16px;">
         <div style="font-size:52px;margin-bottom:12px;">${SYLLABUS[SYL.board]?.[SYL.cls]?.[SYL.subject]?.icon||'📚'}</div>
@@ -1787,7 +1837,7 @@ function startSyllabusChat(){
   closeSyllabus();
   openChat();
   // Opening message with full context
-  const boardFull={CBSE:'CBSE',TN:'Tamil Nadu State Board',MH:'Maharashtra State Board'}[SYL.board]||SYL.board+' Board';
+  const boardFull={CBSE:'CBSE',ICSE:'ICSE',TN:'Tamil Nadu State Board',KL:'Kerala Board (SCERT)',KA:'Karnataka Board (KSEEB)',AP:'AP State Board',TS:'Telangana State Board',MH:'Maharashtra State Board',UP:'UP Board',WB:'WB Board',GJ:'Gujarat Board',RJ:'Rajasthan Board',OTHER:'State Board'}[SYL.board]||SYL.board+' Board';
   const greeting=`Hello ${S.user?.name||'Student'}! 👋\n\nI'm your BrightMind Teacher for:\n\n📚 **${SYL.subject}** — ${boardFull}\n📖 **Chapter:** ${SYL.chapter}\n🎯 **Topic:** ${SYL.topic}\n\nI'll teach you exactly as per your syllabus, step by step. Let's begin! 😊\n\nShall I start explaining **${SYL.topic}**?`;
   addMsg('ai',greeting);
   const bubble=document.getElementById('speech-bubble');
@@ -1796,49 +1846,68 @@ function startSyllabusChat(){
 }
 
 function onBoardChange(){
-  // Update state field hint based on board selected
   const board=document.getElementById('rboard').value;
   const stateMap={TN:'Tamil Nadu',MH:'Maharashtra',KA:'Karnataka',KL:'Kerala',AP:'Andhra Pradesh',TS:'Telangana',UP:'Uttar Pradesh',WB:'West Bengal',GJ:'Gujarat',RJ:'Rajasthan'};
+  const langMap={TN:'ta',KL:'ml',KA:'kn',AP:'te',TS:'te'};
+  // Auto-select state
   if(stateMap[board]){const rs=document.getElementById('rs');if(rs){for(let o of rs.options){if(o.value===stateMap[board]||o.text===stateMap[board])o.selected=true;}}}
+  // Auto-suggest language
+  if(langMap[board]){
+    S.lang=langMap[board];
+    const sel=document.getElementById('lang-sel');
+    if(sel)sel.value=langMap[board];
+  }
 }
 // ══════════════════════════════════════
 // BLACKBOARD
 // ══════════════════════════════════════
-let bbCurrentMode='solve', bbPhotoBase64=null;
+let bbPhotoBase64=null;
+
+// ══════════════════════════════════════
+// BLACKBOARD — CHALK WRITING STEP BY STEP
+// ══════════════════════════════════════
+let bbCurrentMode='solve', bbAllSteps=[], bbCurrentStep=0, bbWriting=false;
 
 function openBlackboard(){
   document.getElementById('blackboard-overlay').classList.add('open');
-  document.getElementById('bb-title').textContent=`${S.sub?.icon||'🖊️'} ${S.sub?.name||'Miss BrightMind'} — Blackboard`;
-  document.getElementById('bb-canvas').innerHTML=`
-    <div style="text-align:center;padding:30px 20px;">
-      <div style="font-size:48px;margin-bottom:12px;">🖊️</div>
-      <div style="color:rgba(255,255,255,.8);font-size:15px;font-weight:600;margin-bottom:8px;">Miss BrightMind's Blackboard</div>
-      <div style="color:rgba(255,255,255,.5);font-size:13px;line-height:1.6;">Type any problem below and I will solve it<br>step by step — just like a real teacher! 😊</div>
-      <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">
-        <div onclick="quickBBQ('Solve: x² - 5x + 6 = 0')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 14px;color:rgba(255,255,255,.8);font-size:12px;cursor:pointer;text-align:left;">📐 Solve: x² - 5x + 6 = 0</div>
-        <div onclick="quickBBQ('Explain Pythagoras theorem with example')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 14px;color:rgba(255,255,255,.8);font-size:12px;cursor:pointer;text-align:left;">📖 Pythagoras theorem</div>
-        <div onclick="quickBBQ('Derive the quadratic formula')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 14px;color:rgba(255,255,255,.8);font-size:12px;cursor:pointer;text-align:left;">📐 Derive quadratic formula</div>
-        <div onclick="quickBBQ('Balance this equation: H2 + O2 = H2O')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 14px;color:rgba(255,255,255,.8);font-size:12px;cursor:pointer;text-align:left;">🧪 Balance: H₂ + O₂ = H₂O</div>
-      </div>
+  const subName=S.sub?.name||'Miss BrightMind';
+  document.getElementById('bb-title').textContent=`✏️ ${S.sub?.icon||'📐'} ${subName} — Blackboard`;
+  showBBWelcome();
+}
+
+function showBBWelcome(){
+  const canvas=document.getElementById('bb-canvas');
+  canvas.innerHTML=`
+    <div style="text-align:center;padding:40px 20px 20px;">
+      <div style="font-size:40px;margin-bottom:10px;">✏️</div>
+      <div style="font-family:'Courier New',monospace;font-size:16px;color:#a0d4a0;margin-bottom:6px;">Miss BrightMind's Blackboard</div>
+      <div style="font-family:'Courier New',monospace;font-size:12px;color:rgba(200,255,200,.5);line-height:1.8;">I will explain step by step.<br>Each step waits for you before moving on. 😊</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;max-width:320px;margin:0 auto;padding:0 16px 20px;">
+      <div onclick="quickBBQ('Solve: x² - 5x + 6 = 0')" class="bb-quick-q">📐 Solve: x² - 5x + 6 = 0</div>
+      <div onclick="quickBBQ('Explain Newton\'s Second Law F=ma')" class="bb-quick-q">⚛️ Newton's Second Law</div>
+      <div onclick="quickBBQ('Derive the quadratic formula step by step')" class="bb-quick-q">📐 Derive quadratic formula</div>
+      <div onclick="quickBBQ('Balance: H2 + O2 = H2O')" class="bb-quick-q">🧪 Balance: H₂ + O₂ = H₂O</div>
+      <div onclick="quickBBQ('Explain photosynthesis process')" class="bb-quick-q">🌱 Photosynthesis process</div>
     </div>`;
+  // add quick-q style
+  if(!document.getElementById('bb-qs-style')){
+    const st=document.createElement('style');
+    st.id='bb-qs-style';
+    st.textContent='.bb-quick-q{background:rgba(255,255,255,.04);border:1px solid #2a4a2a;border-radius:4px;padding:10px 14px;color:rgba(200,255,200,.8);font-size:13px;cursor:pointer;font-family:"Courier New",monospace;transition:background .2s;}.bb-quick-q:active{background:rgba(255,255,255,.1);}';
+    document.head.appendChild(st);
+  }
 }
 
 function closeBlackboard(){
   document.getElementById('blackboard-overlay').classList.remove('open');
+  window.speechSynthesis.cancel();
 }
 
 function bbMode(btn, mode){
   document.querySelectorAll('.bb-tool').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   bbCurrentMode=mode;
-  const placeholders={
-    solve:'Type a maths problem to solve step by step...',
-    explain:'Type a concept to explain...',
-    formula:'Type a topic to show formulas...',
-    example:'Type a topic for worked example...',
-    diagram:'Type a topic for diagram explanation...'
-  };
-  document.getElementById('bb-inp').placeholder=placeholders[mode]||'Type your question...';
 }
 
 function quickBBQ(q){
@@ -1847,124 +1916,290 @@ function quickBBQ(q){
 }
 
 async function sendToBlackboard(){
+  if(bbWriting)return;
   const inp=document.getElementById('bb-inp');
-  const q=inp.value.trim();if(!q)return;
+  const q=inp.value.trim();
+  if(!q)return;
   inp.value='';
+  bbWriting=true;
+  bbAllSteps=[];
+  bbCurrentStep=0;
+
   const canvas=document.getElementById('bb-canvas');
 
-  // Add question card
-  canvas.innerHTML+=`<div class="bb-step" style="border-color:rgba(255,214,0,.3);">
-    <div class="bb-step-num">YOUR QUESTION</div>
-    <div class="bb-step-content" style="color:var(--gold);">❓ ${q}</div>
-  </div>`;
-
-  // Loading
-  const loadId='bb-load-'+Date.now();
-  canvas.innerHTML+=`<div class="bb-loading" id="${loadId}">
-    <div>✍️ Miss BrightMind is writing on the blackboard...</div>
-    <div class="dots"><span></span><span></span><span></span></div>
-  </div>`;
-  canvas.scrollTop=canvas.scrollHeight;
+  // Clear board — chalk wipe effect
+  canvas.innerHTML=`
+    <div class="bb-teacher-row" style="padding-top:8px;">
+      <div class="bb-teacher-av">👩‍🏫</div>
+      <div>
+        <div style="font-family:'Courier New',monospace;font-size:13px;color:#a0d4a0;">Miss BrightMind</div>
+        <div class="bb-teacher-status" id="bb-status">✏️ Preparing solution...</div>
+      </div>
+    </div>
+    <div style="border-top:1px solid #2a4a2a;margin:10px 0 14px;"></div>
+    <div class="bb-chalk-line gold" style="margin-bottom:16px;">❓ ${q}</div>
+    <div class="bb-writing" id="bb-loading">
+      <div>✏️ Writing on board</div>
+      <div class="bb-chalk-dots"><span></span><span></span><span></span></div>
+    </div>`;
+  canvas.scrollTop=0;
 
   const modePrompts={
-    solve:`Solve this problem step by step like a teacher writing on a blackboard. Show EVERY step clearly numbered. Use simple notation. Format:
-STEP 1: [explanation]
-[calculation]
-STEP 2: [explanation]  
-[calculation]
-...
-FINAL ANSWER: [answer]
-Make each step very clear for a Class ${S.user?.class||11} student.`,
-    explain:`Explain this concept like a teacher at a blackboard for Class ${S.user?.class||11}. Use simple language, give Indian examples, break into clear points.`,
-    formula:`List all important formulas for this topic for Class ${S.user?.class||11} ${S.sub?.name||''}. Format each formula clearly with what each variable means.`,
-    example:`Show a complete worked example for Class ${S.user?.class||11}. Show every step a teacher would write on a blackboard.`,
-    diagram:`Explain this topic using a text-based diagram or ASCII art that a teacher would draw on a blackboard. Label everything clearly.`
+    solve:`Break this problem into clear numbered steps. Write EXACTLY like a teacher at a blackboard.
+Format your response as JSON array:
+[
+  {"step": 1, "title": "UNDERSTAND THE PROBLEM", "content": "What we are given and what we need to find", "speak": "First let us understand what we need to solve"},
+  {"step": 2, "title": "STEP NAME", "content": "The working for this step", "speak": "What teacher says out loud for this step"},
+  ...
+  {"step": N, "title": "FINAL ANSWER ✓", "content": "The complete answer clearly stated", "speak": "The final answer is..."}
+]
+Return ONLY the JSON array. No other text.`,
+    explain:`Explain this concept step by step like a teacher at a blackboard for Class ${S.user?.class||11}.
+Format as JSON array:
+[
+  {"step": 1, "title": "WHAT IS IT?", "content": "Simple definition", "speak": "..."},
+  {"step": 2, "title": "KEY CONCEPT", "content": "Main idea", "speak": "..."},
+  ...
+]
+Return ONLY the JSON array.`,
+    formula:`List formulas for this topic for Class ${S.user?.class||11} as JSON:
+[
+  {"step": 1, "title": "FORMULA NAME", "content": "Formula and what each variable means", "speak": "..."},
+  ...
+]
+Return ONLY JSON array.`,
+    example:`Show a worked example for Class ${S.user?.class||11} as JSON:
+[
+  {"step": 1, "title": "GIVEN", "content": "What is given in the problem", "speak": "..."},
+  ...
+  {"step": N, "title": "ANSWER ✓", "content": "Final answer", "speak": "..."}
+]
+Return ONLY JSON array.`,
+    diagram:`Explain with ASCII diagram for Class ${S.user?.class||11} as JSON:
+[
+  {"step": 1, "title": "THE DIAGRAM", "content": "ASCII art diagram", "speak": "Let me draw this for you"},
+  {"step": 2, "title": "LABEL A", "content": "Explanation of part A", "speak": "..."},
+  ...
+]
+Return ONLY JSON array.`
   };
 
   try{
-    const sys=`You are Miss BrightMind, an expert Indian teacher writing on a blackboard for Class ${S.user?.class||11} ${S.sub?.name||''} student. Board: ${S.user?.board||'CBSE'}. Write clearly step by step. Use ✓ for correct steps, → for arrows, = for equations. Make it feel like a real teacher's blackboard. Keep it educational and encouraging.`;
+    const sys=`You are Miss BrightMind, an expert Indian teacher writing on a blackboard for Class ${S.user?.class||11} ${S.sub?.name||''} student. Board: ${S.user?.board||'CBSE'}. State: ${S.user?.state||'India'}. Be encouraging, clear and step by step. Use simple language. Always return ONLY valid JSON array as instructed.`;
     const prompt=modePrompts[bbCurrentMode]+'\n\nQuestion/Topic: '+q;
+
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,system:sys,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,system:sys,
         messages:[{role:'user',content:prompt}]})});
     const d=await r.json();
-    const reply=d.content?.[0]?.text||'Sorry, please try again!';
+    let raw=d.content?.[0]?.text||'[]';
+    raw=raw.replace(/```json|```/g,'').trim();
+
+    // Parse steps
+    try{
+      bbAllSteps=JSON.parse(raw);
+    }catch(e){
+      // Fallback — convert plain text to steps
+      bbAllSteps=raw.split('\n').filter(l=>l.trim()).map((line,i)=>({
+        step:i+1,
+        title:'STEP '+(i+1),
+        content:line,
+        speak:line.replace(/[*#_]/g,'').substring(0,100)
+      }));
+    }
 
     // Remove loading
-    const loadEl=document.getElementById(loadId);
+    const loadEl=document.getElementById('bb-loading');
     if(loadEl)loadEl.remove();
 
-    // Format and display steps
-    const steps=formatBlackboardSteps(reply);
-    steps.forEach((step,i)=>{
-      setTimeout(()=>{
-        canvas.innerHTML+=`<div class="bb-step">
-          <div class="bb-step-num">${step.label}</div>
-          <div class="bb-step-content">${step.content}</div>
-        </div>`;
-        canvas.scrollTop=canvas.scrollHeight;
-      },i*300);
-    });
+    // Update status
+    const status=document.getElementById('bb-status');
+    if(status)status.textContent=`📋 ${bbAllSteps.length} steps ready`;
 
-    // Speak summary
-    setTimeout(()=>{
-      const plainText=reply.replace(/[#\*\-\=]/g,'').replace(/\n/g,' ').substring(0,200);
-      speakText(plainText);
-    },steps.length*300+500);
+    // Show step counter
+    canvas.innerHTML+=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;font-family:'Courier New',monospace;">
+        <div style="font-size:12px;color:rgba(200,255,200,.5);" id="bb-step-counter">Step 1 of ${bbAllSteps.length}</div>
+        <div style="flex:1;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;">
+          <div style="height:100%;background:var(--gold);border-radius:2px;transition:width .5s;" id="bb-progress" style="width:0%"></div>
+        </div>
+      </div>
+      <div id="bb-steps-container"></div>`;
+
+    bbCurrentStep=0;
+    bbWriting=false;
+    showNextBBStep();
 
   }catch(e){
-    const loadEl=document.getElementById(loadId);
+    const loadEl=document.getElementById('bb-loading');
     if(loadEl)loadEl.remove();
-    canvas.innerHTML+=`<div class="bb-step"><div class="bb-step-content" style="color:var(--red);">⚠️ Connection error. Please try again.</div></div>`;
+    canvas.innerHTML+=`<div class="bb-chalk-line" style="color:#ff5252;">⚠️ Could not write on board. Please try again.</div>`;
+    bbWriting=false;
   }
-  canvas.scrollTop=canvas.scrollHeight;
 }
 
-function formatBlackboardSteps(text){
-  const lines=text.split('\n').filter(l=>l.trim());
-  const steps=[];
-  let current=null;
+function showNextBBStep(){
+  if(bbCurrentStep>=bbAllSteps.length)return;
+  const step=bbAllSteps[bbCurrentStep];
+  const container=document.getElementById('bb-steps-container');
+  if(!container)return;
 
-  lines.forEach(line=>{
-    const trimmed=line.trim();
-    // Detect step headers
-    const stepMatch=trimmed.match(/^(STEP\s*\d+|Step\s*\d+|FINAL ANSWER|Final Answer|ANSWER|Solution|Given|To Find|Formula|Note)/i);
-    if(stepMatch){
-      if(current)steps.push(current);
-      current={label:stepMatch[0].toUpperCase(),content:''};
-      const rest=trimmed.replace(stepMatch[0],'').replace(/^[:.\s]+/,'');
-      if(rest)current.content=formatBBLine(rest);
-    } else if(current){
-      current.content+=(current.content?'<br>':'')+formatBBLine(trimmed);
-    } else {
-      current={label:'SOLUTION',content:formatBBLine(trimmed)};
+  // Create step card
+  const card=document.createElement('div');
+  card.className='bb-step-card current';
+  card.id='bb-step-'+bbCurrentStep;
+
+  // Step header
+  card.innerHTML=`<div class="bb-chalk-line step-header">── STEP ${step.step} / ${bbAllSteps.length}: ${step.title} ──</div>
+    <div id="bb-content-${bbCurrentStep}" class="bb-chalk-line"></div>`;
+  container.appendChild(card);
+
+  // Scroll to new step
+  const canvas=document.getElementById('bb-canvas');
+  setTimeout(()=>canvas.scrollTop=canvas.scrollHeight,100);
+
+  // Chalk writing animation — type one character at a time
+  typeChalkText('bb-content-'+bbCurrentStep, step.content, ()=>{
+    // After writing — show buttons
+    const btnDiv=document.createElement('div');
+    btnDiv.style.display='flex';
+    btnDiv.style.gap='8px';
+    btnDiv.style.marginTop='12px';
+    btnDiv.style.flexWrap='wrap';
+
+    const isLast=bbCurrentStep===bbAllSteps.length-1;
+
+    if(!isLast){
+      btnDiv.innerHTML=`
+        <button class="bb-next-btn" onclick="bbNextStep()">
+          ✅ I Understand — Next Step →
+        </button>
+        <button class="bb-replay-btn" onclick="bbReplayStep(${bbCurrentStep})">
+          🔄 Repeat This Step
+        </button>`;
+    }else{
+      btnDiv.innerHTML=`
+        <button class="bb-next-btn" style="background:linear-gradient(135deg,#00c853,#00e676);color:#0a1a0a;" onclick="bbFinished()">
+          🎉 Solution Complete!
+        </button>
+        <button class="bb-replay-btn" onclick="bbReplayStep(${bbCurrentStep})">
+          🔄 Repeat Last Step
+        </button>
+        <button class="bb-replay-btn" onclick="bbRestartFromBeginning()">
+          ↩️ Start Over
+        </button>`;
     }
-  });
-  if(current)steps.push(current);
+    card.appendChild(btnDiv);
 
-  // If no steps detected, split by paragraphs
-  if(steps.length<=1){
-    return lines.reduce((acc,line,i)=>{
-      if(line.trim()){
-        if(i===lines.length-1&&line.match(/answer|result|therefore/i)){
-          acc.push({label:'FINAL ANSWER ✓',content:`<span class="result">${formatBBLine(line)}</span>`});
-        } else {
-          acc.push({label:`STEP ${acc.length+1}`,content:formatBBLine(line)});
-        }
-      }
-      return acc;
-    },[]);
-  }
-  return steps;
+    // Update progress
+    const pct=Math.round(((bbCurrentStep+1)/bbAllSteps.length)*100);
+    const prog=document.getElementById('bb-progress');
+    if(prog)prog.style.width=pct+'%';
+    const counter=document.getElementById('bb-step-counter');
+    if(counter)counter.textContent=`Step ${bbCurrentStep+1} of ${bbAllSteps.length}`;
+
+    // Speak the step
+    if(step.speak)speakText(step.speak);
+
+    canvas.scrollTop=canvas.scrollHeight;
+  });
 }
 
-function formatBBLine(text){
-  return text
-    .replace(/\*\*(.*?)\*\*/g,'<span class="highlight">$1</span>')
-    .replace(/`(.*?)`/g,'<span class="formula">$1</span>')
-    .replace(/=(.*?)$/g,'= <span class="highlight">$1</span>')
-    .replace(/∴|Therefore:|therefore:/g,'<span class="result">∴</span>')
-    .replace(/✓/g,'<span class="result">✓</span>');
+function typeChalkText(elId, text, onDone){
+  const el=document.getElementById(elId);
+  if(!el){if(onDone)onDone();return;}
+  const clean=text.replace(/\*\*(.*?)\*\*/g,'$1').replace(/[#`]/g,'');
+  let i=0;
+  el.textContent='';
+  const cursor=document.createElement('span');
+  cursor.className='bb-cursor';
+  el.appendChild(cursor);
+
+  // Detect if final answer line
+  if(clean.toLowerCase().includes('answer')||clean.toLowerCase().includes('therefore')||clean.includes('=')){
+    el.className='bb-chalk-line gold';
+  }
+
+  const speed=clean.length>100?8:clean.length>50?12:18; // ms per char
+  const timer=setInterval(()=>{
+    if(i<clean.length){
+      cursor.before(clean[i]);
+      i++;
+      const canvas=document.getElementById('bb-canvas');
+      if(canvas&&i%20===0)canvas.scrollTop=canvas.scrollHeight;
+    }else{
+      clearInterval(timer);
+      cursor.remove();
+      if(onDone)onDone();
+    }
+  },speed);
+}
+
+function bbNextStep(){
+  // Mark current step as done
+  const currentCard=document.getElementById('bb-step-'+bbCurrentStep);
+  if(currentCard){
+    currentCard.classList.remove('current');
+    currentCard.classList.add('done');
+    // Remove buttons from done step
+    const btns=currentCard.querySelectorAll('.bb-next-btn,.bb-replay-btn');
+    btns.forEach(b=>b.remove());
+    // Add done indicator
+    const doneDiv=document.createElement('div');
+    doneDiv.style.cssText='font-family:"Courier New",monospace;font-size:11px;color:rgba(200,255,200,.4);margin-top:6px;';
+    doneDiv.textContent='✓ understood';
+    currentCard.appendChild(doneDiv);
+  }
+  bbCurrentStep++;
+  showNextBBStep();
+}
+
+function bbReplayStep(stepIdx){
+  window.speechSynthesis.cancel();
+  const step=bbAllSteps[stepIdx];
+  if(step&&step.speak)speakText(step.speak);
+  // Re-type the content
+  const contentEl=document.getElementById('bb-content-'+stepIdx);
+  if(contentEl){
+    const clean=step.content.replace(/\*\*(.*?)\*\*/g,'$1').replace(/[#`]/g,'');
+    contentEl.textContent='';
+    const cursor=document.createElement('span');cursor.className='bb-cursor';
+    contentEl.appendChild(cursor);
+    let i=0;
+    const timer=setInterval(()=>{
+      if(i<clean.length){cursor.before(clean[i]);i++;}
+      else{clearInterval(timer);cursor.remove();}
+    },12);
+  }
+}
+
+function bbRestartFromBeginning(){
+  window.speechSynthesis.cancel();
+  const container=document.getElementById('bb-steps-container');
+  if(container)container.innerHTML='';
+  bbCurrentStep=0;
+  const prog=document.getElementById('bb-progress');
+  if(prog)prog.style.width='0%';
+  const counter=document.getElementById('bb-step-counter');
+  if(counter)counter.textContent=`Step 1 of ${bbAllSteps.length}`;
+  showNextBBStep();
+}
+
+function bbFinished(){
+  window.speechSynthesis.cancel();
+  const canvas=document.getElementById('bb-canvas');
+  const finDiv=document.createElement('div');
+  finDiv.style.cssText='text-align:center;padding:20px;border-top:1px solid #2a4a2a;margin-top:16px;';
+  finDiv.innerHTML=`<div style="font-size:32px;margin-bottom:8px;">🎉</div>
+    <div class="bb-chalk-line gold" style="text-align:center;font-size:16px;">Solution Complete!</div>
+    <div style="font-family:'Courier New',monospace;font-size:12px;color:rgba(200,255,200,.5);margin-top:6px;">Great work! Do you understand all steps?</div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
+      <button class="bb-next-btn" onclick="bbRestartFromBeginning()">↩️ Review Again</button>
+      <button class="bb-replay-btn" onclick="closeBlackboard()">✓ All Clear! Close</button>
+    </div>`;
+  canvas.appendChild(finDiv);
+  canvas.scrollTop=canvas.scrollHeight;
+  speakText('Excellent! We have completed all the steps. Do you understand the solution? You can review it again or close the blackboard.');
 }
 
 // ══════════════════════════════════════
@@ -2094,7 +2329,8 @@ function speakText(text){
   utt.rate=speechRate; utt.pitch=1.05; utt.volume=1;
   // Pick best available voice
   const voices=window.speechSynthesis.getVoices();
-  const langCode=S.lang==='hi'?'hi-IN':S.lang==='ta'?'ta-IN':'en-IN';
+  const langCodes={en:'en-IN',hi:'hi-IN',ta:'ta-IN',ml:'ml-IN',kn:'kn-IN',te:'te-IN'};
+  const langCode=langCodes[S.lang]||'en-IN';
   const preferred=voices.find(v=>v.lang===langCode)||voices.find(v=>v.lang.startsWith('en'))||voices[0];
   if(preferred)utt.voice=preferred;
   utt.onstart=()=>setAvatarSpeaking(true,clean);
@@ -2133,7 +2369,8 @@ function startMic(){
   if(!SpeechRec){alert('Sorry! Your browser does not support voice input. Please use Chrome on Android.');return;}
   recognition=new SpeechRec();
   recognition.continuous=false; recognition.interimResults=true;
-  recognition.lang=S.lang==='hi'?'hi-IN':S.lang==='ta'?'ta-IN':'en-IN';
+  const micLangCodes={en:'en-IN',hi:'hi-IN',ta:'ta-IN',ml:'ml-IN',kn:'kn-IN',te:'te-IN'};
+  recognition.lang=micLangCodes[S.lang]||'en-IN';
   recognition.onstart=()=>{
     isListening=true;
     const btn=document.getElementById('mic-btn');
@@ -2184,7 +2421,19 @@ function addMsg(role,text){
   m.scrollTop=m.scrollHeight;
 }
 function sendQ(q){document.getElementById('chat-inp').value=q;sendMsg();}
-function changeLang(){S.lang=document.getElementById('lang-sel').value;const l={en:'English',hi:'हिंदी',ta:'தமிழ்'};addMsg('ai',`Language changed to **${l[S.lang]}**! Ask your question now. 😊`);}
+function changeLang(){
+  S.lang=document.getElementById('lang-sel').value;
+  const l={en:'English 🇬🇧',hi:'हिंदी 🇮🇳',ta:'தமிழ் 🇮🇳',ml:'മലയാളം 🇮🇳',kn:'ಕನ್ನಡ 🇮🇳',te:'తెలుగు 🇮🇳'};
+  const greet={
+    en:'Hello! Language changed to English. Ask me anything! 😊',
+    hi:'नमस्ते! भाषा हिंदी में बदल गई। कुछ भी पूछें! 😊',
+    ta:'வணக்கம்! மொழி தமிழுக்கு மாறியது. எதையும் கேளுங்கள்! 😊',
+    ml:'നമസ്കാരം! ഭാഷ മലയാളത്തിലേക്ക് മാറി. എന്തും ചോദിക്കൂ! 😊',
+    kn:'ನಮಸ್ಕಾರ! ಭಾಷೆ ಕನ್ನಡಕ್ಕೆ ಬದಲಾಯಿತು. ಏನಾದರೂ ಕೇಳಿ! 😊',
+    te:'నమస్కారం! భాష తెలుగుకి మారింది. ఏదైనా అడగండి! 😊'
+  };
+  addMsg('ai', greet[S.lang]||'Language changed! Ask me anything 😊');
+}
 
 async function sendMsg(){
   const inp=document.getElementById('chat-inp'),txt=inp.value.trim();if(!txt)return;
