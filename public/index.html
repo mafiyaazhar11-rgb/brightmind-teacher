@@ -1287,6 +1287,64 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
   </div>
 </div>
 
+<!-- ══ INSTANT EXAM OVERLAY ══ -->
+<div id="instant-exam-overlay" style="display:none;position:fixed;inset:0;z-index:75;flex-direction:column;background:var(--gray-light);">
+
+  <!-- HEADER -->
+  <div style="background:linear-gradient(90deg,#b71c1c,#e53935);padding:0 14px;height:56px;display:flex;align-items:center;gap:10px;flex-shrink:0;">
+    <button onclick="closeInstantExam()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer;">←</button>
+    <div style="flex:1;">
+      <div style="font-size:15px;font-weight:700;color:#fff;" id="ie-title">Mathematics Exam</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.8);" id="ie-subtitle">Answer all questions · AI will correct with red pen</div>
+    </div>
+    <div id="ie-timer" style="background:rgba(0,0,0,.25);border-radius:8px;padding:5px 12px;font-size:13px;font-weight:700;color:#fff;">⏱ 15:00</div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div style="background:#fff;padding:8px 14px;flex-shrink:0;border-bottom:1px solid var(--gray-mid);">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray-text);margin-bottom:5px;">
+      <span id="ie-qnum">Question 1 of 10</span>
+      <span id="ie-score">Score: 0/0</span>
+    </div>
+    <div style="height:5px;background:var(--gray-mid);border-radius:4px;overflow:hidden;">
+      <div id="ie-prog" style="height:100%;background:#e53935;border-radius:4px;width:0%;transition:width .4s;"></div>
+    </div>
+  </div>
+
+  <!-- QUESTIONS BODY -->
+  <div style="flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch;" id="ie-body"></div>
+
+  <!-- FOOTER -->
+  <div style="background:#fff;padding:10px 14px;border-top:1px solid var(--gray-mid);display:flex;gap:8px;flex-shrink:0;">
+    <button onclick="ieNext()" style="flex:1;background:#e53935;color:#fff;font-size:15px;font-weight:700;padding:14px;border-radius:12px;border:none;cursor:pointer;">Next Question →</button>
+    <button onclick="ieSubmit()" style="flex:1;background:var(--gold);color:var(--blue-dark);font-size:15px;font-weight:700;padding:14px;border-radius:12px;border:none;cursor:pointer;">Submit ✓</button>
+  </div>
+</div>
+
+<!-- ══ CORRECTED PAPER OVERLAY ══ -->
+<div id="corrected-paper-overlay" style="display:none;position:fixed;inset:0;z-index:80;flex-direction:column;background:var(--gray-light);">
+
+  <!-- HEADER -->
+  <div style="background:linear-gradient(90deg,#b71c1c,#e53935);padding:0 14px;height:56px;display:flex;align-items:center;gap:10px;flex-shrink:0;">
+    <button onclick="closeCorrectedPaper()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer;">←</button>
+    <div style="font-size:15px;font-weight:700;color:#fff;">📋 Your Corrected Answer Sheet</div>
+  </div>
+
+  <!-- CORRECTED PAPER CONTENT -->
+  <div style="flex:1;overflow-y:auto;padding:14px;" id="corrected-paper-body"></div>
+
+  <!-- SHARE FOOTER -->
+  <div style="background:#fff;padding:12px 14px;border-top:1px solid var(--gray-mid);display:flex;gap:8px;flex-shrink:0;">
+    <button onclick="shareCorrectedPaper()" style="flex:1;background:#25D366;color:#fff;font-size:14px;font-weight:700;padding:13px;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.645 17.46c-.795.795-1.77 1.338-2.84 1.57-.516.112-1.048.166-1.58.16a9.9 9.9 0 01-5.095-1.41l-3.572.937.955-3.498a9.9 9.9 0 01-1.398-5.128C3.915 6.97 7.595 3.29 12.185 3.29c2.215 0 4.298.862 5.863 2.427a8.24 8.24 0 012.42 5.858c-.002 4.57-3.677 8.25-8.823 8.885z"/></svg>
+      Share on WhatsApp
+    </button>
+    <button onclick="downloadCorrectedPaper()" style="flex:1;background:var(--blue-mid);color:#fff;font-size:14px;font-weight:700;padding:13px;border-radius:12px;border:none;cursor:pointer;">
+      📥 Download PDF
+    </button>
+  </div>
+</div>
+
 <!-- ══ ADMIN CREATE DEMO OVERLAY ══ -->
 <div id="demo-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(13,27,75,.8);align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:20px;padding:28px 24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:90vh;overflow-y:auto;">
@@ -1895,11 +1953,21 @@ function doLogout(){
 function renderSubjects(){
   document.getElementById('subj-grid').innerHTML=SUBJECTS.map(s=>{
     const d=S.user?.subjects?.[s.id]||{},p=d.progress||0,st=d.stars||0;
-    return `<div class="subj-card" onclick="openSubject('${s.id}')">
+    return `<div class="subj-card" style="padding:12px 10px;">
       <div class="subj-icon">${s.icon}</div>
       <div class="subj-name">${s.name}</div>
       <div class="subj-prog"><div class="subj-prog-fill" style="width:${p}%"></div></div>
       <div class="subj-stars">${'★'.repeat(st)}${'☆'.repeat(5-st)} ${p}%</div>
+      <div style="display:flex;gap:5px;margin-top:8px;">
+        <button onclick="event.stopPropagation();openSubject('${s.id}')" 
+          style="flex:1;background:var(--blue-mid);color:#fff;border:none;padding:6px 4px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;">
+          📚 Study
+        </button>
+        <button onclick="event.stopPropagation();openInstantExam('${s.id}','${s.name}','${s.icon}')" 
+          style="flex:1;background:linear-gradient(135deg,#e65100,#ff6f00);color:#fff;border:none;padding:6px 4px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;">
+          📝 Exam
+        </button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -3553,8 +3621,355 @@ async function verifyPayment(response, amount, plan, subscription_type='monthly'
 }
 
 // ══════════════════════════════════════
-// PAPERS PAGE
+// INSTANT EXAM — RED PEN CORRECTION
 // ══════════════════════════════════════
+let IE = {
+  subject:'', subjectId:'', icon:'', questions:[], answers:{},
+  currentQ:0, timer:null, secs:900, startTime:null
+};
+
+async function openInstantExam(subjectId, subjectName, icon){
+  if(!S.isPaid && checkTrial(S.user)==='expired'){checkPaywall();return;}
+  IE = {subject:subjectName, subjectId, icon, questions:[], answers:{}, currentQ:0, timer:null, secs:900, startTime:Date.now()};
+  document.getElementById('ie-title').textContent = icon+' '+subjectName+' — Quick Exam';
+  document.getElementById('ie-subtitle').textContent = '10 questions · AI corrects with red pen';
+  document.getElementById('ie-body').innerHTML = `
+    <div style="text-align:center;padding:40px 20px;">
+      <div style="font-size:48px;margin-bottom:12px;">${icon}</div>
+      <div style="font-size:16px;font-weight:700;color:var(--blue-dark);margin-bottom:6px;">Generating ${subjectName} Exam...</div>
+      <div style="font-size:13px;color:var(--gray-text);">AI is creating your personalised questions</div>
+      <div style="display:flex;gap:6px;justify-content:center;margin-top:16px;">
+        <div style="width:10px;height:10px;background:#e53935;border-radius:50%;animation:tdot 1.2s infinite;"></div>
+        <div style="width:10px;height:10px;background:#e53935;border-radius:50%;animation:tdot 1.2s .2s infinite;"></div>
+        <div style="width:10px;height:10px;background:#e53935;border-radius:50%;animation:tdot 1.2s .4s infinite;"></div>
+      </div>
+    </div>`;
+  document.getElementById('instant-exam-overlay').style.display='flex';
+
+  try{
+    const board = {CBSE:'CBSE',TN:'Tamil Nadu Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board'}[S.user?.board]||'CBSE';
+    const r = await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,
+        messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class||11} ${subjectName} student.
+Board: ${board}. Mix easy, medium and hard questions from different chapters.
+Return ONLY a JSON array:
+[{"q":"question text","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"why this is correct","marks":1}]`}]})});
+    const d = await r.json();
+    let raw = d.content?.[0]?.text||'[]';
+    raw = raw.replace(/```json|```/g,'').trim();
+    IE.questions = JSON.parse(raw);
+  }catch(e){
+    IE.questions = Array(10).fill(null).map((_,i)=>({
+      q:`${subjectName} Question ${i+1}: Which of the following is correct?`,
+      options:['A) Option 1','B) Option 2','C) Option 3','D) Option 4'],
+      correct:'A', explanation:'This is the correct answer.', marks:1
+    }));
+  }
+
+  IE.currentQ = 0;
+  ieStartTimer();
+  ieRenderQuestion();
+}
+
+function closeInstantExam(){
+  if(IE.timer) clearInterval(IE.timer);
+  document.getElementById('instant-exam-overlay').style.display='none';
+}
+
+function ieStartTimer(){
+  IE.secs = 900;
+  if(IE.timer) clearInterval(IE.timer);
+  IE.timer = setInterval(()=>{
+    IE.secs--;
+    const m=Math.floor(IE.secs/60), s=IE.secs%60;
+    const el=document.getElementById('ie-timer');
+    if(el) el.textContent=`⏱ ${m}:${s.toString().padStart(2,'0')}`;
+    if(IE.secs<=0){clearInterval(IE.timer);ieSubmit();}
+    // Red warning when < 3 mins
+    if(IE.secs<=180&&el) el.style.color='#ffcc00';
+    if(IE.secs<=60&&el) el.style.color='#ff6b6b';
+  },1000);
+}
+
+function ieRenderQuestion(){
+  const q = IE.questions[IE.currentQ];
+  if(!q) return;
+  const tot = IE.questions.length;
+  const done = Object.keys(IE.answers).length;
+  const corr = Object.entries(IE.answers).filter(([i,a])=>IE.questions[i]?.correct===a).length;
+
+  document.getElementById('ie-qnum').textContent = `Question ${IE.currentQ+1} of ${tot}`;
+  document.getElementById('ie-score').textContent = `Score: ${corr}/${done}`;
+  document.getElementById('ie-prog').style.width = ((IE.currentQ/tot)*100)+'%';
+
+  const saved = IE.answers[IE.currentQ];
+  document.getElementById('ie-body').innerHTML=`
+    <div style="background:#fff;border-radius:16px;padding:18px;box-shadow:0 2px 12px rgba(13,27,75,.08);">
+      <div style="font-size:11px;font-weight:700;color:#e53935;letter-spacing:1px;margin-bottom:8px;">QUESTION ${IE.currentQ+1} OF ${tot}</div>
+      <div style="font-size:16px;font-weight:600;color:var(--blue-dark);line-height:1.6;margin-bottom:16px;">${q.q}</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        ${q.options.map((opt,i)=>{
+          let bg='#fff', border='2px solid var(--gray-mid)', color='var(--blue-dark)';
+          if(saved){
+            if(opt[0]===q.correct){bg='#e8f5e9';border='2px solid #4caf50';color='#1b5e20';}
+            else if(opt[0]===saved&&opt[0]!==q.correct){bg='#ffebee';border='2px solid #f44336';color='#b71c1c';}
+          }
+          if(opt[0]===saved&&!saved) {bg='#e3f2fd';border='2px solid var(--blue-mid)';}
+          return `<button onclick="iePickOpt('${opt[0]}')"
+            style="padding:14px 16px;border:${border};border-radius:12px;font-size:14px;cursor:pointer;color:${color};font-weight:${saved&&opt[0]===q.correct?'700':'500'};text-align:left;background:${bg};transition:all .15s;font-family:'Poppins',sans-serif;">
+            ${opt}${saved&&opt[0]===q.correct?' ✓':''}${saved&&opt[0]===saved&&opt[0]!==q.correct?' ✗':''}
+          </button>`;
+        }).join('')}
+      </div>
+      ${saved?`<div style="margin-top:12px;padding:12px;background:#f3f4ff;border-radius:10px;font-size:13px;color:var(--blue-dark);line-height:1.5;">
+        ${saved===q.correct?'✅':'💡'} <strong>Explanation:</strong> ${q.explanation}
+      </div>`:''}
+    </div>`;
+}
+
+function iePickOpt(letter){
+  if(IE.answers[IE.currentQ]) return;
+  IE.answers[IE.currentQ] = letter;
+  ieRenderQuestion();
+}
+
+function ieNext(){
+  if(IE.currentQ < IE.questions.length-1){
+    IE.currentQ++;
+    ieRenderQuestion();
+  } else {
+    ieSubmit();
+  }
+}
+
+async function ieSubmit(){
+  if(IE.timer) clearInterval(IE.timer);
+  closeInstantExam();
+
+  const tot = IE.questions.length;
+  const corr = Object.entries(IE.answers).filter(([i,a])=>IE.questions[i]?.correct===a).length;
+  const score = Math.round((corr/tot)*100);
+  const timeTaken = Math.round((Date.now()-IE.startTime)/60000);
+
+  // Show corrected paper
+  showCorrectedPaper(score, corr, tot, timeTaken);
+
+  // Save to exam history
+  if(S.user){
+    if(!S.user.examHist)S.user.examHist=[];
+    S.user.examHist.push({
+      subject:IE.subject, score, stars:getStars(score),
+      date:new Date().toISOString(), passed:score>=85
+    });
+    S.user.xp=(S.user.xp||0)+(score>=85?300:100);
+    checkBadges(S.user); saveUser();
+    document.getElementById('stat-ex').textContent=S.user.examHist.length;
+  }
+}
+
+function showCorrectedPaper(score, corr, tot, timeTaken){
+  const u = S.user;
+  const passed = score>=85;
+  const date = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+  const board = {CBSE:'CBSE',TN:'Tamil Nadu Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board'}[u?.board]||'CBSE';
+
+  // Build corrected paper HTML
+  let paperHTML = `
+    <!-- PAPER HEADER -->
+    <div style="background:#fff;border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:0 2px 12px rgba(13,27,75,.08);">
+      <div style="text-align:center;border-bottom:3px double #000;padding-bottom:12px;margin-bottom:12px;font-family:'Times New Roman',serif;">
+        <div style="font-size:11px;letter-spacing:2px;color:#555;margin-bottom:3px;">BRIGHTMIND TEACHER — AI EDUCATION</div>
+        <div style="font-size:16px;font-weight:bold;text-transform:uppercase;">${board}</div>
+        <div style="font-size:13px;font-weight:bold;margin:4px 0;">QUICK CHAPTER TEST</div>
+        <div style="font-size:12px;">${IE.icon} ${IE.subject} — Class ${u?.class||11}</div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;">
+          <span>Date: ${date}</span>
+          <span>Time Taken: ${timeTaken} mins</span>
+          <span>Max Marks: ${tot}</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-family:'Times New Roman',serif;">
+        <span>Student: <strong>${u?.name||'Student'}</strong></span>
+        <span>Roll: ${u?.id||'—'}</span>
+      </div>
+    </div>
+
+    <!-- RESULT SUMMARY — stamped like teacher correction -->
+    <div style="background:#fff;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(13,27,75,.08);position:relative;overflow:hidden;">
+      <!-- Red teacher stamp -->
+      <div style="position:absolute;top:12px;right:12px;width:80px;height:80px;border-radius:50%;border:3px solid ${passed?'#4caf50':'#f44336'};display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-15deg);opacity:.9;">
+        <div style="font-size:18px;font-weight:900;color:${passed?'#4caf50':'#f44336'};">${score}%</div>
+        <div style="font-size:9px;font-weight:700;color:${passed?'#4caf50':'#f44336'};">${passed?'PASSED':'FAILED'}</div>
+      </div>
+      <div style="font-family:'Times New Roman',serif;">
+        <div style="font-size:14px;font-weight:bold;margin-bottom:10px;">MARKS SUMMARY</div>
+        <div style="font-size:13px;line-height:2;">
+          Total Questions: ${tot}<br>
+          Correct Answers: <span style="color:#4caf50;font-weight:bold;">✓ ${corr}</span><br>
+          Wrong Answers: <span style="color:#f44336;font-weight:bold;">✗ ${tot-corr}</span><br>
+          Marks Obtained: <strong>${corr}/${tot}</strong><br>
+          Percentage: <strong>${score}%</strong><br>
+          Result: <strong style="color:${passed?'#4caf50':'#f44336'};">${passed?'PASS ✓':'FAIL ✗'}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEACHER'S REMARKS in red -->
+    <div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 12px rgba(13,27,75,.08);">
+      <div style="font-family:'Times New Roman',serif;font-size:14px;font-weight:bold;margin-bottom:8px;">Teacher's Remarks:</div>
+      <div style="font-family:'Segoe Script','Comic Sans MS',cursive;font-size:14px;color:#c62828;line-height:1.8;">
+        ${score>=90?`Excellent work ${u?.name}! You have mastered this chapter. Keep up the brilliant effort! 🌟`
+         :score>=85?`Well done ${u?.name}! You have passed. Review the ${tot-corr} wrong answer(s) to improve further. 👍`
+         :score>=70?`Good attempt ${u?.name}. You are close to passing. Revise the weak areas and try again. Work harder! 📚`
+         :score>=50?`${u?.name}, needs improvement. Study the chapter carefully and attempt again. Don't give up! ✏️`
+         :`${u?.name}, please revise the full chapter with your AI teacher before attempting again. I believe in you! 💪`}
+      </div>
+      <div style="font-family:'Segoe Script','Comic Sans MS',cursive;font-size:12px;color:#c62828;margin-top:8px;">
+        — Miss BrightMind &nbsp;&nbsp; ${date}
+      </div>
+    </div>
+
+    <!-- QUESTION BY QUESTION CORRECTION -->
+    <div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 12px rgba(13,27,75,.08);">
+      <div style="font-family:'Times New Roman',serif;font-size:14px;font-weight:bold;margin-bottom:12px;">DETAILED CORRECTION</div>
+      ${IE.questions.map((q,i)=>{
+        const studentAns = IE.answers[i]||'—';
+        const isCorrect = studentAns===q.correct;
+        return `<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #eee;">
+          <div style="display:flex;align-items:flex-start;gap:8px;">
+            <span style="background:${isCorrect?'#4caf50':'#f44336'};color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;flex-shrink:0;margin-top:2px;">${i+1}</span>
+            <div style="flex:1;">
+              <div style="font-size:13px;color:var(--blue-dark);line-height:1.5;margin-bottom:6px;">${q.q}</div>
+              <div style="font-size:12px;margin-bottom:3px;">
+                <span style="color:#555;">Your answer: </span>
+                <span style="color:${isCorrect?'#4caf50':'#f44336'};font-weight:700;">${studentAns} ${isCorrect?'✓':'✗'}</span>
+                ${!isCorrect?`&nbsp;&nbsp;<span style="color:#555;">Correct: </span><span style="color:#4caf50;font-weight:700;">${q.correct} ✓</span>`:''}
+              </div>
+              ${!isCorrect?`<div style="font-size:11px;color:#c62828;font-family:'Segoe Script','Comic Sans MS',cursive;line-height:1.5;margin-top:4px;">${q.explanation}</div>`:''}
+            </div>
+            <div style="font-size:14px;color:${isCorrect?'#4caf50':'#f44336'};font-weight:bold;flex-shrink:0;">${isCorrect?'+1':'0'}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <!-- SITE WATERMARK FOOTER -->
+    <div style="background:linear-gradient(135deg,var(--blue-dark),var(--blue-bright));border-radius:14px;padding:14px 16px;text-align:center;margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:3px;">🧠 BrightMind Teacher</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.8);">Your AI Teacher — brightmindteacher.com</div>
+      <div style="font-size:11px;color:var(--gold);margin-top:4px;">South India's Most Affordable AI Tutor · ₹199/month</div>
+    </div>`;
+
+  document.getElementById('corrected-paper-body').innerHTML = paperHTML;
+  document.getElementById('corrected-paper-overlay').style.display = 'flex';
+}
+
+function closeCorrectedPaper(){
+  document.getElementById('corrected-paper-overlay').style.display='none';
+}
+
+function shareCorrectedPaper(){
+  const u = S.user;
+  const tot = IE.questions.length;
+  const corr = Object.entries(IE.answers).filter(([i,a])=>IE.questions[i]?.correct===a).length;
+  const score = Math.round((corr/tot)*100);
+  const passed = score>=85;
+
+  const text = `📋 My ${IE.subject} Exam Result\n\n`+
+    `Student: ${u?.name}\n`+
+    `Class: ${u?.class} · ${u?.board||'CBSE'}\n`+
+    `Subject: ${IE.icon} ${IE.subject}\n\n`+
+    `Score: ${corr}/${tot} (${score}%)\n`+
+    `Result: ${passed?'✅ PASSED':'❌ Not Passed'}\n`+
+    `Correct: ${corr} · Wrong: ${tot-corr}\n\n`+
+    `📚 Practised on BrightMind Teacher\n`+
+    `🧠 AI Tutor in Tamil & English\n`+
+    `👉 brightmindteacher.com\n`+
+    `Only ₹199/month!`;
+
+  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+}
+
+function downloadCorrectedPaper(){
+  const u = S.user;
+  const tot = IE.questions.length;
+  const corr = Object.entries(IE.answers).filter(([i,a])=>IE.questions[i]?.correct===a).length;
+  const score = Math.round((corr/tot)*100);
+  const passed = score>=85;
+  const date = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+  const board = {CBSE:'CBSE',TN:'Tamil Nadu Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board'}[u?.board]||'CBSE';
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Corrected Answer Sheet — ${IE.subject}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Times New Roman',serif;font-size:12pt;max-width:210mm;margin:0 auto;padding:20px;color:#000;}
+.header{text-align:center;border-bottom:3px double #000;padding-bottom:12px;margin-bottom:14px;}
+.stamp{float:right;width:90px;height:90px;border-radius:50%;border:3px solid ${passed?'green':'red'};display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-15deg);}
+.stamp-score{font-size:20px;font-weight:bold;color:${passed?'green':'red'};}
+.stamp-result{font-size:10px;font-weight:bold;color:${passed?'green':'red'};}
+.correct{color:green;font-weight:bold;}
+.wrong{color:red;font-weight:bold;}
+.remarks{font-family:'Comic Sans MS',cursive;color:#c62828;font-size:13pt;line-height:1.8;}
+.q-row{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #ddd;display:flex;gap:10px;}
+.q-num{background:${passed?'green':'red'};color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;flex-shrink:0;margin-top:2px;}
+.footer{margin-top:20px;background:#1a237e;color:white;padding:14px;text-align:center;border-radius:10px;}
+.no-print{display:none;}
+@media print{.no-print{display:none;}}
+</style></head><body>
+<div class="no-print" style="display:block!important;text-align:center;margin-bottom:16px;">
+  <button onclick="window.print()" style="background:#c62828;color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-right:10px;">🖨️ Print / Save PDF</button>
+  <button onclick="window.close()" style="background:#555;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:14px;cursor:pointer;">✕ Close</button>
+</div>
+<div class="header">
+  <div style="font-size:9px;letter-spacing:2px;color:#555;">BRIGHTMIND TEACHER — AI EDUCATION PLATFORM</div>
+  <div style="font-size:16px;font-weight:bold;text-transform:uppercase;">${board}</div>
+  <div style="font-size:13px;font-weight:bold;">CORRECTED ANSWER SHEET</div>
+  <div style="font-size:12px;">${IE.icon} ${IE.subject} — Class ${u?.class||11}</div>
+  <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;">
+    <span>Date: ${date}</span>
+    <span>Max Marks: ${tot}</span>
+  </div>
+</div>
+<div style="display:flex;justify-content:space-between;margin-bottom:14px;font-size:12px;">
+  <span>Student: <strong>${u?.name}</strong></span>
+  <div class="stamp"><div class="stamp-score">${score}%</div><div class="stamp-result">${passed?'PASS':'FAIL'}</div></div>
+</div>
+<div style="margin-bottom:14px;font-size:12px;line-height:2;">
+  <strong>MARKS:</strong> ${corr}/${tot} &nbsp;&nbsp; 
+  <strong>CORRECT:</strong> <span class="correct">✓ ${corr}</span> &nbsp;&nbsp; 
+  <strong>WRONG:</strong> <span class="wrong">✗ ${tot-corr}</span>
+</div>
+<div style="margin-bottom:14px;"><strong>Teacher's Remarks:</strong><br>
+<div class="remarks">${score>=90?`Excellent! Mastered this chapter!`:score>=85?`Well done! Passed. Review wrong answers.`:score>=70?`Good attempt. Revise weak areas.`:`Please revise the chapter carefully and try again.`}</div>
+<div class="remarks">— Miss BrightMind &nbsp; ${date}</div>
+</div>
+<hr style="margin:14px 0;">
+<strong>DETAILED CORRECTION:</strong><br><br>
+${IE.questions.map((q,i)=>{
+  const sa=IE.answers[i]||'—';
+  const ok=sa===q.correct;
+  return `<div class="q-row">
+    <div class="q-num">${i+1}</div>
+    <div style="flex:1;">
+      <div style="font-size:11pt;margin-bottom:4px;">${q.q}</div>
+      <div style="font-size:10pt;">Your answer: <span class="${ok?'correct':'wrong'}">${sa} ${ok?'✓':'✗'}</span>${!ok?` &nbsp; Correct: <span class="correct">${q.correct} ✓</span>`:''}</div>
+      ${!ok?`<div style="font-size:10pt;color:#c62828;font-family:'Comic Sans MS',cursive;">${q.explanation}</div>`:''}
+    </div>
+    <div style="font-size:13pt;font-weight:bold;color:${ok?'green':'red'};">${ok?'+1':'0'}</div>
+  </div>`;}).join('')}
+<div class="footer">
+  <div style="font-size:13pt;font-weight:bold;">🧠 BrightMind Teacher</div>
+  <div style="font-size:11pt;opacity:.9;">brightmindteacher.com · South India's AI Tutor · ₹199/month</div>
+</div>
+</body></html>`;
+
+  const win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+}
+
+
 function switchPaperTab2(tab, btn){
   document.getElementById('ptab2-model-content').style.display=tab==='model'?'block':'none';
   document.getElementById('ptab2-generate-content').style.display=tab==='generate'?'block':'none';
