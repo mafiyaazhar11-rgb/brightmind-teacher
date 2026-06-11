@@ -825,6 +825,42 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
         </div>
         <button onclick="showSupportChat()" style="background:var(--blue-mid);color:#fff;border:none;padding:9px 16px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;">Message →</button>
       </div>
+      <!-- PHOTO GALLERY -->
+      <div class="sec-title">📷 My Photo Questions</div>
+      <div id="photo-gallery-section">
+        <div style="color:var(--gray-text);font-size:13px;text-align:center;padding:16px;">
+          Photos you upload to ask questions will appear here.
+        </div>
+      </div>
+
+      <!-- EXAM PAPERS -->
+      <div class="sec-title">📄 Download Exam Papers</div>
+      <div id="exam-papers-section">
+        <div style="background:linear-gradient(135deg,var(--blue-dark),var(--blue-bright));border-radius:14px;padding:16px;margin-bottom:10px;">
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;">📝 Generate Question Paper</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:12px;">Generate a real-looking exam paper for any chapter — printable and downloadable!</div>
+          <select id="qp-subject" style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;margin-bottom:8px;font-family:'Poppins',sans-serif;">
+            <option value="">Select Subject</option>
+            <option>Mathematics</option>
+            <option>Physics</option>
+            <option>Chemistry</option>
+            <option>Biology</option>
+            <option>English</option>
+          </select>
+          <input id="qp-chapter" placeholder="Chapter name (e.g. Quadratic Equations)" 
+            style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;margin-bottom:8px;font-family:'Poppins',sans-serif;box-sizing:border-box;"/>
+          <select id="qp-type" style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;margin-bottom:12px;font-family:'Poppins',sans-serif;">
+            <option value="unit">Unit Test (20 marks · 1 hour)</option>
+            <option value="mid">Mid Term (50 marks · 2 hours)</option>
+            <option value="final">Final Exam (100 marks · 3 hours)</option>
+          </select>
+          <button onclick="generateExamPaper()" style="width:100%;background:var(--gold);color:var(--blue-dark);border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;">
+            📄 Generate & Download Question Paper
+          </button>
+        </div>
+        <div id="past-papers-list"></div>
+      </div>
+
       <div class="sec-title">📊 Subject Progress</div>
       <div id="prog-section"></div>
       <div class="sec-title">🏆 Exam History</div>
@@ -970,6 +1006,10 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
     <!-- Blackboard content renders here -->
   </div>
   <div class="bb-footer">
+    <button onclick="document.getElementById('bb-photo-input').click()" 
+      style="width:42px;height:42px;background:rgba(255,255,255,.1);border:1px solid #3a6a3a;border-radius:4px;cursor:pointer;font-size:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;"
+      title="Upload photo to blackboard">📷</button>
+    <input type="file" id="bb-photo-input" accept="image/*" capture="environment" style="display:none;" onchange="handleBBPhotoUpload(event)"/>
     <input class="bb-ask-inp" id="bb-inp" placeholder="Write your question on the board..." 
       onkeydown="if(event.key==='Enter')sendToBlackboard()"/>
     <button class="bb-send" onclick="sendToBlackboard()">✏</button>
@@ -1689,7 +1729,8 @@ function mapStudent(s){
     homework:typeof s.homework==='string'?JSON.parse(s.homework):s.homework||[],
     examHist:typeof s.exam_hist==='string'?JSON.parse(s.exam_hist):s.exam_hist||[],
     badges:typeof s.badges==='string'?JSON.parse(s.badges):s.badges||[],
-    regOn:s.reg_on||new Date().toISOString()
+    regOn:s.reg_on||new Date().toISOString(),
+    photoGallery:[]  // stored locally per device
   };
 }
 function loginUser(u){
@@ -2372,9 +2413,72 @@ function bbFinished(){
   speakText('Excellent! We have completed all the steps. Do you understand the solution? You can review it again or close the blackboard.');
 }
 
-// ══════════════════════════════════════
-// PHOTO UPLOAD
-// ══════════════════════════════════════
+// BLACKBOARD PHOTO UPLOAD
+async function handleBBPhotoUpload(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    const base64=e.target.result.split(',')[1];
+    const mediaType=file.type||'image/jpeg';
+    addToPhotoGallery(e.target.result, 'Blackboard photo question');
+    const canvas=document.getElementById('bb-canvas');
+    // Show photo on blackboard
+    canvas.innerHTML+=`
+      <div style="border:2px solid #3a6a3a;border-radius:8px;padding:12px;margin-bottom:12px;background:rgba(255,255,255,.03);">
+        <div style="font-family:'Courier New',monospace;font-size:12px;color:#ffd600;margin-bottom:8px;">📷 PHOTO QUESTION</div>
+        <img src="${e.target.result}" style="max-width:100%;border-radius:6px;border:1px solid #3a6a3a;max-height:200px;object-fit:contain;"/>
+      </div>`;
+    // Writing indicator
+    const loadId='bb-photo-load-'+Date.now();
+    canvas.innerHTML+=`<div id="${loadId}" style="display:flex;align-items:center;gap:10px;padding:10px 0;color:#a0ffa0;font-family:'Courier New',monospace;font-size:13px;">
+      <span>✏️ Reading your photo and writing solution...</span>
+      <div style="display:flex;gap:4px;"><span style="width:6px;height:6px;background:#a0d4a0;border-radius:50%;animation:tdot 1.2s infinite;display:inline-block;"></span><span style="width:6px;height:6px;background:#a0d4a0;border-radius:50%;animation:tdot 1.2s .2s infinite;display:inline-block;"></span><span style="width:6px;height:6px;background:#a0d4a0;border-radius:50%;animation:tdot 1.2s .4s infinite;display:inline-block;"></span></div>
+    </div>`;
+    canvas.scrollTop=canvas.scrollHeight;
+    try{
+      const sys=`You are Miss BrightMind, expert Indian teacher for Class ${S.user?.class||11} ${S.sub?.name||''} student. Board: ${S.user?.board||'CBSE'}. A student sent a photo of their question. Identify and solve it step by step like a blackboard teacher. Return a JSON array of steps:
+[{"step":1,"title":"READING THE QUESTION","content":"What I see in the photo","speak":"..."},
+{"step":2,"title":"STEP NAME","content":"solution step","speak":"..."},
+...
+{"step":N,"title":"FINAL ANSWER","content":"complete answer","speak":"..."}]
+Return ONLY JSON array.`;
+      const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,system:sys,
+          messages:[{role:'user',content:[
+            {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+            {type:'text',text:'Please solve this question from my photo step by step on the blackboard.'}
+          ]}]})});
+      const d=await r.json();
+      let raw=d.content?.[0]?.text||'[]';
+      raw=raw.replace(/```json|```/g,'').trim();
+      document.getElementById(loadId)?.remove();
+      try{
+        bbAllSteps=JSON.parse(raw);
+      }catch(e){
+        bbAllSteps=[{step:1,title:'SOLUTION',content:raw,speak:'Here is the solution'}];
+      }
+      bbCurrentStep=0;
+      // Add step counter
+      canvas.innerHTML+=`
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;font-family:'Courier New',monospace;">
+          <div style="font-size:12px;color:#80d080;" id="bb-step-counter">Step 1 of ${bbAllSteps.length}</div>
+          <div style="flex:1;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;background:var(--gold);border-radius:2px;width:0%;transition:width .5s;" id="bb-progress"></div>
+          </div>
+        </div>
+        <div id="bb-steps-container"></div>`;
+      showNextBBStep();
+    }catch(err){
+      document.getElementById(loadId)?.remove();
+      canvas.innerHTML+=`<div style="color:#ff5252;font-family:'Courier New',monospace;padding:10px 0;">⚠️ Could not read photo. Try better lighting!</div>`;
+    }
+  };
+  reader.readAsDataURL(file);
+  event.target.value='';
+}
+
+// PHOTO UPLOAD (chat)
 function handlePhotoUpload(event){
   const file=event.target.files[0];
   if(!file)return;
@@ -2398,6 +2502,7 @@ async function sendPhotoQuestion(){
 
   // Show photo in chat
   addMsg('user','📷 [Photo Question]');
+  addToPhotoGallery('data:'+mediaType+';base64,'+bbPhotoBase64, 'Photo question');
   const msgs=document.getElementById('chat-msgs');
   msgs.innerHTML+=`<div class="msg user"><div class="msg-av" style="background:var(--gold);font-size:12px;font-weight:700;color:var(--blue-dark);">${S.user?.name?.[0]||'S'}</div><div><img src="data:${mediaType};base64,${bbPhotoBase64}" class="photo-preview"/></div></div>`;
   msgs.scrollTop=msgs.scrollHeight;
@@ -2803,6 +2908,7 @@ function filterLB(btn){document.querySelectorAll('.lb-filter').forEach(b=>b.clas
 // ══════════════════════════════════════
 function renderProfile(){
   if(!S.user)return;const u=S.user;
+  renderPhotoGallery();
   document.getElementById('prof-av').textContent=u.name[0].toUpperCase();
   document.getElementById('prof-name').textContent=u.name;
   document.getElementById('prof-meta').textContent='Class '+u.class+' · '+u.state;
@@ -3349,6 +3455,257 @@ async function verifyPayment(response, amount, plan, subscription_type='monthly'
     document.getElementById('paywall-overlay').classList.remove('open');
     alert('✅ Payment received! Premium activated.\nPayment ID: '+response.razorpay_payment_id);
   }
+}
+
+// ══════════════════════════════════════
+// EXAM PAPER GENERATOR
+// ══════════════════════════════════════
+async function generateExamPaper(){
+  const subject = document.getElementById('qp-subject').value;
+  const chapter = document.getElementById('qp-chapter').value.trim();
+  const type = document.getElementById('qp-type').value;
+  if(!subject){alert('Please select a subject!');return;}
+  if(!chapter){alert('Please enter the chapter name!');return;}
+
+  const btn = document.querySelector('#exam-papers-section button');
+  if(btn){btn.textContent='⏳ Generating paper...';btn.disabled=true;}
+
+  const typeConfig = {
+    unit:  {label:'UNIT TEST', marks:20, time:'1 Hour',   sections:['A','B']},
+    mid:   {label:'MID TERM EXAMINATION', marks:50, time:'2 Hours',  sections:['A','B','C']},
+    final: {label:'FINAL EXAMINATION', marks:100, time:'3 Hours', sections:['A','B','C','D']}
+  };
+  const cfg = typeConfig[type];
+  const board = {CBSE:'CBSE',TN:'Tamil Nadu State Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP State Board',TS:'Telangana Board',MH:'Maharashtra Board'}[S.user?.board]||'CBSE';
+
+  try{
+    const prompt = `Generate a complete ${cfg.label} question paper for:
+Subject: ${subject}
+Chapter: ${chapter}
+Board: ${board}
+Class: ${S.user?.class||11}
+Total Marks: ${cfg.marks}
+Time: ${cfg.time}
+
+Create realistic school exam questions exactly like official ${board} papers.
+Return ONLY a JSON object:
+{
+  "instructions": ["All questions are compulsory", "Write neatly", "..."],
+  "sections": [
+    {
+      "name": "SECTION A",
+      "type": "MCQ",
+      "marks_per_q": 1,
+      "questions": [
+        {"no": 1, "q": "question text", "options": ["A) opt1", "B) opt2", "C) opt3", "D) opt4"], "marks": 1}
+      ]
+    },
+    {
+      "name": "SECTION B", 
+      "type": "Short Answer",
+      "marks_per_q": 2,
+      "questions": [
+        {"no": 5, "q": "question text", "marks": 2}
+      ]
+    },
+    {
+      "name": "SECTION C",
+      "type": "Long Answer", 
+      "marks_per_q": 5,
+      "questions": [
+        {"no": 9, "q": "question text", "marks": 5}
+      ]
+    }
+  ]
+}
+Make questions exam-realistic and curriculum-appropriate. Return ONLY JSON.`;
+
+    const r = await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:3000,
+        messages:[{role:'user',content:prompt}]})});
+    const d = await r.json();
+    let raw = d.content?.[0]?.text||'{}';
+    raw = raw.replace(/```json|```/g,'').trim();
+    const paper = JSON.parse(raw);
+
+    // Generate the printable HTML
+    buildExamPaperHTML(paper, subject, chapter, cfg, board);
+
+  }catch(e){
+    alert('Could not generate paper. Please try again!');
+  }finally{
+    if(btn){btn.textContent='📄 Generate & Download Question Paper';btn.disabled=false;}
+  }
+}
+
+function buildExamPaperHTML(paper, subject, chapter, cfg, board){
+  const u = S.user;
+  const date = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${subject} - ${cfg.label}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #000; background: #fff; padding: 20px; max-width: 210mm; margin: 0 auto; }
+  .header { text-align: center; border-bottom: 3px double #000; padding-bottom: 12px; margin-bottom: 14px; }
+  .school-name { font-size: 18pt; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+  .exam-title { font-size: 14pt; font-weight: bold; margin: 6px 0; text-transform: uppercase; }
+  .subject-line { font-size: 13pt; font-weight: bold; margin: 4px 0; }
+  .meta-row { display: flex; justify-content: space-between; margin: 8px 0; font-size: 11pt; }
+  .meta-row span { display: inline-block; }
+  .instructions { border: 1px solid #000; padding: 8px 12px; margin: 10px 0 16px; }
+  .instructions h3 { font-size: 11pt; text-decoration: underline; margin-bottom: 6px; }
+  .instructions ol { padding-left: 18px; font-size: 10pt; line-height: 1.6; }
+  .section-header { background: #000; color: #fff; padding: 5px 12px; font-weight: bold; font-size: 11pt; margin: 16px 0 10px; text-transform: uppercase; letter-spacing: 1px; }
+  .section-desc { font-size: 10pt; font-style: italic; margin-bottom: 10px; color: #333; }
+  .question { margin-bottom: 14px; page-break-inside: avoid; }
+  .q-row { display: flex; gap: 8px; font-size: 11pt; line-height: 1.7; }
+  .q-no { font-weight: bold; min-width: 28px; flex-shrink: 0; }
+  .q-text { flex: 1; }
+  .q-marks { font-weight: bold; color: #000; white-space: nowrap; }
+  .options { margin: 4px 0 0 36px; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; font-size: 10.5pt; }
+  .answer-space { border-bottom: 1px solid #aaa; margin: 6px 0 6px 36px; height: 18px; }
+  .long-answer-space { margin: 6px 0 6px 36px; }
+  .long-answer-space .line { border-bottom: 1px solid #ddd; height: 22px; }
+  .footer { margin-top: 30px; border-top: 2px solid #000; padding-top: 10px; display: flex; justify-content: space-between; font-size: 10pt; }
+  .watermark { text-align: center; color: #e0e0e0; font-size: 48pt; font-weight: bold; position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-30deg); z-index: -1; pointer-events: none; }
+  @media print {
+    body { padding: 10mm; }
+    .no-print { display: none; }
+    .section-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="watermark">BrightMind</div>
+
+<!-- Download button - hidden when printing -->
+<div class="no-print" style="text-align:center;margin-bottom:16px;">
+  <button onclick="window.print()" style="background:#1a237e;color:#fff;border:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-right:10px;">🖨️ Print / Save as PDF</button>
+  <button onclick="window.close()" style="background:#f44336;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:14px;cursor:pointer;">✕ Close</button>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="school-name">BrightMind Teacher</div>
+  <div style="font-size:11pt;margin:3px 0;">${board}</div>
+  <div class="exam-title">${cfg.label}</div>
+  <div class="subject-line">${subject.toUpperCase()} — Class ${u?.class||11}</div>
+  <div style="font-size:10pt;margin-top:4px;">Chapter: ${chapter}</div>
+</div>
+
+<!-- META INFO -->
+<div class="meta-row">
+  <span><b>Date:</b> ${date}</span>
+  <span><b>Time:</b> ${cfg.time}</span>
+  <span><b>Maximum Marks:</b> ${cfg.marks}</span>
+</div>
+<div class="meta-row">
+  <span><b>Student Name:</b> ___________________________________</span>
+  <span><b>Roll No:</b> __________</span>
+</div>
+
+<!-- INSTRUCTIONS -->
+<div class="instructions">
+  <h3>General Instructions:</h3>
+  <ol>
+    ${(paper.instructions||['All questions are compulsory.','Read all questions carefully before answering.','Write legibly and maintain proper margin.','All working must be shown clearly.','Marks are indicated against each question.']).map(i=>`<li>${i}</li>`).join('\n    ')}
+  </ol>
+</div>
+
+<!-- SECTIONS -->
+${(paper.sections||[]).map(section=>`
+<div class="section-header">${section.name} — ${section.type} (${section.marks_per_q} mark${section.marks_per_q>1?'s':''} each)</div>
+<div class="section-desc">Answer all questions in this section.</div>
+${(section.questions||[]).map(q=>`
+<div class="question">
+  <div class="q-row">
+    <span class="q-no">${q.no}.</span>
+    <span class="q-text">${q.q}</span>
+    <span class="q-marks">[${q.marks}]</span>
+  </div>
+  ${q.options?`<div class="options">${q.options.map(o=>`<span>${o}</span>`).join('')}</div>`:
+    q.marks<=3?`<div class="answer-space"></div><div class="answer-space"></div>`:
+    `<div class="long-answer-space">${Array(q.marks*2).fill('<div class="line"></div>').join('')}</div>`}
+</div>`).join('')}`).join('')}
+
+<!-- FOOTER -->
+<div class="footer">
+  <span>Generated by BrightMind Teacher | brightmindteacher.com</span>
+  <span>${subject} | Class ${u?.class||11} | ${board}</span>
+  <span>Page 1 of 1</span>
+</div>
+</body>
+</html>`;
+
+  // Open in new tab — student can print or save as PDF
+  const win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+
+  // Save to past papers list
+  const list = document.getElementById('past-papers-list');
+  if(list){
+    const item = document.createElement('div');
+    item.style.cssText='background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(13,27,75,.06);display:flex;align-items:center;justify-content:space-between;';
+    item.innerHTML=`<div>
+      <div style="font-size:13px;font-weight:700;color:var(--blue-dark);">📄 ${subject} — ${chapter}</div>
+      <div style="font-size:11px;color:var(--gray-text);">${cfg.label} · ${cfg.marks} marks · ${date}</div>
+    </div>
+    <button onclick="this.closest('div').previousElementSibling&&window.open('about:blank')" style="background:var(--blue-mid);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;">📥 Download</button>`;
+    list.prepend(item);
+  }
+}
+
+// ══════════════════════════════════════
+// PHOTO GALLERY - track uploaded photos
+// ══════════════════════════════════════
+function addToPhotoGallery(imageData, question){
+  if(!S.user) return;
+  if(!S.user.photoGallery) S.user.photoGallery=[];
+  S.user.photoGallery.push({
+    img: imageData,
+    q: question||'Photo question',
+    date: new Date().toISOString()
+  });
+  // Keep only last 20 photos
+  if(S.user.photoGallery.length > 20) S.user.photoGallery = S.user.photoGallery.slice(-20);
+  saveUser();
+}
+
+function renderPhotoGallery(){
+  const el = document.getElementById('photo-gallery-section');
+  if(!el) return;
+  const gallery = S.user?.photoGallery||[];
+  if(!gallery.length){
+    el.innerHTML='<div style="color:var(--gray-text);font-size:13px;text-align:center;padding:16px;background:#fff;border-radius:12px;">📷 No photos yet. Upload a question from camera to see it here!</div>';
+    return;
+  }
+  el.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">`+
+  [...gallery].reverse().map((p,i)=>`
+    <div style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(13,27,75,.08);cursor:pointer;" onclick="viewPhoto('${i}')">
+      <img src="${p.img}" style="width:100%;height:80px;object-fit:cover;"/>
+      <div style="padding:4px 6px;font-size:9px;color:var(--gray-text);">${new Date(p.date).toLocaleDateString('en-IN')}</div>
+    </div>`).join('')+`</div>`;
+}
+
+function viewPhoto(idx){
+  const gallery = S.user?.photoGallery||[];
+  const reversed = [...gallery].reverse();
+  const p = reversed[idx];
+  if(!p) return;
+  const overlay = document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
+  overlay.innerHTML=`
+    <img src="${p.img}" style="max-width:100%;max-height:70vh;border-radius:12px;border:2px solid var(--gold);"/>
+    <div style="color:#fff;font-size:13px;margin-top:12px;text-align:center;">${p.q}</div>
+    <div style="color:rgba(255,255,255,.5);font-size:11px;margin-top:4px;">${new Date(p.date).toLocaleString('en-IN')}</div>
+    <button onclick="this.closest('div').remove()" style="margin-top:16px;background:rgba(255,255,255,.2);color:#fff;border:none;padding:10px 24px;border-radius:8px;font-size:13px;cursor:pointer;">Close ✕</button>`;
+  document.body.appendChild(overlay);
 }
 
 function showSupportChat(){
