@@ -495,6 +495,44 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 @keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(244,67,54,.4);}50%{box-shadow:0 0 0 10px rgba(244,67,54,0);}}
 @keyframes mouthTalk{0%,100%{d:path('M 35 58 Q 45 62 55 58');}50%{d:path('M 35 58 Q 45 68 55 58');}}
 @keyframes eyeBlink{0%,90%,100%{transform:scaleY(1);}95%{transform:scaleY(0.1);}}
+/* ══ BLACKBOARD ══ */
+#blackboard-overlay{display:none;position:fixed;inset:0;z-index:65;flex-direction:column;background:#1a1a2e;}
+#blackboard-overlay.open{display:flex;}
+.bb-hdr{background:#0d0d1a;padding:0 14px;height:52px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.1);}
+.bb-title{font-size:14px;font-weight:700;color:#fff;flex:1;}
+.bb-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:22px;cursor:pointer;}
+.bb-tools{display:flex;gap:6px;padding:8px 12px;background:#0d0d1a;flex-shrink:0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid rgba(255,255,255,.1);}
+.bb-tool{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:all .2s;}
+.bb-tool:active{background:rgba(255,255,255,.2);}
+.bb-tool.active{background:var(--gold);color:var(--blue-dark);border-color:var(--gold);}
+.bb-canvas-wrap{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;}
+.bb-step{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-bottom:12px;animation:msgIn .3s ease;}
+.bb-step-num{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1px;margin-bottom:8px;}
+.bb-step-content{font-size:16px;color:#fff;line-height:1.8;font-family:'Courier New',monospace;}
+.bb-step-content .highlight{color:var(--gold);font-weight:700;}
+.bb-step-content .result{color:#00e676;font-weight:700;font-size:18px;}
+.bb-step-content .formula{background:rgba(255,214,0,.1);border:1px solid rgba(255,214,0,.3);border-radius:8px;padding:8px 12px;display:inline-block;margin:4px 0;color:var(--gold);}
+.bb-footer{background:#0d0d1a;padding:10px 14px;border-top:1px solid rgba(255,255,255,.1);flex-shrink:0;display:flex;gap:8px;}
+.bb-ask-inp{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:10px 14px;font-size:13px;color:#fff;outline:none;font-family:'Poppins',sans-serif;}
+.bb-ask-inp::placeholder{color:rgba(255,255,255,.4);}
+.bb-send{width:40px;height:40px;background:var(--gold);color:var(--blue-dark);border:none;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.bb-loading{text-align:center;padding:30px;color:rgba(255,255,255,.5);font-size:14px;}
+.bb-loading .dots{display:inline-flex;gap:4px;margin-top:8px;}
+.bb-loading .dots span{width:8px;height:8px;background:var(--gold);border-radius:50%;animation:tdot 1.2s infinite;}
+.bb-loading .dots span:nth-child(2){animation-delay:.2s;}
+.bb-loading .dots span:nth-child(3){animation-delay:.4s;}
+
+/* ══ PHOTO UPLOAD ══ */
+.photo-btn{width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:var(--gray-mid);color:var(--blue-dark);transition:all .2s;}
+.photo-btn:active{transform:scale(.95);}
+.photo-preview{max-width:200px;border-radius:12px;margin:6px 0;border:2px solid var(--gold);}
+.photo-overlay{display:none;position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.85);align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:20px;}
+.photo-overlay.open{display:flex;}
+.photo-overlay img{max-width:100%;max-height:60vh;border-radius:16px;border:2px solid var(--gold);}
+.photo-overlay .po-title{color:#fff;font-size:16px;font-weight:700;text-align:center;}
+.photo-overlay .po-sub{color:rgba(255,255,255,.7);font-size:13px;text-align:center;}
+.photo-overlay .po-btns{display:flex;gap:10px;width:100%;max-width:320px;}
+
 /* ══ ANIMATIONS ══ */
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
 @keyframes iconPop{from{transform:scale(0);}to{transform:scale(1);}}
@@ -811,6 +849,10 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
     <div class="tdots"><span></span><span></span><span></span></div>
   </div>
   <button class="exam-cta" id="exam-cta" onclick="startExam()">📝 Take Chapter Exam Now!</button>
+  <div style="display:flex;gap:6px;padding:6px 14px 0;background:#fff;flex-shrink:0;">
+    <button onclick="openBlackboard()" style="flex:1;background:linear-gradient(135deg,#1a1a2e,#2d2d5e);color:#fff;border:none;border-radius:10px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">🖊️ Blackboard</button>
+    <button onclick="document.getElementById('photo-input').click()" style="flex:1;background:linear-gradient(135deg,var(--orange),#ff8f00);color:#fff;border:none;border-radius:10px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">📷 Photo Question</button>
+  </div>
   <div class="chat-input-bar">
     <button class="mic-btn" id="mic-btn" onclick="toggleMic()" title="Tap to speak">🎤</button>
     <textarea class="chat-inp" id="chat-inp" placeholder="Type or tap 🎤 to speak..." rows="1"
@@ -837,6 +879,40 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
     <button class="btn-main" id="syl-start-btn" onclick="startSyllabusChat()" style="display:none;">Start Learning 🚀</button>
   </div>
 </div>
+
+<!-- ══ BLACKBOARD OVERLAY ══ -->
+<div id="blackboard-overlay">
+  <div class="bb-hdr">
+    <span style="font-size:20px;">🖊️</span>
+    <div class="bb-title" id="bb-title">Miss BrightMind's Blackboard</div>
+    <button class="bb-close" onclick="closeBlackboard()">✕</button>
+  </div>
+  <div class="bb-tools">
+    <button class="bb-tool active" onclick="bbMode(this,'solve')">🔢 Solve Step by Step</button>
+    <button class="bb-tool" onclick="bbMode(this,'explain')">📖 Explain Concept</button>
+    <button class="bb-tool" onclick="bbMode(this,'formula')">📐 Show Formula</button>
+    <button class="bb-tool" onclick="bbMode(this,'example')">✏️ Worked Example</button>
+    <button class="bb-tool" onclick="bbMode(this,'diagram')">🔬 Diagram</button>
+  </div>
+  <div class="bb-canvas-wrap" id="bb-canvas"></div>
+  <div class="bb-footer">
+    <input class="bb-ask-inp" id="bb-inp" placeholder="Type problem or question for blackboard..." 
+      onkeydown="if(event.key==='Enter')sendToBlackboard()"/>
+    <button class="bb-send" onclick="sendToBlackboard()">➤</button>
+  </div>
+</div>
+
+<!-- ══ PHOTO OVERLAY ══ -->
+<div class="photo-overlay" id="photo-overlay">
+  <div class="po-title">📷 Photo Question</div>
+  <img id="photo-preview-img" src="" alt="Question photo"/>
+  <div class="po-sub">Miss BrightMind will solve this for you!</div>
+  <div class="po-btns">
+    <button class="btn-main" onclick="sendPhotoQuestion()" style="flex:1;">Ask Miss BrightMind 🧠</button>
+    <button onclick="closePhotoOverlay()" style="flex:1;background:rgba(255,255,255,.1);color:#fff;border:none;padding:14px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
+  </div>
+</div>
+<input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoUpload(event)"/>
 
 <!-- ══ EXAM OVERLAY ══ -->
 <div id="exam-overlay">
@@ -1610,8 +1686,242 @@ function onBoardChange(){
   if(stateMap[board]){const rs=document.getElementById('rs');if(rs){for(let o of rs.options){if(o.value===stateMap[board]||o.text===stateMap[board])o.selected=true;}}}
 }
 // ══════════════════════════════════════
-// VIRTUAL TEACHER — AVATAR + VOICE + MIC
+// BLACKBOARD
 // ══════════════════════════════════════
+let bbCurrentMode='solve', bbPhotoBase64=null;
+
+function openBlackboard(){
+  document.getElementById('blackboard-overlay').classList.add('open');
+  document.getElementById('bb-title').textContent=`${S.sub?.icon||'🖊️'} ${S.sub?.name||'Miss BrightMind'} — Blackboard`;
+  document.getElementById('bb-canvas').innerHTML=`
+    <div style="text-align:center;padding:30px 20px;">
+      <div style="font-size:48px;margin-bottom:12px;">🖊️</div>
+      <div style="color:rgba(255,255,255,.8);font-size:15px;font-weight:600;margin-bottom:8px;">Miss BrightMind's Blackboard</div>
+      <div style="color:rgba(255,255,255,.5);font-size:13px;line-height:1.6;">Type any problem below and I will solve it<br>step by step — just like a real teacher! 😊</div>
+      <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;max-width:280px;margin-left:auto;margin-right:auto;">
+        <div onclick="quickBBQ('Solve: x² - 5x + 6 = 0')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 14px;color:rgba(255,255,255,.8);font-size:12px;cursor:pointer;text-align:left;">📐 Solve: x² - 5x + 6 = 0</div>
+        <div onclick="quickBBQ('Explain Pythagoras theorem with example')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 14px;color:rgba(255,255,255,.8);font-size:12px;cursor:pointer;text-align:left;">📖 Pythagoras theorem</div>
+        <div onclick="quickBBQ('Derive the quadratic formula')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 14px;color:rgba(255,255,255,.8);font-size:12px;cursor:pointer;text-align:left;">📐 Derive quadratic formula</div>
+        <div onclick="quickBBQ('Balance this equation: H2 + O2 = H2O')" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 14px;color:rgba(255,255,255,.8);font-size:12px;cursor:pointer;text-align:left;">🧪 Balance: H₂ + O₂ = H₂O</div>
+      </div>
+    </div>`;
+}
+
+function closeBlackboard(){
+  document.getElementById('blackboard-overlay').classList.remove('open');
+}
+
+function bbMode(btn, mode){
+  document.querySelectorAll('.bb-tool').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  bbCurrentMode=mode;
+  const placeholders={
+    solve:'Type a maths problem to solve step by step...',
+    explain:'Type a concept to explain...',
+    formula:'Type a topic to show formulas...',
+    example:'Type a topic for worked example...',
+    diagram:'Type a topic for diagram explanation...'
+  };
+  document.getElementById('bb-inp').placeholder=placeholders[mode]||'Type your question...';
+}
+
+function quickBBQ(q){
+  document.getElementById('bb-inp').value=q;
+  sendToBlackboard();
+}
+
+async function sendToBlackboard(){
+  const inp=document.getElementById('bb-inp');
+  const q=inp.value.trim();if(!q)return;
+  inp.value='';
+  const canvas=document.getElementById('bb-canvas');
+
+  // Add question card
+  canvas.innerHTML+=`<div class="bb-step" style="border-color:rgba(255,214,0,.3);">
+    <div class="bb-step-num">YOUR QUESTION</div>
+    <div class="bb-step-content" style="color:var(--gold);">❓ ${q}</div>
+  </div>`;
+
+  // Loading
+  const loadId='bb-load-'+Date.now();
+  canvas.innerHTML+=`<div class="bb-loading" id="${loadId}">
+    <div>✍️ Miss BrightMind is writing on the blackboard...</div>
+    <div class="dots"><span></span><span></span><span></span></div>
+  </div>`;
+  canvas.scrollTop=canvas.scrollHeight;
+
+  const modePrompts={
+    solve:`Solve this problem step by step like a teacher writing on a blackboard. Show EVERY step clearly numbered. Use simple notation. Format:
+STEP 1: [explanation]
+[calculation]
+STEP 2: [explanation]  
+[calculation]
+...
+FINAL ANSWER: [answer]
+Make each step very clear for a Class ${S.user?.class||11} student.`,
+    explain:`Explain this concept like a teacher at a blackboard for Class ${S.user?.class||11}. Use simple language, give Indian examples, break into clear points.`,
+    formula:`List all important formulas for this topic for Class ${S.user?.class||11} ${S.sub?.name||''}. Format each formula clearly with what each variable means.`,
+    example:`Show a complete worked example for Class ${S.user?.class||11}. Show every step a teacher would write on a blackboard.`,
+    diagram:`Explain this topic using a text-based diagram or ASCII art that a teacher would draw on a blackboard. Label everything clearly.`
+  };
+
+  try{
+    const sys=`You are Miss BrightMind, an expert Indian teacher writing on a blackboard for Class ${S.user?.class||11} ${S.sub?.name||''} student. Board: ${S.user?.board||'CBSE'}. Write clearly step by step. Use ✓ for correct steps, → for arrows, = for equations. Make it feel like a real teacher's blackboard. Keep it educational and encouraging.`;
+    const prompt=modePrompts[bbCurrentMode]+'\n\nQuestion/Topic: '+q;
+    const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,system:sys,
+        messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    const reply=d.content?.[0]?.text||'Sorry, please try again!';
+
+    // Remove loading
+    const loadEl=document.getElementById(loadId);
+    if(loadEl)loadEl.remove();
+
+    // Format and display steps
+    const steps=formatBlackboardSteps(reply);
+    steps.forEach((step,i)=>{
+      setTimeout(()=>{
+        canvas.innerHTML+=`<div class="bb-step">
+          <div class="bb-step-num">${step.label}</div>
+          <div class="bb-step-content">${step.content}</div>
+        </div>`;
+        canvas.scrollTop=canvas.scrollHeight;
+      },i*300);
+    });
+
+    // Speak summary
+    setTimeout(()=>{
+      const plainText=reply.replace(/[#\*\-\=]/g,'').replace(/\n/g,' ').substring(0,200);
+      speakText(plainText);
+    },steps.length*300+500);
+
+  }catch(e){
+    const loadEl=document.getElementById(loadId);
+    if(loadEl)loadEl.remove();
+    canvas.innerHTML+=`<div class="bb-step"><div class="bb-step-content" style="color:var(--red);">⚠️ Connection error. Please try again.</div></div>`;
+  }
+  canvas.scrollTop=canvas.scrollHeight;
+}
+
+function formatBlackboardSteps(text){
+  const lines=text.split('\n').filter(l=>l.trim());
+  const steps=[];
+  let current=null;
+
+  lines.forEach(line=>{
+    const trimmed=line.trim();
+    // Detect step headers
+    const stepMatch=trimmed.match(/^(STEP\s*\d+|Step\s*\d+|FINAL ANSWER|Final Answer|ANSWER|Solution|Given|To Find|Formula|Note)/i);
+    if(stepMatch){
+      if(current)steps.push(current);
+      current={label:stepMatch[0].toUpperCase(),content:''};
+      const rest=trimmed.replace(stepMatch[0],'').replace(/^[:.\s]+/,'');
+      if(rest)current.content=formatBBLine(rest);
+    } else if(current){
+      current.content+=(current.content?'<br>':'')+formatBBLine(trimmed);
+    } else {
+      current={label:'SOLUTION',content:formatBBLine(trimmed)};
+    }
+  });
+  if(current)steps.push(current);
+
+  // If no steps detected, split by paragraphs
+  if(steps.length<=1){
+    return lines.reduce((acc,line,i)=>{
+      if(line.trim()){
+        if(i===lines.length-1&&line.match(/answer|result|therefore/i)){
+          acc.push({label:'FINAL ANSWER ✓',content:`<span class="result">${formatBBLine(line)}</span>`});
+        } else {
+          acc.push({label:`STEP ${acc.length+1}`,content:formatBBLine(line)});
+        }
+      }
+      return acc;
+    },[]);
+  }
+  return steps;
+}
+
+function formatBBLine(text){
+  return text
+    .replace(/\*\*(.*?)\*\*/g,'<span class="highlight">$1</span>')
+    .replace(/`(.*?)`/g,'<span class="formula">$1</span>')
+    .replace(/=(.*?)$/g,'= <span class="highlight">$1</span>')
+    .replace(/∴|Therefore:|therefore:/g,'<span class="result">∴</span>')
+    .replace(/✓/g,'<span class="result">✓</span>');
+}
+
+// ══════════════════════════════════════
+// PHOTO UPLOAD
+// ══════════════════════════════════════
+function handlePhotoUpload(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    bbPhotoBase64=e.target.result.split(',')[1];
+    const mediaType=file.type||'image/jpeg';
+    document.getElementById('photo-preview-img').src=e.target.result;
+    document.getElementById('photo-preview-img').dataset.mediaType=mediaType;
+    document.getElementById('photo-overlay').classList.add('open');
+  };
+  reader.readAsDataURL(file);
+  event.target.value=''; // Reset input
+}
+
+async function sendPhotoQuestion(){
+  if(!bbPhotoBase64)return;
+  closePhotoOverlay();
+
+  const mediaType=document.getElementById('photo-preview-img').dataset.mediaType||'image/jpeg';
+
+  // Show photo in chat
+  addMsg('user','📷 [Photo Question]');
+  const msgs=document.getElementById('chat-msgs');
+  msgs.innerHTML+=`<div class="msg user"><div class="msg-av" style="background:var(--gold);font-size:12px;font-weight:700;color:var(--blue-dark);">${S.user?.name?.[0]||'S'}</div><div><img src="data:${mediaType};base64,${bbPhotoBase64}" class="photo-preview"/></div></div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+
+  // Show typing
+  const ty=document.getElementById('typing');ty.classList.add('show');
+  const bubble=document.getElementById('speech-bubble');
+  if(bubble)bubble.textContent='📷 Reading your photo...';
+
+  try{
+    const sys=`You are Miss BrightMind, an expert Indian teacher for Class ${S.user?.class||11} ${S.sub?.name||''} student. Board: ${S.user?.board||'CBSE'}. A student has sent you a photo of their question or problem. Identify the question in the image and solve/explain it step by step. Be encouraging and clear. If it is a maths problem, show all working steps.`;
+
+    const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,system:sys,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:mediaType,data:bbPhotoBase64}},
+          {type:'text',text:'Please solve or explain this question from my photo. Show step by step working.'}
+        ]}]})});
+    const d=await r.json();
+    const reply=d.content?.[0]?.text||'Sorry, I could not read the photo clearly. Please try again with better lighting!';
+
+    ty.classList.remove('show');
+    addMsg('ai',reply);
+    speakText(reply.substring(0,300));
+
+    // Also offer blackboard
+    setTimeout(()=>{
+      addMsg('ai','💡 Want me to show the full solution on the **Blackboard**? Tap the 🖊️ Blackboard button below!');
+    },1000);
+
+    // Update XP
+    if(S.user){S.user.xp=(S.user.xp||0)+15;saveUser();}
+    bbPhotoBase64=null;
+
+  }catch(e){
+    ty.classList.remove('show');
+    addMsg('ai','⚠️ Could not read the photo. Please try again with clear lighting!');
+  }
+}
+
+function closePhotoOverlay(){
+  document.getElementById('photo-overlay').classList.remove('open');
+}
+
+
 let voiceOn=true, speechRate=1, lastSpokenText='', mouthAnim=null, blinkAnim=null, recognition=null, isListening=false;
 
 const VOICE_SPEEDS={0.8:'Slow',1:'Normal',1.3:'Fast',1.6:'Very Fast'};
