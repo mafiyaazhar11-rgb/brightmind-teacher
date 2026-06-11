@@ -834,31 +834,54 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
       </div>
 
       <!-- EXAM PAPERS -->
-      <div class="sec-title">📄 Download Exam Papers</div>
+      <div class="sec-title">📄 Question Papers</div>
       <div id="exam-papers-section">
-        <div style="background:linear-gradient(135deg,var(--blue-dark),var(--blue-bright));border-radius:14px;padding:16px;margin-bottom:10px;">
-          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;">📝 Generate Question Paper</div>
-          <div style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:12px;">Generate a real-looking exam paper for any chapter — printable and downloadable!</div>
-          <select id="qp-subject" style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;margin-bottom:8px;font-family:'Poppins',sans-serif;">
-            <option value="">Select Subject</option>
-            <option>Mathematics</option>
-            <option>Physics</option>
-            <option>Chemistry</option>
-            <option>Biology</option>
-            <option>English</option>
-          </select>
-          <input id="qp-chapter" placeholder="Chapter name (e.g. Quadratic Equations)" 
-            style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;margin-bottom:8px;font-family:'Poppins',sans-serif;box-sizing:border-box;"/>
-          <select id="qp-type" style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;margin-bottom:12px;font-family:'Poppins',sans-serif;">
-            <option value="unit">Unit Test (20 marks · 1 hour)</option>
-            <option value="mid">Mid Term (50 marks · 2 hours)</option>
-            <option value="final">Final Exam (100 marks · 3 hours)</option>
-          </select>
-          <button onclick="generateExamPaper()" style="width:100%;background:var(--gold);color:var(--blue-dark);border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;">
-            📄 Generate & Download Question Paper
-          </button>
+
+        <!-- TABS -->
+        <div style="display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;">
+          <button onclick="switchPaperTab('model',this)" id="ptab-model" style="background:var(--blue-mid);color:#fff;border:none;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📚 Model Papers</button>
+          <button onclick="switchPaperTab('generate',this)" id="ptab-generate" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">⚙️ Generate Custom</button>
         </div>
-        <div id="past-papers-list"></div>
+
+        <!-- MODEL PAPERS TAB -->
+        <div id="ptab-model-content">
+          <!-- Exam Type Filter -->
+          <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;" id="paper-type-filter">
+            <button onclick="filterPapers('all',this)" style="background:var(--blue-mid);color:#fff;border:none;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">All</button>
+            <button onclick="filterPapers('unit',this)" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">Unit Test</button>
+            <button onclick="filterPapers('mid',this)" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">Mid Term</button>
+            <button onclick="filterPapers('quarterly',this)" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">Quarterly</button>
+            <button onclick="filterPapers('halfyearly',this)" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">Half Yearly</button>
+            <button onclick="filterPapers('annual',this)" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">Annual</button>
+            <button onclick="filterPapers('board',this)" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">Board Exam</button>
+          </div>
+          <div id="model-papers-grid"></div>
+        </div>
+
+        <!-- GENERATE CUSTOM TAB -->
+        <div id="ptab-generate-content" style="display:none;">
+          <div style="background:linear-gradient(135deg,var(--blue-dark),var(--blue-bright));border-radius:14px;padding:16px;margin-bottom:10px;">
+            <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;">⚙️ Generate Custom Paper</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:12px;">AI generates unique questions for any chapter!</div>
+            <select id="qp-subject" style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;margin-bottom:8px;font-family:'Poppins',sans-serif;">
+              <option value="">Select Subject</option>
+              <option>Mathematics</option><option>Physics</option><option>Chemistry</option>
+              <option>Biology</option><option>English</option><option>Social Science</option>
+            </select>
+            <input id="qp-chapter" placeholder="Chapter (e.g. Quadratic Equations)"
+              style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;margin-bottom:8px;font-family:'Poppins',sans-serif;box-sizing:border-box;"/>
+            <select id="qp-type" style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;margin-bottom:12px;font-family:'Poppins',sans-serif;">
+              <option value="unit">Unit Test (20 marks · 1 hour)</option>
+              <option value="mid">Mid Term (50 marks · 2 hours)</option>
+              <option value="final">Final Exam (100 marks · 3 hours)</option>
+            </select>
+            <button onclick="generateExamPaper()" style="width:100%;background:var(--gold);color:var(--blue-dark);border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;">
+              📄 Generate & Download
+            </button>
+          </div>
+          <div id="past-papers-list"></div>
+        </div>
+
       </div>
 
       <div class="sec-title">📊 Subject Progress</div>
@@ -2909,6 +2932,7 @@ function filterLB(btn){document.querySelectorAll('.lb-filter').forEach(b=>b.clas
 function renderProfile(){
   if(!S.user)return;const u=S.user;
   renderPhotoGallery();
+  setTimeout(initModelPapers, 100);
   document.getElementById('prof-av').textContent=u.name[0].toUpperCase();
   document.getElementById('prof-name').textContent=u.name;
   document.getElementById('prof-meta').textContent='Class '+u.class+' · '+u.state;
@@ -3458,8 +3482,183 @@ async function verifyPayment(response, amount, plan, subscription_type='monthly'
 }
 
 // ══════════════════════════════════════
-// EXAM PAPER GENERATOR
+// MODEL PAPERS LIBRARY
 // ══════════════════════════════════════
+const MODEL_PAPERS = [
+  // UNIT TESTS
+  {id:'ut_math11_q',type:'unit',board:'CBSE',class:'11',subject:'Mathematics',title:'Unit Test — Quadratic Equations',marks:20,time:'1 Hour',chapters:'Quadratic Equations, Complex Numbers',icon:'📐'},
+  {id:'ut_phy11_m',type:'unit',board:'CBSE',class:'11',subject:'Physics',title:'Unit Test — Laws of Motion',marks:20,time:'1 Hour',chapters:'Laws of Motion, Work & Energy',icon:'⚛️'},
+  {id:'ut_chem11_a',type:'unit',board:'CBSE',class:'11',subject:'Chemistry',title:'Unit Test — Atomic Structure',marks:20,time:'1 Hour',chapters:'Atomic Structure, Periodic Table',icon:'🧪'},
+  {id:'ut_bio11_c',type:'unit',board:'CBSE',class:'11',subject:'Biology',title:'Unit Test — Cell Biology',marks:20,time:'1 Hour',chapters:'Cell Structure, Cell Division',icon:'🌱'},
+  {id:'ut_math10_q',type:'unit',board:'CBSE',class:'10',subject:'Mathematics',title:'Unit Test — Quadratic Equations',marks:20,time:'1 Hour',chapters:'Quadratic Equations, AP',icon:'📐'},
+  {id:'ut_sci10_c',type:'unit',board:'CBSE',class:'10',subject:'Science',title:'Unit Test — Chemical Reactions',marks:20,time:'1 Hour',chapters:'Chemical Reactions, Acids & Bases',icon:'🔬'},
+  // MID TERMS
+  {id:'mid_math11',type:'mid',board:'CBSE',class:'11',subject:'Mathematics',title:'Mid Term — Mathematics',marks:50,time:'2 Hours',chapters:'Sets, Relations, Trigonometry, Sequences',icon:'📐'},
+  {id:'mid_phy11',type:'mid',board:'CBSE',class:'11',subject:'Physics',title:'Mid Term — Physics',marks:50,time:'2 Hours',chapters:'Units, Motion, Laws of Motion, Work Energy',icon:'⚛️'},
+  {id:'mid_chem11',type:'mid',board:'CBSE',class:'11',subject:'Chemistry',title:'Mid Term — Chemistry',marks:50,time:'2 Hours',chapters:'Basic Concepts, Atomic Structure, Bonding',icon:'🧪'},
+  {id:'mid_math10',type:'mid',board:'CBSE',class:'10',subject:'Mathematics',title:'Mid Term — Mathematics',marks:50,time:'2 Hours',chapters:'Real Numbers, Polynomials, Linear Equations',icon:'📐'},
+  {id:'mid_sci10',type:'mid',board:'CBSE',class:'10',subject:'Science',title:'Mid Term — Science',marks:50,time:'2 Hours',chapters:'Chemical Reactions, Life Processes, Light',icon:'🔬'},
+  // QUARTERLY
+  {id:'q1_math11_tn',type:'quarterly',board:'TN',class:'11',subject:'Mathematics',title:'1st Quarterly — Mathematics',marks:90,time:'2.5 Hours',chapters:'Sets, Relations, Basic Algebra, Trigonometry I',icon:'📐'},
+  {id:'q1_phy11_tn',type:'quarterly',board:'TN',class:'11',subject:'Physics',title:'1st Quarterly — Physics',marks:90,time:'2.5 Hours',chapters:'Physical World, Units, Motion, Laws of Motion',icon:'⚛️'},
+  {id:'q1_bio11_tn',type:'quarterly',board:'TN',class:'11',subject:'Biology',title:'1st Quarterly — Biology',marks:90,time:'2.5 Hours',chapters:'Living World, Classification, Cell Biology',icon:'🌱'},
+  {id:'q1_math10_tn',type:'quarterly',board:'TN',class:'10',subject:'Mathematics',title:'1st Quarterly — Mathematics',marks:100,time:'2.5 Hours',chapters:'Relations, Numbers, Algebra',icon:'📐'},
+  {id:'q2_math11_tn',type:'quarterly',board:'TN',class:'11',subject:'Mathematics',title:'2nd Quarterly — Mathematics',marks:90,time:'2.5 Hours',chapters:'Matrices, Vector Algebra, Statistics',icon:'📐'},
+  // HALF YEARLY
+  {id:'hy_math11',type:'halfyearly',board:'CBSE',class:'11',subject:'Mathematics',title:'Half Yearly — Mathematics',marks:80,time:'3 Hours',chapters:'Sets to Sequences — Full 1st Half Syllabus',icon:'📐'},
+  {id:'hy_phy11',type:'halfyearly',board:'CBSE',class:'11',subject:'Physics',title:'Half Yearly — Physics',marks:70,time:'3 Hours',chapters:'Physical World to Thermodynamics',icon:'⚛️'},
+  {id:'hy_math12',type:'halfyearly',board:'CBSE',class:'12',subject:'Mathematics',title:'Half Yearly — Mathematics',marks:80,time:'3 Hours',chapters:'Relations to Integrals — Full 1st Half',icon:'📐'},
+  {id:'hy_math11_tn',type:'halfyearly',board:'TN',class:'11',subject:'Mathematics',title:'Half Yearly — Mathematics',marks:90,time:'3 Hours',chapters:'Full 1st Semester Syllabus',icon:'📐'},
+  {id:'hy_phy11_tn',type:'halfyearly',board:'TN',class:'11',subject:'Physics',title:'Half Yearly — Physics',marks:90,time:'3 Hours',chapters:'Full 1st Semester Physics',icon:'⚛️'},
+  // ANNUAL
+  {id:'ann_math11',type:'annual',board:'CBSE',class:'11',subject:'Mathematics',title:'Annual Exam — Mathematics',marks:80,time:'3 Hours',chapters:'Complete Class 11 Mathematics Syllabus',icon:'📐'},
+  {id:'ann_phy11',type:'annual',board:'CBSE',class:'11',subject:'Physics',title:'Annual Exam — Physics',marks:70,time:'3 Hours',chapters:'Complete Class 11 Physics Syllabus',icon:'⚛️'},
+  {id:'ann_chem11',type:'annual',board:'CBSE',class:'11',subject:'Chemistry',title:'Annual Exam — Chemistry',marks:70,time:'3 Hours',chapters:'Complete Class 11 Chemistry',icon:'🧪'},
+  {id:'ann_math10',type:'annual',board:'CBSE',class:'10',subject:'Mathematics',title:'Annual Exam — Mathematics',marks:80,time:'3 Hours',chapters:'Complete Class 10 Mathematics',icon:'📐'},
+  {id:'ann_sci10',type:'annual',board:'CBSE',class:'10',subject:'Science',title:'Annual Exam — Science',marks:80,time:'3 Hours',chapters:'Complete Class 10 Science',icon:'🔬'},
+  // BOARD EXAMS
+  {id:'board_math12',type:'board',board:'CBSE',class:'12',subject:'Mathematics',title:'CBSE Board Exam — Mathematics',marks:80,time:'3 Hours',chapters:'Complete Class 12 — Board Pattern 2024-25',icon:'📐'},
+  {id:'board_phy12',type:'board',board:'CBSE',class:'12',subject:'Physics',title:'CBSE Board Exam — Physics',marks:70,time:'3 Hours',chapters:'Complete Class 12 Physics — Board Pattern',icon:'⚛️'},
+  {id:'board_chem12',type:'board',board:'CBSE',class:'12',subject:'Chemistry',title:'CBSE Board Exam — Chemistry',marks:70,time:'3 Hours',chapters:'Complete Class 12 Chemistry',icon:'🧪'},
+  {id:'board_bio12',type:'board',board:'CBSE',class:'12',subject:'Biology',title:'CBSE Board Exam — Biology',marks:70,time:'3 Hours',chapters:'Complete Class 12 Biology',icon:'🌱'},
+  {id:'board_math10',type:'board',board:'CBSE',class:'10',subject:'Mathematics',title:'CBSE Board Exam — Mathematics',marks:80,time:'3 Hours',chapters:'Complete Class 10 — Board Pattern 2024-25',icon:'📐'},
+  {id:'board_math12_tn',type:'board',board:'TN',class:'12',subject:'Mathematics',title:'TN Board Exam — Mathematics',marks:90,time:'3 Hours',chapters:'Complete Class 12 TN Board Pattern',icon:'📐'},
+  {id:'board_phy12_tn',type:'board',board:'TN',class:'12',subject:'Physics',title:'TN Board Exam — Physics',marks:90,time:'3 Hours',chapters:'Complete Class 12 TN Physics',icon:'⚛️'},
+  {id:'board_bio12_tn',type:'board',board:'TN',class:'12',subject:'Biology',title:'TN Board Exam — Biology',marks:90,time:'3 Hours',chapters:'Complete Class 12 TN Biology',icon:'🌱'},
+];
+
+function switchPaperTab(tab, btn){
+  document.getElementById('ptab-model-content').style.display = tab==='model'?'block':'none';
+  document.getElementById('ptab-generate-content').style.display = tab==='generate'?'block':'none';
+  document.querySelectorAll('#exam-papers-section > div:first-child button').forEach(b=>{
+    b.style.background='var(--gray-light)'; b.style.color='var(--blue-dark)';
+  });
+  btn.style.background='var(--blue-mid)'; btn.style.color='#fff';
+  if(tab==='model') renderModelPapers('all');
+}
+
+function filterPapers(type, btn){
+  document.querySelectorAll('#paper-type-filter button').forEach(b=>{
+    b.style.background='var(--gray-light)'; b.style.color='var(--blue-dark)';
+  });
+  btn.style.background='var(--blue-mid)'; btn.style.color='#fff';
+  renderModelPapers(type);
+}
+
+function renderModelPapers(typeFilter){
+  const el=document.getElementById('model-papers-grid');
+  if(!el)return;
+  const userBoard=S.user?.board||'CBSE';
+  const userClass=S.user?.class||'11';
+
+  // Filter papers relevant to student first, then others
+  let papers = MODEL_PAPERS.filter(p=>typeFilter==='all'||p.type===typeFilter);
+
+  // Sort: matching board+class first
+  papers.sort((a,b)=>{
+    const aMatch=(a.board===userBoard&&a.class===userClass)?0:(a.board===userBoard?1:2);
+    const bMatch=(b.board===userBoard&&b.class===userClass)?0:(b.board===userBoard?1:2);
+    return aMatch-bMatch;
+  });
+
+  const typeLabels={unit:'Unit Test',mid:'Mid Term',quarterly:'Quarterly',halfyearly:'Half Yearly',annual:'Annual',board:'Board Exam'};
+  const typeColors={unit:'#1565c0',mid:'#6a1b9a',quarterly:'#e65100',halfyearly:'#2e7d32',annual:'#c62828',board:'#1a237e'};
+
+  el.innerHTML = papers.map(p=>`
+    <div style="background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 10px rgba(13,27,75,.08);border-left:4px solid ${typeColors[p.type]||'var(--blue-mid)'};">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <span style="font-size:20px;">${p.icon}</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--blue-dark);">${p.title}</div>
+              <div style="font-size:11px;color:var(--gray-text);margin-top:1px;">${p.board} · Class ${p.class}</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--gray-text);margin-left:28px;line-height:1.5;">${p.chapters}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-left:10px;">
+          <div style="background:${typeColors[p.type]};color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:4px;">${typeLabels[p.type]}</div>
+          <div style="font-size:11px;color:var(--gray-text);">${p.marks} marks</div>
+          <div style="font-size:11px;color:var(--gray-text);">${p.time}</div>
+        </div>
+      </div>
+      <button onclick="downloadModelPaper('${p.id}')" 
+        style="width:100%;background:linear-gradient(135deg,var(--blue-dark),var(--blue-bright));color:#fff;border:none;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;margin-top:4px;">
+        📄 Download Question Paper
+      </button>
+    </div>`).join('');
+}
+
+async function downloadModelPaper(paperId){
+  const paper = MODEL_PAPERS.find(p=>p.id===paperId);
+  if(!paper){alert('Paper not found!');return;}
+
+  const btn = document.querySelector(`[onclick="downloadModelPaper('${paperId}')"]`);
+  if(btn){btn.textContent='⏳ Generating...';btn.disabled=true;}
+
+  try{
+    const boardFull = {CBSE:'CBSE',TN:'Tamil Nadu State Board',KL:'Kerala Board (SCERT)',KA:'Karnataka Board (KSEEB)',AP:'AP State Board',TS:'Telangana State Board',MH:'Maharashtra Board'}[paper.board]||paper.board;
+    const typeConfig = {
+      unit:  {label:'UNIT TEST',         sections:'A(MCQ 1m×5), B(Short 2m×5), C(Long 5m×2)'},
+      mid:   {label:'MID TERM EXAMINATION', sections:'A(MCQ 1m×10), B(Short 2m×10), C(Long 5m×6)'},
+      quarterly:{label:'QUARTERLY EXAMINATION',sections:'A(MCQ 1m×15), B(Short 2m×10), C(Long 5m×8), D(Essay 10m×2)'},
+      halfyearly:{label:'HALF YEARLY EXAMINATION',sections:'A(MCQ 1m×15), B(Short 2m×10), C(Long 5m×8), D(Essay 10m×2)'},
+      annual:{label:'ANNUAL EXAMINATION', sections:'A(MCQ 1m×15), B(Short 2m×10), C(Long 5m×8), D(Essay 10m×2)'},
+      board: {label:'BOARD EXAMINATION',  sections:'A(MCQ 1m×20), B(Short 2m×10), C(Long 5m×6), D(Essay 10m×2)'}
+    };
+    const cfg = typeConfig[paper.type];
+
+    const prompt = `Generate a complete ${cfg.label} question paper for:
+Subject: ${paper.subject}
+Board: ${boardFull}
+Class: ${paper.class}
+Chapters/Topics: ${paper.chapters}
+Total Marks: ${paper.marks}
+Time: ${paper.time}
+Section structure: ${cfg.sections}
+
+Create authentic exam questions exactly matching ${boardFull} official paper style.
+Make questions curriculum-appropriate, challenging, and varied.
+
+Return ONLY this JSON:
+{
+  "instructions": ["All questions are compulsory", "...5 instructions total"],
+  "sections": [
+    {"name": "SECTION A", "type": "Multiple Choice Questions", "marks_per_q": 1, "total_marks": 20,
+     "questions": [{"no":1,"q":"question","options":["A) ","B) ","C) ","D) "],"marks":1}]},
+    {"name": "SECTION B", "type": "Short Answer Questions", "marks_per_q": 2, "total_marks": 20,
+     "questions": [{"no":6,"q":"question","marks":2}]},
+    {"name": "SECTION C", "type": "Long Answer Questions", "marks_per_q": 5, "total_marks": 30,
+     "questions": [{"no":16,"q":"question","marks":5}]}
+  ]
+}`;
+
+    const r = await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:3000,
+        messages:[{role:'user',content:prompt}]})});
+    const d = await r.json();
+    let raw = d.content?.[0]?.text||'{}';
+    raw = raw.replace(/```json|```/g,'').trim();
+    const paperData = JSON.parse(raw);
+
+    buildExamPaperHTML(paperData, paper.subject, paper.chapters, {
+      label:cfg.label, marks:paper.marks, time:paper.time
+    }, boardFull);
+
+  }catch(e){
+    alert('Could not generate. Please try again!');
+  }finally{
+    if(btn){btn.textContent='📄 Download Question Paper';btn.disabled=false;}
+  }
+}
+
+// Init model papers on profile load
+function initModelPapers(){
+  renderModelPapers('all');
+}
+
+
 async function generateExamPaper(){
   const subject = document.getElementById('qp-subject').value;
   const chapter = document.getElementById('qp-chapter').value.trim();
