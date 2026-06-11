@@ -3067,14 +3067,25 @@ async function loadAdminSessions(){
       <div style="font-size:24px;font-weight:900;color:var(--green);">${(totalMins/60).toFixed(1)}h</div>
     </div>
   </div>`+
-  d.sessions.map(s=>`<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(13,27,75,.05);">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-      <div style="font-size:13px;font-weight:700;color:var(--blue-dark);">${s.student_name}</div>
-      <div style="font-size:13px;font-weight:700;color:${s.logout_at?'var(--blue-mid)':'var(--green)'};">${s.logout_at?Math.round(parseFloat(s.mins||0))+' mins':'🟢 Online now'}</div>
-    </div>
-    <div style="font-size:11px;color:var(--gray-text);">Class ${s.class} · ${s.state} · ${new Date(s.login_at).toLocaleString('en-IN')}</div>
-    <div style="font-size:11px;color:var(--blue-mid);margin-top:2px;">Questions: ${s.questions_in_session||0}</div>
-  </div>`).join('');
+  d.sessions.map(s=>{
+    const loginTime = new Date(s.login_at);
+    const minutesAgo = Math.round((Date.now() - loginTime) / 60000);
+    const isReallyOnline = !s.logout_at && minutesAgo < 15;
+    const statusText = s.logout_at 
+      ? Math.round(parseFloat(s.mins||0))+' mins'
+      : isReallyOnline 
+        ? '🟢 Online now'
+        : '⚪ Inactive ('+minutesAgo+' mins ago)';
+    const statusColor = s.logout_at ? 'var(--blue-mid)' : isReallyOnline ? 'var(--green)' : 'var(--gray-text)';
+    return `<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(13,27,75,.05);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="font-size:13px;font-weight:700;color:var(--blue-dark);">${s.student_name}</div>
+        <div style="font-size:13px;font-weight:700;color:${statusColor};">${statusText}</div>
+      </div>
+      <div style="font-size:11px;color:var(--gray-text);">Class ${s.class} · ${s.state} · ${new Date(s.login_at).toLocaleString('en-IN')}</div>
+      <div style="font-size:11px;color:var(--blue-mid);margin-top:2px;">Questions: ${s.questions_in_session||0}</div>
+    </div>`;
+  }).join('');
 }
 
 async function loadAdminAudit(){
@@ -3133,6 +3144,7 @@ async function renderAdmin(){
       <button onclick="adminResetPwd('${u.name}')" style="margin-top:8px;background:#e8eaf6;color:var(--blue-mid);border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">🔑 Reset Password</button>
       <button onclick="adminExtendAccess('${u.id}','${u.name}')" style="margin-top:8px;background:#e8f5e9;color:#1b5e20;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-left:6px;">⏰ Extend Access</button>
       <button onclick="adminGivePremium('${u.id}','${u.name}')" style="margin-top:8px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--blue-dark);border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-left:6px;">💎 Give Premium</button>
+      <button onclick="adminLoginAs('${u.id}','${u.name}')" style="margin-top:8px;background:linear-gradient(135deg,#4a148c,#7b1fa2);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-left:6px;">👁️ View as Student</button>
     </div>`).join('');
 }
 
@@ -3445,6 +3457,42 @@ async function createDemoAccount(){
   } else {
     alert('Failed: ' + (d.msg||'Try again'));
   }
+}
+
+// Admin view as student — inspect any account
+async function adminLoginAs(studentId, studentName){
+  if(!confirm(`Login as ${studentName} to check their account?\n\nYou will see exactly what they see.\nYour admin session will be saved — logout to return to admin.`)) return;
+  const res = await fetch(API_URL+'/api/admin/get-student/'+studentId, {
+    headers:{'x-admin-key':'azhar2026'}
+  });
+  const d = await res.json();
+  if(!d.ok){alert('Could not load student data!');return;}
+  // Save admin flag
+  sessionStorage.setItem('admin_viewing','true');
+  sessionStorage.setItem('admin_name','admin');
+  // Login as student
+  loginUser(mapStudent(d.student));
+  // Show banner that admin is viewing
+  setTimeout(()=>{
+    const banner = document.createElement('div');
+    banner.id='admin-view-banner';
+    banner.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#4a148c,#7b1fa2);color:#fff;padding:8px 16px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:space-between;';
+    banner.innerHTML=`<span>👁️ ADMIN VIEWING: ${studentName}</span><button onclick="adminReturnFromView()" style="background:rgba(255,255,255,.3);border:none;color:#fff;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">← Back to Admin</button>`;
+    document.body.prepend(banner);
+    // Push content down
+    document.getElementById('app').style.paddingTop='36px';
+  },600);
+}
+
+function adminReturnFromView(){
+  sessionStorage.removeItem('admin_viewing');
+  sessionStorage.removeItem('admin_name');
+  const banner = document.getElementById('admin-view-banner');
+  if(banner) banner.remove();
+  document.getElementById('app').style.paddingTop='0';
+  S.user=null;
+  renderAdmin();
+  go('admin-screen');
 }
 
 async function adminResetPwd(name){
