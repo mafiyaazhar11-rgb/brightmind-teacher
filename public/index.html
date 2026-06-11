@@ -799,6 +799,75 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
       <div id="sc-india-lb"></div>
     </div>
 
+    <!-- PAPERS PAGE -->
+    <div id="pg-papers" class="page">
+      <div class="hero" style="background:linear-gradient(135deg,#1b5e20,#2e7d32);">
+        <div class="hero-greet">📄 Question Papers</div>
+        <div class="hero-name" id="papers-hero-name">Study Smart!</div>
+        <div class="hero-sub">Download papers · Practice exams · Score better</div>
+        <div class="hero-stats">
+          <div class="hstat"><div class="v">32+</div><div class="l">Model Papers</div></div>
+          <div class="hstat"><div class="v">6</div><div class="l">Exam Types</div></div>
+          <div class="hstat"><div class="v">∞</div><div class="l">Custom Papers</div></div>
+        </div>
+      </div>
+
+      <!-- EXAM MAKER CARD -->
+      <div style="background:linear-gradient(135deg,#e65100,#ff6f00);border-radius:16px;padding:16px 18px;margin-bottom:16px;cursor:pointer;box-shadow:0 4px 14px rgba(230,81,0,.3);" onclick="startQuickExam()">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:15px;font-weight:800;color:#fff;">📝 Take Chapter Exam</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.9);margin-top:3px;">Test yourself · AI grades instantly</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:2px;">10 questions · 15 minutes · 85% to pass</div>
+          </div>
+          <div style="font-size:40px;">🎯</div>
+        </div>
+      </div>
+
+      <!-- PAPER TABS -->
+      <div style="display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;">
+        <button onclick="switchPaperTab2('model',this)" id="ptab2-model" style="background:var(--blue-mid);color:#fff;border:none;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📚 Model Papers</button>
+        <button onclick="switchPaperTab2('generate',this)" id="ptab2-generate" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">⚙️ Custom Paper</button>
+      </div>
+
+      <!-- MODEL PAPERS -->
+      <div id="ptab2-model-content">
+        <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;" id="paper-type-filter2">
+          <button onclick="filterPapers2('all',this)" style="background:var(--blue-mid);color:#fff;border:none;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">All</button>
+          <button onclick="filterPapers2('unit',this)" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">Unit Test</button>
+          <button onclick="filterPapers2('mid',this)" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">Mid Term</button>
+          <button onclick="filterPapers2('quarterly',this)" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">Quarterly</button>
+          <button onclick="filterPapers2('halfyearly',this)" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">Half Yearly</button>
+          <button onclick="filterPapers2('annual',this)" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">Annual</button>
+          <button onclick="filterPapers2('board',this)" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">Board Exam</button>
+        </div>
+        <div id="model-papers-grid2"></div>
+      </div>
+
+      <!-- CUSTOM PAPER -->
+      <div id="ptab2-generate-content" style="display:none;">
+        <div style="background:linear-gradient(135deg,var(--blue-dark),var(--blue-bright));border-radius:14px;padding:16px;margin-bottom:10px;">
+          <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;">⚙️ Generate Custom Paper</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:12px;">AI creates unique questions for any chapter!</div>
+          <select id="qp2-subject" style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;margin-bottom:8px;font-family:'Poppins',sans-serif;">
+            <option value="">Select Subject</option>
+            <option>Mathematics</option><option>Physics</option><option>Chemistry</option>
+            <option>Biology</option><option>English</option><option>Social Science</option>
+          </select>
+          <input id="qp2-chapter" placeholder="Chapter (e.g. Quadratic Equations)"
+            style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;margin-bottom:8px;font-family:'Poppins',sans-serif;box-sizing:border-box;"/>
+          <select id="qp2-type" style="width:100%;padding:10px;border-radius:8px;border:none;font-size:13px;margin-bottom:12px;font-family:'Poppins',sans-serif;">
+            <option value="unit">Unit Test (20 marks · 1 hour)</option>
+            <option value="mid">Mid Term (50 marks · 2 hours)</option>
+            <option value="final">Annual/Board Exam (80 marks · 3 hours)</option>
+          </select>
+          <button onclick="generateExamPaper2()" style="width:100%;background:var(--gold);color:var(--blue-dark);border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;">
+            📄 Generate & Download Paper
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- PROFILE -->
     <div id="pg-profile" class="page">
       <div class="prof-card">
@@ -895,6 +964,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
   <div class="bottomnav">
     <button class="btab active" onclick="showPage('home',this)"><span class="ti">🏠</span>Home</button>
     <button class="btab" onclick="showPage('lb',this)"><span class="ti">🏆</span>Ranks</button>
+    <button class="btab" onclick="showPage('papers',this)"><span class="ti">📄</span>Papers</button>
     <button class="btab" onclick="showPage('score',this)"><span class="ti">📊</span>Score</button>
     <button class="btab" onclick="showPage('profile',this)"><span class="ti">👤</span>Profile</button>
   </div>
@@ -1473,7 +1543,7 @@ const DEMO_LB=[
   {name:'Meena Iyer',state:'Karnataka',score:82,stars:4,class:'11'},
 ];
 let S={
-  user:null,sub:null,chatHist:[],qToday:0,freeLimit:5,isPaid:false,lang:'en',
+  user:null,sub:null,chatHist:[],qToday:0,freeLimit:5,isPaid:false,lang:'en',papersDownloaded:0,
   examQs:[],examAns:{},examIdx:0,examTimer:null,examSecs:900,examSub:null,
   students:JSON.parse(localStorage.getItem('bmt_v3')||'[]'),
 };
@@ -1490,6 +1560,7 @@ function showPage(name,tab){
   if(name==='lb')renderLB();
   if(name==='profile')renderProfile();
   if(name==='score')renderScorecard();
+  if(name==='papers')initPapersPage();
 }
 function openChat(){document.getElementById('chat-overlay').classList.add('open');}
 function closeChat(){document.getElementById('chat-overlay').classList.remove('open');}
@@ -1757,7 +1828,7 @@ function mapStudent(s){
   };
 }
 function loginUser(u){
-  S.user=u;S.isPaid=u.isPaid||false;S.qToday=u.qToday||0;S.freeLimit=10;S.photoUsed=u.photoUsed||0;S.photoLimit=2;
+  S.user=u;S.isPaid=u.isPaid||false;S.qToday=u.qToday||0;S.freeLimit=10;S.photoUsed=u.photoUsed||0;S.photoLimit=2;S.papersDownloaded=parseInt(localStorage.getItem('bmt_papers_'+u.id)||'0');
   document.getElementById('nav-av').textContent=u.name[0].toUpperCase();
   document.getElementById('nav-uname').textContent=u.name;
   document.getElementById('hero-name').textContent='Hello, '+u.name+'! 👋';
@@ -3482,6 +3553,89 @@ async function verifyPayment(response, amount, plan, subscription_type='monthly'
 }
 
 // ══════════════════════════════════════
+// PAPERS PAGE
+// ══════════════════════════════════════
+function switchPaperTab2(tab, btn){
+  document.getElementById('ptab2-model-content').style.display=tab==='model'?'block':'none';
+  document.getElementById('ptab2-generate-content').style.display=tab==='generate'?'block':'none';
+  document.querySelectorAll('#ptab2-model,#ptab2-generate').forEach(b=>{
+    b.style.background='var(--gray-light)';b.style.color='var(--blue-dark)';
+  });
+  btn.style.background='var(--blue-mid)';btn.style.color='#fff';
+  if(tab==='model')renderModelPapers2('all');
+}
+
+function filterPapers2(type, btn){
+  document.querySelectorAll('#paper-type-filter2 button').forEach(b=>{
+    b.style.background='var(--gray-light)';b.style.color='var(--blue-dark)';
+  });
+  btn.style.background='var(--blue-mid)';btn.style.color='#fff';
+  renderModelPapers2(type);
+}
+
+function renderModelPapers2(typeFilter){
+  const el=document.getElementById('model-papers-grid2');
+  if(!el)return;
+  const userBoard=S.user?.board||'CBSE';
+  const userClass=S.user?.class||'11';
+  let papers=MODEL_PAPERS.filter(p=>typeFilter==='all'||p.type===typeFilter);
+  papers.sort((a,b)=>{
+    const aM=(a.board===userBoard&&a.class===userClass)?0:(a.board===userBoard?1:2);
+    const bM=(b.board===userBoard&&b.class===userClass)?0:(b.board===userBoard?1:2);
+    return aM-bM;
+  });
+  const typeColors={unit:'#1565c0',mid:'#6a1b9a',quarterly:'#e65100',halfyearly:'#2e7d32',annual:'#c62828',board:'#1a237e'};
+  const typeLabels={unit:'Unit Test',mid:'Mid Term',quarterly:'Quarterly',halfyearly:'Half Yearly',annual:'Annual',board:'Board Exam'};
+  if(!papers.length){el.innerHTML='<div style="color:var(--gray-text);text-align:center;padding:20px;">No papers found for this type.</div>';return;}
+  el.innerHTML=papers.map((p,idx)=>`
+    <div style="background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 10px rgba(13,27,75,.08);border-left:4px solid ${typeColors[p.type]||'var(--blue-mid)'};">
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+        <span style="font-size:24px;flex-shrink:0;">${p.icon}</span>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:700;color:var(--blue-dark);">${p.title}</div>
+          <div style="font-size:11px;color:var(--gray-text);margin-top:2px;">${p.board} · Class ${p.class} · ${p.marks} marks · ${p.time}</div>
+          <div style="font-size:11px;color:var(--gray-text);margin-top:2px;line-height:1.4;">${p.chapters}</div>
+        </div>
+        <span style="background:${typeColors[p.type]};color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;flex-shrink:0;">${typeLabels[p.type]}</span>
+      </div>
+      ${(!S.isPaid && idx > 0) ?
+        `<button onclick="showModal('sub-modal')" style="width:100%;background:var(--gray-mid);color:var(--gray-text);border:none;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
+          🔒 Subscribe to Download
+        </button>` :
+        `<button onclick="downloadModelPaper('${p.id}')"
+          style="width:100%;background:linear-gradient(135deg,var(--blue-dark),var(--blue-bright));color:#fff;border:none;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">
+          📄 Download Question Paper ${!S.isPaid && idx === 0 ? '(1 Free)' : ''}
+        </button>`}
+    </div>`).join('');
+}
+
+async function generateExamPaper2(){
+  const subject=document.getElementById('qp2-subject').value;
+  const chapter=document.getElementById('qp2-chapter').value.trim();
+  const type=document.getElementById('qp2-type').value;
+  if(!subject){alert('Please select a subject!');return;}
+  if(!chapter){alert('Please enter the chapter name!');return;}
+  document.getElementById('qp-subject').value=subject;
+  document.getElementById('qp-chapter').value=chapter;
+  document.getElementById('qp-type').value=type==='final'?'final':type;
+  await generateExamPaper();
+}
+
+function startQuickExam(){
+  SYL={board:S.user?.board||'CBSE',cls:S.user?.class||'11',subject:'',chapter:'',topic:'',step:1};
+  document.getElementById('syllabus-overlay').classList.add('open');
+  renderSyllabusStep();
+}
+
+function initPapersPage(){
+  if(S.user){
+    const el=document.getElementById('papers-hero-name');
+    if(el)el.textContent='Hello, '+S.user.name+'! 👋';
+  }
+  renderModelPapers2('all');
+}
+
+// ══════════════════════════════════════
 // MODEL PAPERS LIBRARY
 // ══════════════════════════════════════
 const MODEL_PAPERS = [
@@ -3594,6 +3748,24 @@ async function downloadModelPaper(paperId){
   const paper = MODEL_PAPERS.find(p=>p.id===paperId);
   if(!paper){alert('Paper not found!');return;}
 
+  // CHECK DOWNLOAD LIMIT
+  if(!S.isPaid){
+    if(S.papersDownloaded >= 1){
+      // Show upgrade prompt
+      showModal('sub-modal');
+      setTimeout(()=>{
+        const modal = document.querySelector('#sub-modal .modal-sheet');
+        if(modal){
+          const note = document.createElement('div');
+          note.style.cssText='background:#fff3e0;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#e65100;text-align:center;font-weight:600;';
+          note.innerHTML='📄 Free users get <b>1 paper download</b> only.<br>Subscribe for <b>unlimited downloads!</b>';
+          modal.insertBefore(note, modal.children[2]);
+        }
+      },300);
+      return;
+    }
+  }
+
   const btn = document.querySelector(`[onclick="downloadModelPaper('${paperId}')"]`);
   if(btn){btn.textContent='⏳ Generating...';btn.disabled=true;}
 
@@ -3646,6 +3818,12 @@ Return ONLY this JSON:
       label:cfg.label, marks:paper.marks, time:paper.time
     }, boardFull);
 
+    // Track download count for free users
+    if(!S.isPaid){
+      S.papersDownloaded++;
+      localStorage.setItem('bmt_papers_'+(S.user?.id||'guest'), S.papersDownloaded);
+    }
+
   }catch(e){
     alert('Could not generate. Please try again!');
   }finally{
@@ -3665,6 +3843,12 @@ async function generateExamPaper(){
   const type = document.getElementById('qp-type').value;
   if(!subject){alert('Please select a subject!');return;}
   if(!chapter){alert('Please enter the chapter name!');return;}
+
+  // Check download limit for free users
+  if(!S.isPaid && S.papersDownloaded >= 1){
+    showModal('sub-modal');
+    return;
+  }
 
   const btn = document.querySelector('#exam-papers-section button');
   if(btn){btn.textContent='⏳ Generating paper...';btn.disabled=true;}
