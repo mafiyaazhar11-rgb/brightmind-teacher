@@ -51,7 +51,13 @@ async function initDB() {
 
     -- Add columns if not exists (for existing deployments)
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS mobile VARCHAR(15);
-    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS email VARCHAR(150) UNIQUE;
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS email VARCHAR(150);
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS subscription_type VARCHAR(20) DEFAULT 'monthly';
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS subscription_start TIMESTAMP;
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS subscription_end TIMESTAMP;
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS next_due_date TIMESTAMP;
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS reminder_sent BOOLEAN DEFAULT FALSE;
+    CREATE UNIQUE INDEX IF NOT EXISTS bmt_students_email_unique ON bmt_students(email) WHERE email IS NOT NULL;
 
     CREATE TABLE IF NOT EXISTS bmt_support (
       id BIGSERIAL PRIMARY KEY,
