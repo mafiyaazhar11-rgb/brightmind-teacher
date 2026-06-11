@@ -617,6 +617,98 @@ app.get('/api/admin/revenue', async (req, res) => {
   } catch (e) { res.json({ ok: false, payments: [], total: 0 }); }
 });
 
+// ADMIN — Extend student access
+app.post('/api/admin/extend-access', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== process.env.ADMIN_KEY) return res.status(401).json({ ok: false });
+    const { student_id, days } = req.body;
+    // Get current expiry or use now
+    const s = await pool.query('SELECT next_due_date, is_paid FROM bmt_students WHERE id=$1', [student_id]);
+    if (!s.rows.length) return res.json({ ok: false, msg: 'Student not found' });
+    const base = s.rows[0].next_due_date ? new Date(s.rows[0].next_due_date) : new Date();
+    base.setDate(base.getDate() + parseInt(days));
+    await pool.query(
+      `UPDATE bmt_students SET 
+       is_paid=true, next_due_date=$1, subscription_end=$1, reminder_sent=false
+       WHERE id=$2`,
+      [base, student_id]
+    );
+    await pool.query(`INSERT INTO bmt_audit_log (student_id, student_name, action, details) 
+      SELECT id, name, 'ADMIN_EXTEND', $1 FROM bmt_students WHERE id=$2`,
+      [JSON.stringify({days, new_expiry: base}), student_id]
+    ).catch(()=>{});
+    console.log(`⏰ ADMIN EXTENDED: ${student_id} by ${days} days until ${base}`);
+    res.json({ ok: true, new_expiry: base });
+  } catch (e) {
+    console.error(e);
+    res.json({ ok: false });
+  }
+});
+
+// ADMIN — Give premium
+app.post('/api/admin/give-premium', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== process.env.ADMIN_KEY) return res.status(401).json({ ok: false });
+    const { student_id, student_name, months, plan } = req.body;
+    const expiry = new Date();
+    expiry.setMonth(expiry.getMonth() + parseInt(months));
+    await pool.query(
+      `UPDATE bmt_students SET 
+       is_paid=true, plan=$1, subscription_type='admin_gift',
+       subscription_start=NOW(), subscription_end=$2, next_due_date=$2, reminder_sent=false
+       WHERE id=$3`,
+      [plan || 'all', expiry, student_id]
+    );
+    await pool.query(
+      `INSERT INTO bmt_payments (student_id, student_name, amount, plan, razorpay_id, status)
+       VALUES ($1, $2, 0, $3, 'admin_gift', 'success')`,
+      [student_id, student_name, plan || 'all']
+    ).catch(()=>{});
+    await pool.query(`INSERT INTO bmt_audit_log (student_id, student_name, action, details)
+      SELECT id, name, 'ADMIN_GIFT', $1 FROM bmt_students WHERE id=$2`,
+      [JSON.stringify({months, plan, expiry}), student_id]
+    ).catch(()=>{});
+    console.log(`💎 ADMIN GIFT: ${student_name} | ${months} months`);
+    res.json({ ok: true, expiry });
+  } catch (e) {
+    console.error(e);
+    res.json({ ok: false });
+  }
+});
+
+// ADMIN — Create demo account
+app.post('/api/admin/create-demo', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== process.env.ADMIN_KEY) return res.status(401).json({ ok: false });
+    const { name, email, password, board, class: cls, state, days } = req.body;
+    if (!name || !password || !cls || !state) return res.json({ ok: false, msg: 'Fill all fields!' });
+    // Check name exists
+    const exists = await pool.query('SELECT id FROM bmt_students WHERE LOWER(name)=LOWER($1)', [name]);
+    if (exists.rows.length) return res.json({ ok: false, msg: 'Name already taken!' });
+    const expiry = new Date();
+    expiry.setDate(expiry.getDate() + parseInt(days || 1));
+    const result = await pool.query(
+      `INSERT INTO bmt_students 
+       (name, password, board, class, state, email, is_paid, plan, subscription_type, subscription_start, subscription_end, next_due_date, reg_on)
+       VALUES ($1,$2,$3,$4,$5,$6,true,'all','demo_trial',NOW(),$7,$7,NOW()) RETURNING id`,
+      [name, password, board || 'CBSE', cls, state, email || null, expiry]
+    );
+    await pool.query(
+      `INSERT INTO bmt_audit_log (student_id, student_name, action, details)
+       VALUES ($1,$2,'ADMIN_CREATE_DEMO',$3)`,
+      [result.rows[0].id, name, JSON.stringify({days, expiry, email})]
+    ).catch(()=>{});
+    console.log(`🎭 DEMO CREATED: ${name} | ${days} days | expires ${expiry}`);
+    res.json({ ok: true, expiry, student_id: result.rows[0].id });
+  } catch (e) {
+    console.error(e);
+    res.json({ ok: false, msg: e.message });
+  }
+});
+
 // STUDENT SUPPORT MESSAGE
 app.post('/api/support', async (req, res) => {
   try {
