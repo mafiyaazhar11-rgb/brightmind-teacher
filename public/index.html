@@ -1253,9 +1253,9 @@ function checkPaywall(){
 }
 function selPaywallPlan(el){document.querySelectorAll('.paywall-plan').forEach(p=>p.classList.remove('hot'));el.classList.add('hot');}
 function activatePaywall(){
-  alert('Razorpay will be integrated here!\n\nActivating Premium for demo...');
-  if(S.user){S.user.isPaid=true;S.isPaid=true;saveUser();renderLimitBar();renderTrialBanner(S.user);}
-  document.getElementById('paywall-overlay').classList.remove('open');
+  const plan=document.querySelector('.paywall-plan.hot');
+  const amount=plan?.querySelector('.pp')?.textContent?.includes('199')?199:120;
+  openRazorpay(amount, amount===199?'all':'single');
 }
 
 // ══════════════════════════════════════
@@ -2495,14 +2495,124 @@ function showModal(id){document.getElementById(id).classList.add('show');}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 function selPlan(el){document.querySelectorAll('.plan-opt').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');}
 function subscribePlan(){
-  alert('🚀 Razorpay will be integrated here!\n\nActivating Premium for demo...');
-  if(S.user){S.user.isPaid=true;S.isPaid=true;saveUser();renderLimitBar();}
+  const sel=document.querySelector('.plan-opt.sel');
+  const amount=sel?.querySelector('.pp')?.textContent?.includes('99')?199:120;
+  const plan=amount===199?'all':'single';
   closeModal('sub-modal');
+  openRazorpay(amount,plan);
 }
 
 // ══════════════════════════════════════
 // UTILS
 // ══════════════════════════════════════
+// ══════════════════════════════════════
+// RAZORPAY PAYMENT
+// ══════════════════════════════════════
+function loadRazorpay(){
+  return new Promise(resolve=>{
+    if(window.Razorpay){resolve(true);return;}
+    const s=document.createElement('script');
+    s.src='https://checkout.razorpay.com/v1/checkout.js';
+    s.onload=()=>resolve(true);
+    s.onerror=()=>resolve(false);
+    document.head.appendChild(s);
+  });
+}
+
+async function openRazorpay(amount, plan){
+  if(!S.user){alert('Please login first!');return;}
+  const loaded=await loadRazorpay();
+  if(!loaded){alert('Payment system could not load. Please check internet and try again.');return;}
+
+  const planNames={all:'All Subjects — BrightMind Teacher',single:'Single Subject — BrightMind Teacher'};
+
+  const options={
+    key:'rzp_live_T0ELMmLSIlgcLq',
+    amount:amount*100, // in paise
+    currency:'INR',
+    name:'BrightMind Teacher',
+    description:planNames[plan]||'BrightMind Teacher Subscription',
+    image:'https://brightmindteacher.com/favicon.ico',
+    prefill:{
+      name:S.user.name,
+      contact:''
+    },
+    notes:{
+      student_id:String(S.user.id),
+      student_name:S.user.name,
+      plan:plan,
+      class:S.user.class,
+      state:S.user.state
+    },
+    theme:{color:'#1a237e'},
+    modal:{
+      ondismiss:()=>{
+        console.log('Payment cancelled by user');
+      }
+    },
+    handler:async function(response){
+      // Payment successful
+      await verifyPayment(response, amount, plan);
+    }
+  };
+
+  const rzp=new window.Razorpay(options);
+  rzp.on('payment.failed',function(response){
+    alert('Payment failed! Reason: '+response.error.description+'\nPlease try again.');
+  });
+  rzp.open();
+}
+
+async function verifyPayment(response, amount, plan){
+  try{
+    // Show loading
+    const bubble=document.getElementById('speech-bubble');
+    if(bubble)bubble.textContent='💰 Verifying payment...';
+
+    // Save payment to server
+    const res=await apiPost('/api/payment/verify',{
+      student_id:S.user.id,
+      student_name:S.user.name,
+      amount:amount,
+      plan:plan,
+      razorpay_id:response.razorpay_payment_id
+    });
+
+    if(res.ok){
+      // Activate premium locally
+      S.user.isPaid=true;
+      S.user.plan=plan;
+      S.isPaid=true;
+      saveUser();
+      renderLimitBar();
+      renderTrialBanner(S.user);
+
+      // Close paywall if open
+      document.getElementById('paywall-overlay').classList.remove('open');
+      closeModal('sub-modal');
+
+      // Celebrate!
+      if(bubble)bubble.textContent='🎉 Premium activated!';
+      setTimeout(()=>{
+        alert(`🎉 Welcome to BrightMind Teacher Premium!\n\n✅ Payment of ₹${amount} received\n✅ ${plan==='all'?'All Subjects':'Single Subject'} unlocked\n✅ Unlimited questions activated\n\nThank you ${S.user.name}! Start learning! 🚀`);
+        if(bubble)bubble.textContent='🎓 Premium active! Ask me anything!';
+      },500);
+
+      // Update admin panel revenue display
+      document.getElementById('plan-title').textContent='✅ Premium Plan';
+      document.getElementById('stat-rank').textContent='#'+rank(S.user);
+
+    }else{
+      alert('Payment received but activation failed. Please contact support with payment ID: '+response.razorpay_payment_id);
+    }
+  }catch(e){
+    console.error('Payment verification error:',e);
+    // Still activate if server error — payment was received
+    S.user.isPaid=true;S.isPaid=true;saveUser();renderLimitBar();
+    alert('✅ Payment received! Premium activated.\nPayment ID: '+response.razorpay_payment_id);
+  }
+}
+
 function changeParentPIN(){
   const newPin=prompt('Enter new 4-digit Parent PIN:');
   if(!newPin||newPin.length!==4||isNaN(newPin)){alert('PIN must be exactly 4 digits!');return;}
