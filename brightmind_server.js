@@ -27,6 +27,11 @@ async function initDB() {
       state VARCHAR(50) NOT NULL,
       is_paid BOOLEAN DEFAULT FALSE,
       plan VARCHAR(20) DEFAULT 'free',
+      subscription_type VARCHAR(20) DEFAULT 'monthly',
+      subscription_start TIMESTAMP,
+      subscription_end TIMESTAMP,
+      next_due_date TIMESTAMP,
+      reminder_sent BOOLEAN DEFAULT FALSE,
       xp INTEGER DEFAULT 0,
       streak INTEGER DEFAULT 0,
       stars INTEGER DEFAULT 0,
@@ -64,6 +69,28 @@ async function initDB() {
       razorpay_id VARCHAR(100),
       status VARCHAR(20) DEFAULT 'pending',
       created_at TIMESTAMP DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS bmt_audit_log (
+      id BIGSERIAL PRIMARY KEY,
+      student_id BIGINT,
+      student_name VARCHAR(100),
+      action VARCHAR(50),
+      details JSONB DEFAULT '{}',
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS bmt_sessions (
+      id BIGSERIAL PRIMARY KEY,
+      student_id BIGINT,
+      student_name VARCHAR(100),
+      class VARCHAR(5),
+      state VARCHAR(50),
+      login_at TIMESTAMP DEFAULT NOW(),
+      logout_at TIMESTAMP,
+      duration_minutes INTEGER,
+      questions_in_session INTEGER DEFAULT 0,
+      subjects_studied JSONB DEFAULT '[]'
     );
   `);
   console.log('✅ BrightMind DB tables ready');
@@ -137,6 +164,23 @@ app.post('/api/login', async (req, res) => {
     }
 
     console.log(`🔑 LOGIN: ${student.name} | Class ${student.class} | ${student.state}`);
+
+    // Log to audit
+    await pool.query(
+      `INSERT INTO bmt_audit_log (student_id, student_name, action, details)
+       VALUES ($1, $2, 'LOGIN', $3)`,
+      [student.id, student.name, JSON.stringify({
+        class: student.class, state: student.state,
+        ip: req.ip, time: new Date().toISOString()
+      })]
+    ).catch(()=>{});
+
+    // Start session
+    await pool.query(
+      `INSERT INTO bmt_sessions (student_id, student_name, class, state)
+       VALUES ($1, $2, $3, $4)`,
+      [student.id, student.name, student.class, student.state]
+    ).catch(()=>{});
     res.json({ ok: true, student: sanitize(student) });
   } catch (e) {
     console.error(e);
@@ -295,20 +339,87 @@ app.get('/api/admin/stats', async (req, res) => {
   }
 });
 
-// PAYMENT WEBHOOK (Razorpay — add later)
+// PAYMENT VERIFY
 app.post('/api/payment/verify', async (req, res) => {
   try {
-    const { student_id, student_name, amount, plan, razorpay_id } = req.body;
+    const { student_id, student_name, amount, plan, razorpay_id, subscription_type } = req.body;
+    const now = new Date();
+    let subEnd = new Date(now);
+    let nextDue = new Date(now);
+    if (subscription_type === 'quarterly') {
+      subEnd.setMonth(subEnd.getMonth() + 3);
+      nextDue.setMonth(nextDue.getMonth() + 3);
+    } else if (subscription_type === 'yearly') {
+      subEnd.setFullYear(subEnd.getFullYear() + 1);
+      nextDue.setFullYear(nextDue.getFullYear() + 1);
+    } else {
+      subEnd.setMonth(subEnd.getMonth() + 1);
+      nextDue.setMonth(nextDue.getMonth() + 1);
+    }
     await pool.query(
       `INSERT INTO bmt_payments (student_id,student_name,amount,plan,razorpay_id,status)
        VALUES ($1,$2,$3,$4,$5,'success')`,
       [student_id, student_name, amount, plan, razorpay_id]
     );
     await pool.query(
-      'UPDATE bmt_students SET is_paid=true, plan=$1 WHERE id=$2',
-      [plan, student_id]
+      `UPDATE bmt_students SET is_paid=true, plan=$1,
+       subscription_type=$2, subscription_start=NOW(),
+       subscription_end=$3, next_due_date=$4, reminder_sent=false
+       WHERE id=$5`,
+      [plan, subscription_type || 'monthly', subEnd, nextDue, student_id]
     );
-    res.json({ ok: true });
+    await pool.query(
+      `INSERT INTO bmt_audit_log (student_id, student_name, action, details)
+       VALUES ($1,$2,'PAYMENT',$3)`,
+      [student_id, student_name, JSON.stringify({amount, plan, subscription_type, razorpay_id, sub_end: subEnd})]
+    ).catch(()=>{});
+    console.log(`💰 PAYMENT: ${student_name} | ₹${amount} | ${plan} | ${subscription_type||'monthly'}`);
+    res.json({ ok: true, sub_end: subEnd });
+  } catch (e) {
+    console.error(e);
+    res.json({ ok: false });
+  }
+});
+
+// CHECK RENEWAL REMINDERS (called daily)
+app.get('/api/admin/check-renewals', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== process.env.ADMIN_KEY) return res.status(401).json({ ok: false });
+    const threeDaysFromNow = new Date();
+    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+    const due = await pool.query(
+      `SELECT id, name, plan, subscription_type, next_due_date
+       FROM bmt_students
+       WHERE is_paid=true
+       AND next_due_date <= $1
+       AND next_due_date >= NOW()
+       AND reminder_sent=false`,
+      [threeDaysFromNow]
+    );
+    // Mark reminder sent
+    for (const s of due.rows) {
+      await pool.query('UPDATE bmt_students SET reminder_sent=true WHERE id=$1', [s.id]);
+    }
+    res.json({ ok: true, due_students: due.rows });
+  } catch (e) {
+    res.json({ ok: false, due_students: [] });
+  }
+});
+
+// GET STUDENT SUBSCRIPTION STATUS
+app.get('/api/subscription/:id', async (req, res) => {
+  try {
+    const s = await pool.query(
+      `SELECT is_paid, plan, subscription_type, subscription_end, next_due_date
+       FROM bmt_students WHERE id=$1`, [req.params.id]
+    );
+    if (!s.rows.length) return res.json({ ok: false });
+    const student = s.rows[0];
+    const now = new Date();
+    const daysLeft = student.next_due_date ?
+      Math.ceil((new Date(student.next_due_date) - now) / (1000*60*60*24)) : null;
+    res.json({ ok: true, ...student, days_left: daysLeft });
   } catch (e) {
     res.json({ ok: false });
   }
@@ -356,6 +467,67 @@ app.post('/api/reset-password', async (req, res) => {
     console.error(e);
     res.json({ ok: false, msg: 'Server error. Try again.' });
   }
+});
+
+// SESSION END
+app.post('/api/session-end', async (req, res) => {
+  try {
+    const { student_id, questions, subjects } = req.body;
+    await pool.query(
+      `UPDATE bmt_sessions SET
+        logout_at = NOW(),
+        duration_minutes = EXTRACT(EPOCH FROM (NOW() - login_at))/60,
+        questions_in_session = $1,
+        subjects_studied = $2
+       WHERE student_id = $3
+       AND logout_at IS NULL
+       ORDER BY login_at DESC
+       LIMIT 1`,
+      [questions || 0, JSON.stringify(subjects || []), student_id]
+    );
+    res.json({ ok: true });
+  } catch (e) { res.json({ ok: false }); }
+});
+
+// ADMIN — Audit Log
+app.get('/api/admin/audit', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== process.env.ADMIN_KEY) return res.status(401).json({ ok: false });
+    const logs = await pool.query(
+      `SELECT * FROM bmt_audit_log ORDER BY created_at DESC LIMIT 200`
+    );
+    res.json({ ok: true, logs: logs.rows });
+  } catch (e) { res.json({ ok: false, logs: [] }); }
+});
+
+// ADMIN — Sessions
+app.get('/api/admin/sessions', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== process.env.ADMIN_KEY) return res.status(401).json({ ok: false });
+    const sessions = await pool.query(
+      `SELECT s.*, 
+        ROUND(COALESCE(s.duration_minutes, 
+          EXTRACT(EPOCH FROM (NOW() - s.login_at))/60)::numeric, 1) as mins
+       FROM bmt_sessions s
+       ORDER BY s.login_at DESC LIMIT 500`
+    );
+    res.json({ ok: true, sessions: sessions.rows });
+  } catch (e) { res.json({ ok: false, sessions: [] }); }
+});
+
+// ADMIN — Revenue Detail
+app.get('/api/admin/revenue', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== process.env.ADMIN_KEY) return res.status(401).json({ ok: false });
+    const payments = await pool.query(
+      `SELECT * FROM bmt_payments WHERE status='success' ORDER BY created_at DESC`
+    );
+    const total = payments.rows.reduce((s, p) => s + (p.amount || 0), 0);
+    res.json({ ok: true, payments: payments.rows, total });
+  } catch (e) { res.json({ ok: false, payments: [], total: 0 }); }
 });
 
 // HEALTH CHECK
