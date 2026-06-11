@@ -2097,15 +2097,15 @@ async function sendToBlackboard(){
 
   // Clear board — chalk wipe effect
   canvas.innerHTML=`
-    <div class="bb-teacher-row" style="padding-top:8px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-top:8px;">
       <div class="bb-teacher-av">👩‍🏫</div>
       <div>
-        <div style="font-family:'Courier New',monospace;font-size:13px;color:#a0d4a0;">Miss BrightMind</div>
+        <div style="font-family:'Courier New',monospace;font-size:13px;color:#a0ffa0;">Miss BrightMind</div>
         <div class="bb-teacher-status" id="bb-status">✏️ Preparing solution...</div>
       </div>
     </div>
     <div style="border-top:1px solid #2a4a2a;margin:10px 0 14px;"></div>
-    <div class="bb-chalk-line gold" style="margin-bottom:16px;">❓ ${q}</div>
+    <div style="font-family:'Courier New',monospace;font-size:18px;color:#ffd600;margin-bottom:16px;text-shadow:0 0 8px rgba(255,214,0,.4);">❓ ${q}</div>
     <div class="bb-writing" id="bb-loading">
       <div>✏️ Writing on board</div>
       <div class="bb-chalk-dots"><span></span><span></span><span></span></div>
@@ -2187,7 +2187,7 @@ Return ONLY JSON array.`
     // Show step counter
     canvas.innerHTML+=`
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;font-family:'Courier New',monospace;">
-        <div style="font-size:12px;color:rgba(200,255,200,.5);" id="bb-step-counter">Step 1 of ${bbAllSteps.length}</div>
+        <div style="font-size:12px;color:#80d080;font-family:'Courier New',monospace;" id="bb-step-counter">Step 1 of ${bbAllSteps.length}</div>
         <div style="flex:1;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;">
           <div style="height:100%;background:var(--gold);border-radius:2px;transition:width .5s;" id="bb-progress" style="width:0%"></div>
         </div>
@@ -2218,8 +2218,8 @@ function showNextBBStep(){
   card.id='bb-step-'+bbCurrentStep;
 
   // Step header
-  card.innerHTML=`<div class="bb-chalk-line step-header">── STEP ${step.step} / ${bbAllSteps.length}: ${step.title} ──</div>
-    <div id="bb-content-${bbCurrentStep}" class="bb-chalk-line"></div>`;
+  card.innerHTML=`<div style="font-family:'Courier New',monospace;font-size:12px;color:#ffd600;letter-spacing:1px;margin-bottom:8px;">── STEP ${step.step}/${bbAllSteps.length}: ${step.title} ──</div>
+    <div id="bb-content-${bbCurrentStep}" style="font-family:'Courier New',monospace;font-size:17px;color:#e8ffe8;line-height:1.8;"></div>`;
   container.appendChild(card);
 
   // Scroll to new step
@@ -2284,8 +2284,10 @@ function typeChalkText(elId, text, onDone){
   el.appendChild(cursor);
 
   // Detect if final answer line
-  if(clean.toLowerCase().includes('answer')||clean.toLowerCase().includes('therefore')||clean.includes('=')){
-    el.className='bb-chalk-line gold';
+  if(clean.toLowerCase().includes('final answer')||clean.toLowerCase().includes('therefore')||clean.toLowerCase().includes('∴')){
+    el.style.color='#ffd600';
+    el.style.fontSize='19px';
+    el.style.fontWeight='700';
   }
 
   const speed=clean.length>100?8:clean.length>50?12:18; // ms per char
@@ -3476,7 +3478,7 @@ async function adminLoginAs(studentId, studentName){
   setTimeout(()=>{
     const banner = document.createElement('div');
     banner.id='admin-view-banner';
-    banner.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#4a148c,#7b1fa2);color:#fff;padding:8px 16px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:space-between;';
+    banner.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#4a148c,#7b1fa2);color:#fff;padding:6px 16px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:space-between;height:36px;box-sizing:border-box;';
     banner.innerHTML=`<span>👁️ ADMIN VIEWING: ${studentName}</span><button onclick="adminReturnFromView()" style="background:rgba(255,255,255,.3);border:none;color:#fff;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">← Back to Admin</button>`;
     document.body.prepend(banner);
     // Push content down
@@ -3516,6 +3518,26 @@ function saveUser(){
     plan:S.user.plan||'free', parent_pin:S.user.parentPin||'1234'
   }).catch(()=>{});
 }
+// ── MOBILE HARDWARE BACK BUTTON ──────────────────
+window.addEventListener('popstate', function(e) {
+  // Close overlays in order of priority
+  if(document.getElementById('demo-overlay')?.style.display==='flex'){closeDemoOverlay();return;}
+  if(document.getElementById('support-overlay')?.style.display==='flex'){closeSupportChat();return;}
+  if(document.getElementById('rankcard-overlay')?.classList.contains('open')){closeRankCard();return;}
+  if(document.getElementById('result-overlay')?.classList.contains('open')){backFromResult();return;}
+  if(document.getElementById('exam-overlay')?.classList.contains('open')){if(confirm('Leave exam? Progress will be lost.'))document.getElementById('exam-overlay').classList.remove('open');return;}
+  if(document.getElementById('blackboard-overlay')?.classList.contains('open')){closeBlackboard();return;}
+  if(document.getElementById('chat-overlay')?.classList.contains('open')){closeChat();return;}
+  if(document.getElementById('syllabus-overlay')?.classList.contains('open')){closeSyllabus();return;}
+  if(document.getElementById('paywall-overlay')?.classList.contains('open')){document.getElementById('paywall-overlay').classList.remove('open');return;}
+  if(document.getElementById('sub-modal')?.classList.contains('show')){closeModal('sub-modal');return;}
+  // If on app screen — do nothing (don't exit app)
+  history.pushState(null,'',location.href);
+});
+
+// Push state on load so back button works
+history.pushState(null,'',location.href);
+
 function save(){} // no-op — using API now
 </script>
 </body>
