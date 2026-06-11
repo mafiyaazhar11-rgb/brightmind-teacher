@@ -1076,7 +1076,11 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 <div id="admin-screen" class="screen">
   <div class="admin-hdr">
     <div><div class="admin-title">🛡️ Admin Panel</div><div style="font-size:11px;opacity:.7;margin-top:2px;">BrightMind Teacher Dashboard</div></div>
-    <div style="display:flex;align-items:center;gap:8px;"><div class="admin-badge">ADMIN</div><button onclick="doLogout()" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;">Logout</button></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button onclick="showCreateDemo()" style="background:var(--gold);color:var(--blue-dark);border:none;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">➕ Demo Account</button>
+      <div class="admin-badge">ADMIN</div>
+      <button onclick="doLogout()" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;">Logout</button>
+    </div>
   </div>
   <div class="admin-body">
     <div class="revenue-card">
@@ -1146,6 +1150,41 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
       </div>
       <button onclick="sendSupportMessage()" style="background:linear-gradient(135deg,var(--blue-mid),var(--blue-bright));color:#fff;font-size:15px;font-weight:700;padding:14px;border-radius:13px;border:none;cursor:pointer;">Send Message 📤</button>
       <button onclick="closeSupportChat()" style="background:none;border:none;font-size:13px;color:var(--gray-text);cursor:pointer;padding:8px;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN CREATE DEMO OVERLAY ══ -->
+<div id="demo-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(13,27,75,.8);align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:20px;padding:28px 24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:90vh;overflow-y:auto;">
+    <div style="font-size:20px;font-weight:800;color:var(--blue-dark);margin-bottom:4px;">➕ Create Demo Account</div>
+    <div style="font-size:13px;color:var(--gray-text);margin-bottom:20px;">Give someone free trial access with custom duration</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="fg"><label>Student Name</label><input id="demo-name" placeholder="Enter student name"/></div>
+      <div class="fg"><label>Email</label><input id="demo-email" type="email" placeholder="student@email.com"/></div>
+      <div class="fg"><label>Password</label><input id="demo-pass" placeholder="Set password for them"/></div>
+      <div class="fg"><label>Board</label>
+        <select id="demo-board"><option value="CBSE">CBSE</option><option value="TN">Tamil Nadu Board</option><option value="KL">Kerala Board</option><option value="KA">Karnataka Board</option><option value="AP">AP Board</option><option value="TS">Telangana Board</option></select>
+      </div>
+      <div class="fg"><label>Class</label>
+        <select id="demo-class"><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
+      </div>
+      <div class="fg"><label>State</label>
+        <select id="demo-state"><option>Tamil Nadu</option><option>Kerala</option><option>Karnataka</option><option>Andhra Pradesh</option><option>Telangana</option><option>Maharashtra</option><option>Delhi</option><option>Other</option></select>
+      </div>
+      <div class="fg"><label>Access Duration</label>
+        <select id="demo-duration">
+          <option value="1">1 Day Trial</option>
+          <option value="3">3 Days Trial</option>
+          <option value="7">7 Days - 1 Week</option>
+          <option value="30">30 Days - 1 Month Gift</option>
+        </select>
+      </div>
+      <div style="background:#e8f5e9;border-radius:10px;padding:10px 12px;font-size:12px;color:#1b5e20;line-height:1.5;">
+        This student gets PREMIUM access for the selected duration - no payment needed!
+      </div>
+      <button onclick="createDemoAccount()" class="btn-main">Create Demo Account</button>
+      <button onclick="closeDemoOverlay()" style="background:none;border:none;color:var(--gray-text);font-size:13px;cursor:pointer;padding:8px;">Cancel</button>
     </div>
   </div>
 </div>
@@ -3092,6 +3131,8 @@ async function renderAdmin(){
         <div class="asr-stat"><div class="sv">${(u.homework||[]).filter(h=>h.done).length}/${(u.homework||[]).length}</div><div class="sl">HW Done</div></div>
       </div>
       <button onclick="adminResetPwd('${u.name}')" style="margin-top:8px;background:#e8eaf6;color:var(--blue-mid);border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">🔑 Reset Password</button>
+      <button onclick="adminExtendAccess('${u.id}','${u.name}')" style="margin-top:8px;background:#e8f5e9;color:#1b5e20;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-left:6px;">⏰ Extend Access</button>
+      <button onclick="adminGivePremium('${u.id}','${u.name}')" style="margin-top:8px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--blue-dark);border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-left:6px;">💎 Give Premium</button>
     </div>`).join('');
 }
 
@@ -3325,6 +3366,87 @@ function changeParentPIN(){
   if(!newPin||newPin.length!==4||isNaN(newPin)){alert('PIN must be exactly 4 digits!');return;}
   if(S.user){S.user.parentPin=newPin;saveUser();renderProfile();alert('✅ Parent PIN updated to: '+newPin);}
 }
+// ══════════════════════════════════════
+// ADMIN CONTROLS
+// ══════════════════════════════════════
+
+// Extend student access
+async function adminExtendAccess(studentId, studentName){
+  const choice = prompt(`Extend access for ${studentName}:\n\n1 = Add 1 day\n7 = Add 7 days\n30 = Add 30 days\n\nEnter number of days to add:`);
+  if(!choice || isNaN(choice) || choice < 1) return;
+  const days = parseInt(choice);
+  const res = await fetch(API_URL+'/api/admin/extend-access', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},
+    body: JSON.stringify({student_id: studentId, days})
+  });
+  const d = await res.json();
+  if(d.ok){
+    alert(`✅ Extended access for ${studentName} by ${days} day(s)!\nNew expiry: ${new Date(d.new_expiry).toLocaleDateString('en-IN')}`);
+    renderAdmin();
+  } else {
+    alert('Failed to extend. Try again!');
+  }
+}
+
+// Give premium instantly
+async function adminGivePremium(studentId, studentName){
+  const choice = prompt(`Give Premium to ${studentName}:\n\n1 = 1 Month Free\n3 = 3 Months Free\n12 = 1 Year Free\n\nEnter months:`);
+  if(!choice || isNaN(choice)) return;
+  const months = parseInt(choice);
+  const res = await fetch(API_URL+'/api/admin/give-premium', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},
+    body: JSON.stringify({student_id: studentId, student_name: studentName, months, plan:'all'})
+  });
+  const d = await res.json();
+  if(d.ok){
+    alert(`✅ ${months} month(s) Premium given to ${studentName}!\nExpiry: ${new Date(d.expiry).toLocaleDateString('en-IN')}`);
+    renderAdmin();
+  } else {
+    alert('Failed. Try again!');
+  }
+}
+
+// Show create demo overlay
+function showCreateDemo(){
+  document.getElementById('demo-overlay').style.display='flex';
+  document.getElementById('demo-name').value='';
+  document.getElementById('demo-email').value='';
+  document.getElementById('demo-pass').value='';
+}
+function closeDemoOverlay(){
+  document.getElementById('demo-overlay').style.display='none';
+}
+
+// Create demo account
+async function createDemoAccount(){
+  const name = document.getElementById('demo-name').value.trim();
+  const email = document.getElementById('demo-email').value.trim();
+  const pass = document.getElementById('demo-pass').value.trim();
+  const board = document.getElementById('demo-board').value;
+  const cls = document.getElementById('demo-class').value;
+  const state = document.getElementById('demo-state').value;
+  const days = parseInt(document.getElementById('demo-duration').value);
+  if(!name||!email||!pass){alert('Please fill name, email and password!');return;}
+  const btn=document.querySelector('#demo-overlay .btn-main');
+  if(btn){btn.textContent='Creating...';btn.disabled=true;}
+  const res = await fetch(API_URL+'/api/admin/create-demo', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},
+    body: JSON.stringify({name, email, password:pass, board, class:cls, state, days})
+  });
+  if(btn){btn.textContent='Create Demo Account';btn.disabled=false;}
+  const d = await res.json();
+  if(d.ok){
+    closeDemoOverlay();
+    alert(`✅ Demo account created!\n\nName: ${name}\nEmail: ${email}\nPassword: ${pass}\nAccess: ${days} day(s) Premium\nExpiry: ${new Date(d.expiry).toLocaleDateString('en-IN')}\n\nShare these credentials with the student!`);
+    renderAdmin();
+  } else {
+    alert('Failed: ' + (d.msg||'Try again'));
+  }
+}
+
 async function adminResetPwd(name){
   const newPass=prompt(`Reset password for ${name}:\nEnter new password:`);
   if(!newPass||newPass.length<4){alert('Password must be at least 4 characters!');return;}
