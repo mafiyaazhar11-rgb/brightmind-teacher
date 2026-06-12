@@ -698,10 +698,18 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
         </select>
       </div>
       <div class="fg"><label>Class</label>
-        <select id="rc"><option value="">Select Class</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
+        <select id="rc" onchange="toggleStreamField(this.value)"><option value="">Select Class</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
       </div>
       <div class="fg"><label>State</label>
         <select id="rs"><option value="">Select State</option><option>Tamil Nadu</option><option>Maharashtra</option><option>Karnataka</option><option>Kerala</option><option>Uttar Pradesh</option><option>Rajasthan</option><option>Gujarat</option><option>West Bengal</option><option>Andhra Pradesh</option><option>Telangana</option><option>Delhi</option><option>Punjab</option><option>Haryana</option><option>Bihar</option><option>Madhya Pradesh</option><option>Other</option></select>
+      </div>
+      <div class="fg" id="stream-field" style="display:none;">
+        <label>Stream (Class 11 & 12 only)</label>
+        <select id="rstream">
+          <option value="science">🔬 Science (Physics, Chemistry, Maths, Biology)</option>
+          <option value="commerce">💰 Commerce (Accountancy, Business Studies, Economics)</option>
+          <option value="arts">🏛️ Arts / Humanities (History, Geography, Political Science)</option>
+        </select>
       </div>
       <div class="fg"><label>Password</label><input id="rp" type="password" placeholder="Create password"/></div>
       <button class="btn-gold" onclick="doRegister()">Create Account ✨</button>
@@ -1658,66 +1666,56 @@ async function apiGet(endpoint) {
 function getSubjectsForClass(cls, board){
   const c = parseInt(cls)||11;
 
-  // Class 9 & 10 — Core subjects
+  // Class 9 & 10 — Core subjects only
   if(c<=10){
     const base = [
-      {id:'math',      name:'Mathematics',    icon:'📐', qs:['Explain quadratic equations','What is Pythagoras theorem?','Explain trigonometry basics','How to solve linear equations?']},
-      {id:'science',   name:'Science',         icon:'🔬', qs:['What is photosynthesis?','Explain Newton laws','What is an atom?','Explain chemical reactions']},
-      {id:'english',   name:'English',         icon:'📖', qs:['How to write an essay?','Active and passive voice','Reading comprehension tips','Letter writing format']},
-      {id:'socialsc',  name:'Social Science',  icon:'🌍', qs:['What is democracy?','Explain the French Revolution','What are natural resources?','Explain globalisation']},
+      {id:'math',     name:'Mathematics',   icon:'📐', qs:['Explain quadratic equations','What is Pythagoras theorem?','Explain trigonometry basics','How to solve linear equations?']},
+      {id:'science',  name:'Science',        icon:'🔬', qs:['What is photosynthesis?','Explain Newton laws','What is an atom?','Explain chemical reactions']},
+      {id:'english',  name:'English',        icon:'📖', qs:['How to write an essay?','Active and passive voice','Reading comprehension tips','Letter writing format']},
+      {id:'socialsc', name:'Social Science', icon:'🌍', qs:['What is democracy?','Explain the French Revolution','What are natural resources?','Explain globalisation']},
     ];
-    // Board-specific language subjects
     if(board==='TN'||board==='KL'||board==='KA'||board==='AP'||board==='TS'){
-      base.push({id:'tamil',name:board==='KL'?'Malayalam':board==='KA'?'Kannada':board==='AP'||board==='TS'?'Telugu':'Tamil',icon:'📜',qs:['Explain grammar rules','How to write essay?','Poem explanation','Language practice']});
-    } else {
+      const langName={TN:'Tamil',KL:'Malayalam',KA:'Kannada',AP:'Telugu',TS:'Telugu'}[board]||'Tamil';
+      base.push({id:'tamil',name:langName,icon:'📜',qs:['Explain grammar rules','How to write essay?','Poem explanation','Language practice']});
+    }else{
       base.push({id:'hindi',name:'Hindi',icon:'📜',qs:['संज्ञा क्या है?','निबंध कैसे लिखें?','व्याकरण समझाओ','समास की परिभाषा']});
     }
     return base;
   }
 
-  // Class 11 & 12 — Stream based
-  const common = [
-    {id:'english',name:'English',icon:'📖',qs:['Essay writing tips','Reading comprehension','Grammar rules','How to write report?']},
-  ];
+  // Class 11 & 12 — use student's stream
+  const stream = S.user?.stream||'science'; // default science
 
-  const science = [
-    {id:'math',    name:'Mathematics', icon:'📐', qs:['What is differentiation?','Explain integration','Matrices explained','Probability basics']},
-    {id:'physics', name:'Physics',     icon:'⚛️', qs:["Newton's laws",'What is kinetic energy?','Explain wave motion','Ohm\'s Law']},
-    {id:'chem',    name:'Chemistry',   icon:'🧪', qs:['What is mole concept?','Periodic table explained','Covalent bonds','Organic chemistry basics']},
-    {id:'bio',     name:'Biology',     icon:'🌱', qs:['Explain cell division','What is photosynthesis?','DNA structure','Genetics basics']},
-    {id:'cs',      name:'Computer Science', icon:'💻', qs:['What is a function in Python?','Explain arrays','What is DBMS?','OOP concepts']},
-  ];
+  const englishSubj = {id:'english',name:'English',icon:'📖',qs:['Essay writing','Reading comprehension','Grammar rules','Report writing']};
 
-  const commerce = [
-    {id:'accountancy', name:'Accountancy',     icon:'💰', qs:['What is journal entry?','Explain trial balance','What is depreciation?','Partnership accounts']},
-    {id:'bst',         name:'Business Studies', icon:'🏢', qs:['What is marketing?','Types of business organisations','Functions of management','What is entrepreneurship?']},
-    {id:'economics',   name:'Economics',        icon:'📊', qs:['What is GDP?','Explain supply and demand','What is inflation?','Monetary policy explained']},
-    {id:'math',        name:'Mathematics',      icon:'📐', qs:['What is differentiation?','Explain integration','Matrices explained','Statistics basics']},
-    {id:'cs',          name:'Computer Science', icon:'💻', qs:['What is a function in Python?','Explain spreadsheets','What is DBMS?','Internet and networking']},
-  ];
-
-  const arts = [
-    {id:'history',    name:'History',           icon:'🏛️', qs:['Explain colonialism','What is nationalism?','French Revolution summary','India independence movement']},
-    {id:'geography',  name:'Geography',         icon:'🗺️', qs:['What is climate change?','Explain plate tectonics','Types of soil','Water resources']},
-    {id:'polsci',     name:'Political Science',  icon:'⚖️', qs:['What is democracy?','Explain Constitution','Types of government','What are fundamental rights?']},
-    {id:'economics',  name:'Economics',          icon:'📊', qs:['What is GDP?','Explain supply and demand','What is inflation?','Development economics']},
-    {id:'sociology',  name:'Sociology',          icon:'👥', qs:['What is social stratification?','Explain culture','What is globalisation?','Social institutions']},
-    {id:'cs',         name:'Computer Science',   icon:'💻', qs:['What is a function in Python?','Explain arrays','What is DBMS?','Web development basics']},
-  ];
-
-  // Show all streams for Class 11/12 — students can pick what they study
-  const all11_12 = [
-    ...common,
-    ...science.filter(s=>s.id!=='english'),
-    {id:'accountancy',name:'Accountancy',icon:'💰',qs:['What is journal entry?','Explain trial balance','What is depreciation?','Partnership accounts']},
-    {id:'bst',name:'Business Studies',icon:'🏢',qs:['What is marketing?','Types of business','Functions of management','Entrepreneurship']},
-    {id:'economics',name:'Economics',icon:'📊',qs:['What is GDP?','Supply and demand','Inflation explained','Monetary policy']},
-    {id:'history',name:'History',icon:'🏛️',qs:['Colonialism explained','Nationalism in India','French Revolution','World War history']},
-    {id:'geography',name:'Geography',icon:'🗺️',qs:['Climate change','Plate tectonics','Water resources','Population geography']},
-    {id:'polsci',name:'Political Science',icon:'⚖️',qs:['What is democracy?','Indian Constitution','Fundamental rights','Types of government']},
-  ];
-
-  return all11_12;
+  if(stream==='science'){
+    return [
+      englishSubj,
+      {id:'math',    name:'Mathematics',     icon:'📐', qs:['What is differentiation?','Explain integration','Matrices explained','Probability basics']},
+      {id:'physics', name:'Physics',          icon:'⚛️', qs:["Newton's laws",'What is kinetic energy?','Explain wave motion',"Ohm's Law"]},
+      {id:'chem',    name:'Chemistry',        icon:'🧪', qs:['What is mole concept?','Periodic table explained','Covalent bonds','Organic chemistry basics']},
+      {id:'bio',     name:'Biology',          icon:'🌱', qs:['Explain cell division','What is photosynthesis?','DNA structure','Genetics basics']},
+      {id:'cs',      name:'Computer Science', icon:'💻', qs:['What is a function in Python?','Explain arrays','What is DBMS?','OOP concepts']},
+    ];
+  }else if(stream==='commerce'){
+    return [
+      englishSubj,
+      {id:'math',        name:'Mathematics',     icon:'📐', qs:['What is differentiation?','Statistics basics','Matrices explained','Probability']},
+      {id:'accountancy', name:'Accountancy',      icon:'💰', qs:['What is journal entry?','Explain trial balance','What is depreciation?','Partnership accounts']},
+      {id:'bst',         name:'Business Studies', icon:'🏢', qs:['What is marketing?','Types of business','Functions of management','Entrepreneurship']},
+      {id:'economics',   name:'Economics',        icon:'📊', qs:['What is GDP?','Supply and demand','Inflation explained','Monetary policy']},
+      {id:'cs',          name:'Computer Science', icon:'💻', qs:['Spreadsheets basics','What is DBMS?','Internet and networking','Python basics']},
+    ];
+  }else{ // arts/humanities
+    return [
+      englishSubj,
+      {id:'history',   name:'History',           icon:'🏛️', qs:['Explain colonialism','Nationalism in India','French Revolution','World War history']},
+      {id:'geography', name:'Geography',          icon:'🗺️', qs:['Climate change','Plate tectonics','Water resources','Population geography']},
+      {id:'polsci',    name:'Political Science',  icon:'⚖️', qs:['What is democracy?','Indian Constitution','Fundamental rights','Types of government']},
+      {id:'economics', name:'Economics',          icon:'📊', qs:['What is GDP?','Supply and demand','Inflation explained','Development economics']},
+      {id:'sociology', name:'Sociology',          icon:'👥', qs:['What is social stratification?','Explain culture','What is globalisation?','Social institutions']},
+    ];
+  }
 }
 
 const SUBJECTS_STATIC=[
@@ -2002,7 +2000,12 @@ async function doResetPassword(){
     alert(res.msg||'Reset failed. Please check your name and try again.');
   }
 }
-async function doRegister(){
+async function toggleStreamField(cls){
+  const sf=document.getElementById('stream-field');
+  if(sf)sf.style.display=(cls==='11'||cls==='12')?'block':'none';
+}
+
+function doRegister(){
   const n=document.getElementById('rn').value.trim(),
         email=document.getElementById('remail').value.trim(),
         board=document.getElementById('rboard').value,
@@ -2013,7 +2016,8 @@ async function doRegister(){
   if(!email.includes('@')||!email.includes('.')){alert('Please enter a valid email address!');return;}
   const btn=document.querySelector('#register-form .btn-gold');
   if(btn){btn.textContent='Creating...';btn.disabled=true;}
-  const res=await apiPost('/api/register',{name:n,password:p,board,class:c,state:st,email});
+  const stream=document.getElementById('rstream')?.value||'science';
+  const res=await apiPost('/api/register',{name:n,password:p,board,class:c,state:st,email,stream});
   if(btn){btn.textContent='Create Account ✨';btn.disabled=false;}
   if(res.ok){alert('✅ Account created! Please login with your email.');}
   else{alert(res.msg||'Registration failed. Please try again.');}
@@ -2042,7 +2046,8 @@ function mapStudent(s){
     examHist:typeof s.exam_hist==='string'?JSON.parse(s.exam_hist):s.exam_hist||[],
     badges:typeof s.badges==='string'?JSON.parse(s.badges):s.badges||[],
     regOn:s.reg_on||new Date().toISOString(),
-    photoGallery:[]  // stored locally per device
+    stream:s.stream||'science',
+    photoGallery:[]
   };
 }
 function loginUser(u){
