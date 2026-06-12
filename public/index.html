@@ -74,7 +74,7 @@ body{font-family:'Poppins',sans-serif;background:#030820;font-size:16px;}
 
 /* PAGES */
 .pages{flex:1;overflow:hidden;position:relative;min-height:0;}
-.page{display:none;height:100%;overflow-y:auto;padding:16px 16px 80px;-webkit-overflow-scrolling:touch;background:transparent;min-height:0;box-sizing:border-box;}
+.page{display:none;height:100%;overflow-y:auto;padding:16px 16px 80px;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#030820,#060d3d);min-height:0;box-sizing:border-box;}
 .page.active{display:block;}
 
 /* BOTTOM NAV */
@@ -275,11 +275,11 @@ body{font-family:'Poppins',sans-serif;background:#030820;font-size:16px;}
 .eh-score .s{font-size:11px;color:var(--gold-dark);}
 
 /* ══ ADMIN ══ */
-#admin-screen{background:var(--gray-light);}
-.admin-hdr{background:linear-gradient(135deg,#1a0533,#3a0a6b);padding:18px 16px;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+#admin-screen{background:linear-gradient(180deg,#030820,#060d3d);}
+.admin-hdr{background:rgba(3,8,32,0.95);backdrop-filter:blur(16px);border-bottom:2px solid rgba(255,214,0,0.2);padding:18px 16px;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .admin-title{font-size:19px;font-weight:800;}
 .admin-badge{background:var(--gold);color:var(--blue-dark);font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;}
-.admin-body{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;}
+.admin-body{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;background:transparent;}
 .revenue-card{background:linear-gradient(135deg,#1b5e20,#2e7d32);border-radius:16px;padding:18px;color:#fff;margin-bottom:16px;}
 .rc-label{font-size:13px;opacity:.8;margin-bottom:3px;}
 .rc-amount{font-size:38px;font-weight:900;color:var(--gold);}
@@ -887,32 +887,32 @@ body{font-family:'Poppins',sans-serif;background:#030820;font-size:16px;}
           </div>
           <div class="xp-bar-wrap"><div class="xp-bar-fill" id="sc-xp-bar" style="width:0%"></div></div>
         </div>
-        <button onclick="showRankCard()" style="margin-top:14px;background:var(--gold);color:var(--blue-dark);font-size:13px;font-weight:800;padding:10px 20px;border-radius:20px;border:none;cursor:pointer;">🏅 View My Rank Card</button>
+        <button onclick="showRankCard()" style="margin-top:14px;background:linear-gradient(135deg,#ffd600,#ff8f00);color:#0a0f2e;font-size:13px;font-weight:800;padding:10px 20px;border-radius:20px;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(255,214,0,0.4);">🏅 View My Rank Card</button>
       </div>
 
       <!-- Weekly Challenge -->
       <div class="weekly-challenge" id="weekly-challenge"></div>
 
       <!-- Subject Scores -->
-      <div class="sec-title" style="color:var(--blue-dark);">📚 Subject Scores</div>
+      <div class="sec-title">📚 Subject Scores</div>
       <div id="sc-subjects"></div>
 
       <!-- Badges -->
-      <div class="sec-title" style="color:var(--blue-dark);">🏅 My Badges</div>
+      <div class="sec-title">🏅 My Badges</div>
       <div class="badges-grid" id="sc-badges"></div>
 
       <!-- State Leaderboard Preview -->
-      <div class="sec-title" style="color:var(--blue-dark);" id="sc-state-title">📍 State Leaderboard</div>
+      <div class="sec-title" id="sc-state-title">📍 State Leaderboard</div>
       <div id="sc-state-lb"></div>
 
       <!-- All India Preview -->
-      <div class="sec-title" style="color:var(--blue-dark);">🇮🇳 All India Top 10</div>
+      <div class="sec-title">🇮🇳 All India Top 10</div>
       <div id="sc-india-lb"></div>
     </div>
 
     <!-- PAPERS PAGE -->
     <div id="pg-papers" class="page">
-      <div class="hero" style="background:linear-gradient(135deg,#1b5e20,#2e7d32);">
+      <div class="hero" style="background:linear-gradient(135deg,#1b3a20,#2d5a30);border:1px solid rgba(100,200,100,0.2);">
         <div class="hero-greet">📄 Question Papers</div>
         <div class="hero-name" id="papers-hero-name">Study Smart!</div>
         <div class="hero-sub">Download papers · Practice exams · Score better</div>
@@ -1076,7 +1076,7 @@ body{font-family:'Poppins',sans-serif;background:#030820;font-size:16px;}
     <button class="btab active" onclick="showPage('home',this)"><span class="ti">🏠</span>Home</button>
     <button class="btab" onclick="showPage('score',this)"><span class="ti">🏆</span>My Score</button>
     <button class="btab" onclick="showPage('papers',this)"><span class="ti">📄</span>Papers</button>
-    <button class="btab" onclick="showPage('score',this)"><span class="ti">📊</span>Performance</button>
+    <button class="btab" onclick="showPage('lb',this)"><span class="ti">📊</span>Ranks</button>
     <button class="btab" onclick="showPage('profile',this)"><span class="ti">👤</span>Profile</button>
   </div>
 </div>
@@ -1343,10 +1343,10 @@ body{font-family:'Poppins',sans-serif;background:#030820;font-size:16px;}
     <div class="sec-title">📋 Admin Tabs</div>
     <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;">
       <button onclick="showAdminTab('students',this)" id="tab-students" style="background:var(--blue-mid);color:#fff;border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">👥 Students</button>
-      <button onclick="showAdminTab('revenue',this)" id="tab-revenue" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💰 Revenue</button>
-      <button onclick="showAdminTab('sessions',this)" id="tab-sessions" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">⏱ Sessions</button>
-      <button onclick="showAdminTab('audit',this)" id="tab-audit" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📋 Audit Log</button>
-      <button onclick="showAdminTab('support',this)" id="tab-support" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💬 Support</button>
+      <button onclick="showAdminTab('revenue',this)" id="tab-revenue" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💰 Revenue</button>
+      <button onclick="showAdminTab('sessions',this)" id="tab-sessions" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">⏱ Sessions</button>
+      <button onclick="showAdminTab('audit',this)" id="tab-audit" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📋 Audit Log</button>
+      <button onclick="showAdminTab('support',this)" id="tab-support" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💬 Support</button>
     </div>
     <div id="adm-tab-students">
       <div class="sec-title">👥 All Students</div>
