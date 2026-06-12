@@ -2256,11 +2256,35 @@ const CHAPTER_TOPICS={
 let SYL={board:'',cls:'',subject:'',chapter:'',topic:'',step:1};
 
 function openSubject(id){
-  // Open syllabus selector instead of direct chat
-  SYL={board:S.user?.board||'CBSE',cls:S.user?.class||'11',subject:'',chapter:'',topic:'',step:1};
-  const sub=SUBJECTS_STATIC.find(s=>s.id===id)||{id,name:id,icon:'📚',qs:[]};
-  if(sub){SYL.subject=sub.name;}
   if(!S.isPaid&&S.qToday>=S.freeLimit){showModal('sub-modal');return;}
+
+  // Map subject id to exact SYLLABUS key name
+  const nameMap={
+    math:'Mathematics',english:'English',science:'Science',
+    physics:'Physics',chem:'Chemistry',bio:'Biology',
+    cs:'Computer Science',history:'History',geography:'Geography',
+    polsci:'Political Science',economics:'Economics',
+    sociology:'Sociology',accountancy:'Accountancy',
+    bst:'Business Studies',socialsc:'Social Science',
+    tamil:'Tamil',hindi:'Hindi',
+    ml:'Malayalam',kn:'Kannada',te:'Telugu'
+  };
+
+  const board=S.user?.board||'CBSE';
+  const cls=String(S.user?.class||'11');
+  const subjectName=nameMap[id]||SUBJECTS_STATIC.find(s=>s.id===id)?.name||id;
+  const subIcon=SUBJECTS_STATIC.find(s=>s.id===id)?.icon||'📚';
+
+  // Set SYL with subject already selected — jump to STEP 2 (chapters)
+  SYL={board:board,cls:cls,subject:subjectName,chapter:'',topic:'',step:2};
+
+  // Ensure subject exists in SYLLABUS — add if missing
+  const boardData=SYLLABUS[board]||SYLLABUS['CBSE'];
+  const clsData=boardData[cls]||boardData['11']||{};
+  if(!clsData[subjectName]){
+    clsData[subjectName]={icon:subIcon,chapters:['Introduction','Core Concepts','Important Theorems','Practice Problems','Previous Year Questions']};
+  }
+
   document.getElementById('syllabus-overlay').classList.add('open');
   renderSyllabusStep();
 }
@@ -2369,26 +2393,25 @@ function updateCrumbs(){
 }
 
 function startSyllabusChat(){
-  const sub=SUBJECTS_STATIC.find(s=>s.name===SYL.subject)||{id:SYL.subject.toLowerCase(),name:SYL.subject,icon:SYLLABUS[SYL.board]?.[SYL.cls]?.[SYL.subject]?.icon||'📚',qs:[]};
+  const subjectIcon=SYLLABUS[SYL.board]&&SYLLABUS[SYL.board][SYL.cls]&&SYLLABUS[SYL.board][SYL.cls][SYL.subject]?SYLLABUS[SYL.board][SYL.cls][SYL.subject].icon:'📚';
+  const sub=SUBJECTS_STATIC.find(s=>s.name===SYL.subject)||{id:(SYL.subject||'').toLowerCase().replace(/\s+/g,'-'),name:SYL.subject,icon:subjectIcon,qs:[]};
   S.sub=sub;S.chatHist=[];
   document.getElementById('chat-icon').textContent=sub.icon||'📚';
   document.getElementById('chat-sname').textContent=sub.name;
   document.getElementById('chat-ssub').textContent=SYL.board+' · Class '+SYL.cls+' · '+SYL.chapter;
-  // Build quick questions based on topic
   const topics=CHAPTER_TOPICS[SYL.chapter]||CHAPTER_TOPICS['DEFAULT'];
-  document.getElementById('chat-qqs').innerHTML=topics.slice(0,4).map(t=>
-    `<div class="qq" onclick="sendQ('Explain: ${t.replace(/'/g,"\\'")}')">Explain: ${t}</div>`).join('');
+  document.getElementById('chat-qqs').innerHTML=topics.slice(0,4).map(t=>'<div class="qq" onclick="sendQ(\'Explain: '+t.replace(/'/g,"\\'")+'\')")>Explain: '+t+'</div>').join('');
   document.getElementById('chat-msgs').innerHTML='';
   document.getElementById('exam-cta').style.display='none';
   closeSyllabus();
   openChat();
-  // Opening message with full context
-  const boardFull={CBSE:'CBSE',ICSE:'ICSE',TN:'Tamil Nadu State Board',KL:'Kerala Board (SCERT)',KA:'Karnataka Board (KSEEB)',AP:'AP State Board',TS:'Telangana State Board',MH:'Maharashtra State Board',UP:'UP Board',WB:'WB Board',GJ:'Gujarat Board',RJ:'Rajasthan Board',OTHER:'State Board'}[SYL.board]||SYL.board+' Board';
-  const greeting=`Hello ${S.user?.name||'Student'}! 👋\n\nI'm your BrightMind Teacher for:\n\n📚 **${SYL.subject}** — ${boardFull}\n📖 **Chapter:** ${SYL.chapter}\n🎯 **Topic:** ${SYL.topic}\n\nI'll teach you exactly as per your syllabus, step by step. Let's begin! 😊\n\nShall I start explaining **${SYL.topic}**?`;
+  const boardFull={CBSE:'CBSE',TN:'Tamil Nadu State Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP State Board',TS:'Telangana Board',MH:'Maharashtra Board'}[SYL.board]||SYL.board+' Board';
+  const nm=S.user&&S.user.name?S.user.name:'Student';
+  const greeting='Hello '+nm+'! 👋\n\nI am your BrightMind Teacher for:\n\n📚 **'+SYL.subject+'** — '+boardFull+'\n📖 **Chapter:** '+SYL.chapter+'\n🎯 **Topic:** '+SYL.topic+'\n\nI will teach you exactly as per your syllabus, step by step! Shall I begin? 😊';
   addMsg('ai',greeting);
   const bubble=document.getElementById('speech-bubble');
-  if(bubble)bubble.textContent=`Teaching ${SYL.subject} — ${SYL.topic.substring(0,30)}`;
-  setTimeout(()=>speakText(`Hello ${S.user?.name||'Student'}! I am your BrightMind Teacher for ${SYL.subject}. Today we will study ${SYL.topic} from ${SYL.chapter}. Shall I begin?`),600);
+  if(bubble)bubble.textContent='Teaching '+SYL.subject+' — '+(SYL.topic||'').substring(0,30);
+  setTimeout(()=>speakText('Hello '+nm+'! I am your BrightMind Teacher for '+SYL.subject+'. Today we will study '+SYL.topic+' from '+SYL.chapter+'. Shall I begin?'),600);
 }
 
 function onBoardChange(){
