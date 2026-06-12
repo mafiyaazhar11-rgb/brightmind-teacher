@@ -57,6 +57,7 @@ async function initDB() {
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS subscription_end TIMESTAMP;
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS next_due_date TIMESTAMP;
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS reminder_sent BOOLEAN DEFAULT FALSE;
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS stream VARCHAR(20) DEFAULT 'science';
     CREATE UNIQUE INDEX IF NOT EXISTS bmt_students_email_unique ON bmt_students(email) WHERE email IS NOT NULL;
 
     CREATE TABLE IF NOT EXISTS bmt_support (
@@ -124,7 +125,7 @@ async function initDB() {
 function sanitize(s) {
   return {
     id: s.id, name: s.name, email: s.email||null, board: s.board || 'CBSE',
-    class: s.class, state: s.state,
+    class: s.class, state: s.state, stream: s.stream || 'science',
     is_paid: s.is_paid || false, plan: s.plan || 'free',
     xp: s.xp || 0, streak: s.streak || 0, stars: s.stars || 0,
     total_questions: s.total_questions || 0,
@@ -146,7 +147,7 @@ function sanitize(s) {
 // REGISTER
 app.post('/api/register', async (req, res) => {
   try {
-    const { name, password, board, class: cls, state, mobile, email } = req.body;
+    const { name, password, board, class: cls, state, mobile, email, stream } = req.body;
     if (!name || !password || !cls || !state) return res.json({ ok: false, msg: 'Please fill all fields!' });
 
     // Check name taken
@@ -162,9 +163,9 @@ app.post('/api/register', async (req, res) => {
     }
 
     await pool.query(
-      `INSERT INTO bmt_students (name, password, board, class, state, email, mobile, reg_on)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())`,
-      [name, password, board || 'CBSE', cls, state, email || null, mobile || null]
+      `INSERT INTO bmt_students (name, password, board, class, state, email, mobile, stream, reg_on)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW())`,
+      [name, password, board || 'CBSE', cls, state, email || null, mobile || null, stream || 'science']
     );
 
     // Audit log
