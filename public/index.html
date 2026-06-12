@@ -2562,7 +2562,7 @@ Return ONLY JSON array.`
         messages:[{role:'user',content:prompt}]})});
     const d=await r.json();
     let raw=d.content?.[0]?.text||'[]';
-    raw=raw.replace(/```json|```/g,'').trim();
+    raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
 
     // Parse steps
     try{
@@ -2811,7 +2811,7 @@ Return ONLY JSON array.`;
           ]}]})});
       const d=await r.json();
       let raw=d.content?.[0]?.text||'[]';
-      raw=raw.replace(/```json|```/g,'').trim();
+      raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
       document.getElementById(loadId)?.remove();
       try{
         bbAllSteps=JSON.parse(raw);
@@ -3095,7 +3095,7 @@ async function sendMsg(){
     speakText(rep);
     if(S.user){if(!S.user.subjects[S.sub.id])S.user.subjects[S.sub.id]={progress:0,stars:0};S.user.subjects[S.sub.id].progress=Math.min(100,(S.user.subjects[S.sub.id].progress||0)+5);saveUser();}
     if(S.chatHist.length>=8)document.getElementById('exam-cta').style.display='block';
-    if(S.chatHist.length===6)setTimeout(()=>assignHW(txt),1500);
+    if(S.chatHist.length===20)setTimeout(()=>assignHW(txt),1500);
   }catch(e){ty.classList.remove('show');addMsg('ai','⚠️ Connection error. Please try again.');}
 }
 
@@ -3130,7 +3130,7 @@ async function startExam(){
         messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name}. Topics: ${topics||'general chapter concepts'}. Make questions TOUGH — test deep understanding. Return ONLY a JSON array, no other text:
 [{"q":"question","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"brief explanation"}]`}]})});
     const d=await r.json();let raw=d.content?.[0]?.text||'[]';
-    raw=raw.replace(/```json|```/g,'').trim();
+    raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
     S.examQs=JSON.parse(raw);
   }catch(e){S.examQs=fallbackQs();}
   startTimer();renderExamQ();
@@ -3953,7 +3953,7 @@ Return ONLY a JSON array:
 [{"q":"question text","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"why this is correct","marks":1}]`}]})});
     const d = await r.json();
     let raw = d.content?.[0]?.text||'[]';
-    raw = raw.replace(/```json|```/g,'').trim();
+    raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
     IE.questions = JSON.parse(raw);
   }catch(e){
     IE.questions = Array(10).fill(null).map((_,i)=>({
@@ -4745,8 +4745,21 @@ Return ONLY this JSON:
         messages:[{role:'user',content:prompt}]})});
     const d = await r.json();
     let raw = d.content?.[0]?.text||'{}';
-    raw = raw.replace(/```json|```/g,'').trim();
-    const paperData = JSON.parse(raw);
+    // Remove markdown code fences safely
+    raw = raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
+    // Find JSON object in response
+    const jsonStart = raw.indexOf('{');
+    const jsonEnd = raw.lastIndexOf('}');
+    if(jsonStart>=0 && jsonEnd>jsonStart) raw = raw.slice(jsonStart, jsonEnd+1);
+    let paperData;
+    try{ paperData = JSON.parse(raw); }
+    catch(pe){
+      // Build a basic fallback paper if JSON parse fails
+      paperData = {
+        instructions:['All questions are compulsory.','Write neatly.','Show all working for full marks.','Time: '+paper.time+'.','Max Marks: '+paper.marks+'.'],
+        sections:[{name:'SECTION A',type:'Questions',marks_per_q:1,total_marks:paper.marks,questions:[{no:1,q:'Answer all questions based on the chapter: '+paper.chapters,marks:paper.marks}]}]
+      };
+    }
 
     buildExamPaperHTML(paperData, paper.subject, paper.chapters, {
       label:cfg.label, marks:paper.marks, time:paper.time
@@ -4842,8 +4855,12 @@ Make questions exam-realistic and curriculum-appropriate. Return ONLY JSON.`;
         messages:[{role:'user',content:prompt}]})});
     const d = await r.json();
     let raw = d.content?.[0]?.text||'{}';
-    raw = raw.replace(/```json|```/g,'').trim();
-    const paper = JSON.parse(raw);
+    raw = raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
+    const jsonStart=raw.indexOf('{'),jsonEnd=raw.lastIndexOf('}');
+    if(jsonStart>=0&&jsonEnd>jsonStart) raw=raw.slice(jsonStart,jsonEnd+1);
+    let paper;
+    try{ paper=JSON.parse(raw); }
+    catch(pe){ paper={instructions:['All questions compulsory.','Write neatly.','Time: '+cfg.time+'.'],sections:[{name:'SECTION A',type:'Questions',marks_per_q:1,questions:[{no:1,q:'Exam paper for '+chapter+' — '+subject,marks:cfg.marks}]}]}; }
 
     // Generate the printable HTML
     buildExamPaperHTML(paper, subject, chapter, cfg, board);
