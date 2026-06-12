@@ -51,6 +51,7 @@ async function initDB() {
 
     -- Add columns if not exists (for existing deployments)
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS mobile VARCHAR(15);
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS stream VARCHAR(20) DEFAULT 'science';
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS email VARCHAR(150);
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS subscription_type VARCHAR(20) DEFAULT 'monthly';
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS subscription_start TIMESTAMP;
@@ -125,7 +126,7 @@ async function initDB() {
 function sanitize(s) {
   return {
     id: s.id, name: s.name, email: s.email||null, board: s.board || 'CBSE',
-    class: s.class, state: s.state, stream: s.stream || 'science',
+    class: s.class, state: s.state, stream: s.stream || 'science', stream: s.stream || 'science',
     is_paid: s.is_paid || false, plan: s.plan || 'free',
     xp: s.xp || 0, streak: s.streak || 0, stars: s.stars || 0,
     total_questions: s.total_questions || 0,
