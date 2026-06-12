@@ -689,12 +689,13 @@ body{font-family:'Poppins',sans-serif;background:#030820;font-size:16px;}
         </select>
       </div>
       <div class="fg"><label>Class</label>
-        <select id="rc"><option value="">Select Class</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
+        <select id="rc" onchange="toggleStreamField(this.value)"><option value="">Select Class</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
       </div>
       <div class="fg"><label>State</label>
         <select id="rs"><option value="">Select State</option><option>Tamil Nadu</option><option>Maharashtra</option><option>Karnataka</option><option>Kerala</option><option>Uttar Pradesh</option><option>Rajasthan</option><option>Gujarat</option><option>West Bengal</option><option>Andhra Pradesh</option><option>Telangana</option><option>Delhi</option><option>Punjab</option><option>Haryana</option><option>Bihar</option><option>Madhya Pradesh</option><option>Other</option></select>
       </div>
       <div class="fg"><label>Password</label><input id="rp" type="password" placeholder="Create password"/></div>
+      <div class="fg" id="stream-field" style="display:none;"><label>Stream (Class 11 &amp; 12)</label><select id="rstream"><option value="science">🔬 Science</option><option value="commerce">💰 Commerce</option><option value="arts">🏛️ Arts</option></select></div>
       <button class="btn-gold" onclick="doRegister()">Create Account ✨</button>
     </div>
     <!-- PARENT LOGIN FORM -->
@@ -727,90 +728,111 @@ body{font-family:'Poppins',sans-serif;background:#030820;font-size:16px;}
     <div id="pg-home" class="page active">
 
       <!-- PREMIUM HERO -->
-      <div class="hero" style="padding:20px 18px 24px;position:relative;overflow:hidden;">
-        <!-- decorative circles -->
-        <div style="position:absolute;top:-30px;right:-30px;width:130px;height:130px;background:rgba(255,255,255,.06);border-radius:50%;"></div>
-        <div style="position:absolute;top:10px;right:20px;width:70px;height:70px;background:rgba(255,255,255,.05);border-radius:50%;"></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <!-- ══ HOME PAGE — PREMIUM DARK ══ -->
+
+      <!-- TOP NAV STYLE HEADER -->
+      <div style="background:linear-gradient(135deg,#0a0c2e 0%,#0d1547 50%,#1a1060 100%);padding:18px 16px 14px;border-bottom:1px solid rgba(255,214,0,0.15);position:relative;overflow:hidden;">
+        <!-- Gold top border line -->
+        <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#ffd600,transparent);"></div>
+        <!-- Decorative circle -->
+        <div style="position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:rgba(255,214,0,0.05);border-radius:50%;"></div>
+
+        <!-- Greeting + XP -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;">
           <div>
-            <div style="font-size:12px;color:rgba(255,255,255,.7);font-weight:500;" id="hero-greet-time">Good morning! ☀️</div>
-            <div style="font-size:22px;font-weight:800;color:#fff;margin-top:2px;" id="hero-name">Welcome!</div>
-            <div style="font-size:12px;color:rgba(255,255,255,.75);margin-top:2px;" id="hero-sub">Class 11 · Tamil Nadu</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.6);font-weight:500;" id="hero-greet-time">Good morning! ☀️</div>
+            <div style="font-size:22px;font-weight:900;color:#fff;margin-top:2px;letter-spacing:-0.3px;" id="hero-name">Hello, Student! 👋</div>
+            <div style="font-size:12px;color:rgba(255,214,0,0.8);margin-top:3px;font-weight:600;" id="hero-sub">TN · Class 9 · Tamil Nadu</div>
           </div>
-          <!-- XP pill -->
-          <div style="background:rgba(255,255,255,.15);border-radius:20px;padding:6px 14px;text-align:center;">
-            <div style="font-size:16px;font-weight:800;color:#ffd600;" id="hero-xp">0</div>
-            <div style="font-size:9px;color:rgba(255,255,255,.7);font-weight:600;">XP</div>
+          <!-- XP Circle -->
+          <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#ffd600,#ff8f00);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(255,214,0,0.4);flex-shrink:0;">
+            <div style="font-size:15px;font-weight:900;color:#0a0c2e;line-height:1;" id="hero-xp">0</div>
+            <div style="font-size:8px;font-weight:800;color:#0a0c2e;opacity:0.7;">XP</div>
           </div>
         </div>
-        <!-- stats row -->
-        <div style="display:flex;gap:8px;">
-          <div style="flex:1;background:rgba(255,255,255,.12);border-radius:12px;padding:10px 8px;text-align:center;">
-            <div style="font-size:20px;font-weight:800;color:#fff;" id="stat-q">0</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.7);">Questions</div>
+
+        <!-- STAT BOXES — 4 cards like screenshot -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;">
+          <div style="background:rgba(102,126,234,0.15);border:1px solid rgba(102,126,234,0.3);border-radius:12px;padding:10px 6px;text-align:center;">
+            <div style="font-size:22px;margin-bottom:2px;">❓</div>
+            <div style="font-size:18px;font-weight:800;color:#fff;line-height:1;" id="stat-q">0</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.55);margin-top:2px;">Questions</div>
           </div>
-          <div style="flex:1;background:rgba(255,255,255,.12);border-radius:12px;padding:10px 8px;text-align:center;">
-            <div style="font-size:20px;font-weight:800;color:#fff;" id="stat-ex">0</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.7);">Exams</div>
+          <div style="background:rgba(79,195,247,0.12);border:1px solid rgba(79,195,247,0.25);border-radius:12px;padding:10px 6px;text-align:center;">
+            <div style="font-size:22px;margin-bottom:2px;">📝</div>
+            <div style="font-size:18px;font-weight:800;color:#fff;line-height:1;" id="stat-ex">0</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.55);margin-top:2px;">Exams</div>
           </div>
-          <div style="flex:1;background:rgba(255,255,255,.12);border-radius:12px;padding:10px 8px;text-align:center;">
-            <div style="font-size:20px;font-weight:800;color:#ffd600;" id="stat-rank">#—</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.7);">My Rank</div>
+          <div style="background:rgba(255,214,0,0.12);border:1px solid rgba(255,214,0,0.3);border-radius:12px;padding:10px 6px;text-align:center;">
+            <div style="font-size:22px;margin-bottom:2px;">👑</div>
+            <div style="font-size:18px;font-weight:800;color:#ffd600;line-height:1;" id="stat-rank">#—</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.55);margin-top:2px;">My Rank</div>
           </div>
-          <div style="flex:1;background:rgba(255,255,255,.12);border-radius:12px;padding:10px 8px;text-align:center;">
-            <div style="font-size:20px;font-weight:800;color:#69f0ae;" id="stat-streak">0🔥</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.7);">Streak</div>
+          <div style="background:rgba(255,107,53,0.12);border:1px solid rgba(255,107,53,0.25);border-radius:12px;padding:10px 6px;text-align:center;">
+            <div style="font-size:22px;margin-bottom:2px;">🔥</div>
+            <div style="font-size:18px;font-weight:800;color:#ff6b35;line-height:1;" id="stat-streak">0</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.55);margin-top:2px;">Streak</div>
           </div>
         </div>
       </div>
 
       <!-- FREE LIMIT BAR -->
-      <div class="limit-bar" id="limit-bar" style="margin:0;border-radius:0;">
-        <div class="lb-label">Free questions today</div>
+      <div style="background:rgba(3,8,32,0.6);border-bottom:1px solid rgba(255,255,255,0.06);padding:8px 16px;display:flex;align-items:center;gap:10px;" id="limit-bar">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);flex:1;">🎁 Free questions today</div>
         <div class="lb-dots" id="lb-dots"></div>
-        <div class="lb-count" id="lb-count">10 left</div>
+        <div style="font-size:11px;font-weight:700;" id="lb-count">
+          <span style="color:#ffd600;">⭐ Premium</span> · <span style="color:rgba(255,255,255,0.7);">Unlimited</span>
+        </div>
       </div>
 
-      <!-- QUICK ACTION CARDS -->
-      <div style="padding:14px 14px 4px;">
+      <!-- MAIN CONTENT -->
+      <div style="padding:14px 14px 0;">
         <div id="trial-banner-wrap"></div>
 
-        <!-- UPGRADE BANNER — only for free users -->
-        <div id="upgrade-banner-home" class="upgrade-banner" onclick="showModal('sub-modal')" style="margin-bottom:14px;">
-          <div class="ub-left">
-            <div class="t">🎉 Launch Offer — Till Aug 31!</div>
-            <div class="s">All subjects · Unlimited · Exams · ₹399 → ₹199</div>
+        <!-- UPGRADE BANNER -->
+        <div id="upgrade-banner-home" onclick="showModal('sub-modal')"
+          style="background:linear-gradient(135deg,#ffd600,#ff8f00,#ffd600);background-size:200%;animation:goldShimmer 3s ease infinite;border-radius:14px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 20px rgba(255,214,0,0.3);">
+          <div>
+            <div style="font-size:13px;font-weight:800;color:#0a0c2e;">🎉 Launch Offer — Till Aug 31!</div>
+            <div style="font-size:10px;color:rgba(10,12,46,0.7);margin-top:2px;">All subjects · Unlimited · Exams · ₹399 → ₹199</div>
           </div>
-          <div class="ub-price">₹199<small>/mo</small></div>
+          <div style="font-size:20px;font-weight:900;color:#0a0c2e;">₹199<span style="font-size:11px;">/mo</span></div>
         </div>
 
-        <!-- QUICK ACTIONS ROW -->
-        <div style="display:flex;gap:10px;margin-bottom:14px;">
+        <!-- QUICK ACTIONS — exactly like screenshot -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
           <div onclick="document.getElementById('blackboard-overlay').classList.add('open');showBBWelcome();"
-            style="flex:1;background:linear-gradient(135deg,#0d2b0d,#1a4a1a);border-radius:14px;padding:14px 12px;cursor:pointer;text-align:center;box-shadow:0 3px 12px rgba(0,0,0,.15);">
-            <div style="font-size:26px;margin-bottom:6px;">🖊️</div>
-            <div style="font-size:12px;font-weight:700;color:#a0ffa0;">Blackboard</div>
-            <div style="font-size:10px;color:rgba(160,255,160,.6);margin-top:2px;">Step by step</div>
+            style="background:linear-gradient(135deg,#1a3a1a,#2d5a2d);border:1px solid rgba(100,200,100,0.2);border-radius:16px;padding:16px 10px;cursor:pointer;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.3);transition:transform .2s;">
+            <div style="width:44px;height:44px;background:rgba(100,200,100,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:24px;">🖊️</div>
+            <div style="font-size:12px;font-weight:800;color:#a0ffa0;">Blackboard</div>
+            <div style="font-size:9px;color:rgba(160,255,160,0.6);margin-top:2px;">Step by step</div>
+            <div style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:rgba(100,200,100,0.4);font-size:18px;">›</div>
           </div>
           <div onclick="showPage('papers',document.querySelector('.btab:nth-child(3)'))"
-            style="flex:1;background:linear-gradient(135deg,#1b5e20,#2e7d32);border-radius:14px;padding:14px 12px;cursor:pointer;text-align:center;box-shadow:0 3px 12px rgba(0,0,0,.15);">
-            <div style="font-size:26px;margin-bottom:6px;">📄</div>
-            <div style="font-size:12px;font-weight:700;color:#a5d6a7;">Papers</div>
-            <div style="font-size:10px;color:rgba(165,214,167,.6);margin-top:2px;">Download now</div>
+            style="background:linear-gradient(135deg,#1a3a2a,#2d5a3d);border:1px solid rgba(100,200,150,0.2);border-radius:16px;padding:16px 10px;cursor:pointer;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.3);transition:transform .2s;">
+            <div style="width:44px;height:44px;background:rgba(100,200,150,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:24px;">📄</div>
+            <div style="font-size:12px;font-weight:800;color:#a5d6a7;">Papers</div>
+            <div style="font-size:9px;color:rgba(165,214,167,0.6);margin-top:2px;">Download now</div>
           </div>
           <div onclick="showPage('score',document.querySelector('.btab:nth-child(4)'))"
-            style="flex:1;background:linear-gradient(135deg,#4a148c,#7b1fa2);border-radius:14px;padding:14px 12px;cursor:pointer;text-align:center;box-shadow:0 3px 12px rgba(0,0,0,.15);">
-            <div style="font-size:26px;margin-bottom:6px;">🏆</div>
-            <div style="font-size:12px;font-weight:700;color:#ce93d8;">My Score</div>
-            <div style="font-size:10px;color:rgba(206,147,216,.6);margin-top:2px;">Badges & XP</div>
+            style="background:linear-gradient(135deg,#2a1a3a,#4a2a6a);border:1px solid rgba(180,100,220,0.2);border-radius:16px;padding:16px 10px;cursor:pointer;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.3);transition:transform .2s;">
+            <div style="width:44px;height:44px;background:rgba(180,100,220,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:24px;">🏆</div>
+            <div style="font-size:12px;font-weight:800;color:#ce93d8;">My Score</div>
+            <div style="font-size:9px;color:rgba(206,147,216,0.6);margin-top:2px;">Badges & XP</div>
           </div>
         </div>
 
-        <!-- SUBJECTS TITLE -->
-        <div style="font-size:14px;font-weight:700;color:var(--blue-dark);margin-bottom:10px;">📚 Choose Your Subject</div>
-        <div class="subj-grid" id="subj-grid"></div>
+        <!-- SUBJECTS SECTION TITLE -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <span style="font-size:18px;">👑</span>
+          <span style="font-size:15px;font-weight:800;color:#fff;letter-spacing:0.3px;">Choose Your Subject</span>
+          <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(255,214,0,0.3),transparent);margin-left:4px;"></div>
+        </div>
+
+        <!-- SUBJECT GRID — matches screenshot style -->
+        <div id="subj-grid" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;"></div>
+
       </div>
-    </div>
     <!-- LEADERBOARD -->
     <div id="pg-lb" class="page">
       <div class="my-rank-banner">
@@ -1034,9 +1056,9 @@ body{font-family:'Poppins',sans-serif;background:#030820;font-size:16px;}
   </div>
   <div class="bottomnav">
     <button class="btab active" onclick="showPage('home',this)"><span class="ti">🏠</span>Home</button>
-    <button class="btab" onclick="showPage('lb',this)"><span class="ti">🏆</span>Ranks</button>
+    <button class="btab" onclick="showPage('score',this)"><span class="ti">🏆</span>My Score</button>
     <button class="btab" onclick="showPage('papers',this)"><span class="ti">📄</span>Papers</button>
-    <button class="btab" onclick="showPage('score',this)"><span class="ti">📊</span>Score</button>
+    <button class="btab" onclick="showPage('score',this)"><span class="ti">📊</span>Performance</button>
     <button class="btab" onclick="showPage('profile',this)"><span class="ti">👤</span>Profile</button>
   </div>
 </div>
@@ -1522,7 +1544,7 @@ body{font-family:'Poppins',sans-serif;background:#030820;font-size:16px;}
     <div class="rc-divider"></div>
     <div id="rc-level" style="text-align:center;"></div>
   </div>
-  <button class="rc-share-btn" onclick="shareRankCard()">📤 Share on WhatsApp</button>
+  <div style="display:flex;gap:8px;"><button class="rc-share-btn" style="flex:1;" onclick="shareRankCard()">📤 WhatsApp</button><button class="rc-share-btn" style="flex:1;background:linear-gradient(135deg,#ffd600,#ff8f00);color:#0a0f2e;" onclick="downloadRankCard()">📥 Download</button></div>
   <button class="rc-close" onclick="closeRankCard()">Close</button>
 </div>
 
@@ -1936,6 +1958,64 @@ function shareRankCard(){
   const text=`🧠 BrightMind Teacher\n\n👤 ${u.name}\n📚 Class ${u.class} · ${u.board||'CBSE'}\n\n🏆 GPA: ${computeGPA(u)}/10\n📍 ${u.state} Rank: #${computeStateRank(u)}\n🇮🇳 All India Rank: #${rank(u)}\n🔥 Streak: ${u.streak||0} days\n⭐ Stars: ${u.stars||0}\n\nJoin BrightMind Teacher — AI Tutor from ₹120/month!`;
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
+function downloadRankCard(){
+  const u=S.user;if(!u)return;
+  const gpa=computeGPA(u),xp=u.xp||0,lvl=getLevel(xp),stRank=computeStateRank(u),inRank=rank(u);
+  const date=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+  const ini=u.name[0].toUpperCase();
+  const bf={CBSE:'CBSE',TN:'Tamil Nadu Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board'}[u.board]||u.board||'CBSE';
+  const cr=Math.max(1,Math.floor(inRank/3));
+  var h='<!DOCTYPE html><html><head><meta charset="UTF-8">';
+  h+='<style>*{margin:0;padding:0;box-sizing:border-box;}body{background:#030820;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:Arial,sans-serif;padding:24px;}';
+  h+='.card{width:360px;background:linear-gradient(145deg,#0a0f2e,#1a237e,#283593);border-radius:28px;padding:28px 20px;text-align:center;border:1px solid rgba(255,214,0,.3);box-shadow:0 24px 64px rgba(0,0,0,.8);}';
+  h+='.tl{height:3px;background:linear-gradient(90deg,transparent,#ffd600,transparent);margin-bottom:16px;}.logo{font-size:10px;letter-spacing:3px;color:rgba(255,214,0,.85);font-weight:700;margin-bottom:14px;}';
+  h+='.av{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#ffd600,#ff8f00);font-size:32px;font-weight:900;color:#0a0f2e;display:flex;align-items:center;justify-content:center;margin:0 auto;box-shadow:0 0 0 4px rgba(255,214,0,.25);}';
+  h+='.lp{display:inline-block;margin:8px 0;background:linear-gradient(135deg,#ffd600,#ff8f00);color:#0a0f2e;font-size:10px;font-weight:800;padding:3px 10px;border-radius:10px;}';
+  h+='.nm{font-size:22px;font-weight:900;color:#fff;margin-top:10px;}.mt{font-size:11px;color:rgba(255,255,255,.6);margin-top:4px;}';
+  h+='.dv{height:1px;background:linear-gradient(90deg,transparent,rgba(255,214,0,.4),transparent);margin:16px 0;}';
+  h+='.ranks{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:14px;}';
+  h+='.rb{border-radius:12px;padding:12px 4px;}.rs{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);}.rc{background:rgba(255,214,0,.12);border:1px solid rgba(255,214,0,.3);}';
+  h+='.rn{font-size:22px;font-weight:900;color:#ffd600;}.rl{font-size:9px;color:rgba(255,255,255,.5);margin-top:3px;font-weight:600;}.rc .rl{color:rgba(255,214,0,.7);}';
+  h+='.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:14px;}';
+  h+='.sb{background:rgba(255,255,255,.07);border-radius:10px;padding:9px 4px;}.sv{font-size:16px;font-weight:800;color:#fff;}.sl{font-size:9px;color:rgba(255,255,255,.45);margin-top:2px;}';
+  h+='.chips{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}';
+  h+='.chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,.8);font-weight:600;}';
+  h+='.ft{font-size:10px;color:rgba(255,255,255,.3);letter-spacing:1px;}';
+  h+='.btn{display:block;margin:20px auto 0;background:linear-gradient(135deg,#ffd600,#ff8f00);color:#0a0f2e;border:none;padding:12px 32px;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;}';
+  h+='@media print{.btn{display:none;}}';
+  h+='</style></head><body><div class="card"><div class="tl"></div>';
+  h+='<div class="logo">🧠 BRIGHTMIND TEACHER</div>';
+  h+='<div class="av">'+ini+'</div>';
+  h+='<div class="lp">'+lvl.icon+' '+lvl.name+'</div>';
+  h+='<div class="nm">'+u.name+'</div>';
+  h+='<div class="mt">'+bf+' &middot; Class '+u.class+' &middot; '+u.state+'</div>';
+  h+='<div class="dv"></div>';
+  h+='<div class="ranks">';
+  h+='<div class="rb rs"><div class="rn">#'+stRank+'</div><div class="rl">'+u.state+'<br>Rank</div></div>';
+  h+='<div class="rb rc"><div class="rn">#'+inRank+'</div><div class="rl">&#127470;&#127475; All India<br>Rank</div></div>';
+  h+='<div class="rb rs"><div class="rn">#'+cr+'</div><div class="rl">Class '+u.class+'<br>Rank</div></div>';
+  h+='</div>';
+  h+='<div class="stats">';
+  h+='<div class="sb"><div class="sv">'+gpa+'</div><div class="sl">GPA</div></div>';
+  h+='<div class="sb"><div class="sv">'+(u.stars||0)+'</div><div class="sl">Stars</div></div>';
+  h+='<div class="sb"><div class="sv">'+(u.streak||0)+'</div><div class="sl">Streak</div></div>';
+  h+='<div class="sb"><div class="sv">'+xp+'</div><div class="sl">XP</div></div>';
+  h+='</div>';
+  h+='<div class="chips">';
+  h+='<div class="chip">&#128218; '+(u.totalQ||0)+' Qs</div>';
+  h+='<div class="chip">&#127885; '+((u.badges||[]).length)+' Badges</div>';
+  h+='<div class="chip">&#128197; '+date+'</div>';
+  h+='</div>';
+  h+='<div class="dv"></div>';
+  h+='<div class="ft">brightmindteacher.com &middot; AI Tutor for India</div>';
+  h+='</div>';
+  h+='<button class="btn" onclick="window.print()">&#128438; Save as PDF</button>';
+  h+='</body></html>';
+  var w=window.open('','_blank');
+  if(w){w.document.write(h);w.document.close();}
+}
+
+
 
 // AUTH
 // ══════════════════════════════════════
@@ -1998,6 +2078,8 @@ async function doResetPassword(){
     alert(res.msg||'Reset failed. Please check your name and try again.');
   }
 }
+function toggleStreamField(cls){var sf=document.getElementById("stream-field");if(sf)sf.style.display=(cls==="11"||cls==="12")?"block":"none";}
+
 async function doRegister(){
   const n=document.getElementById('rn').value.trim(),
         email=document.getElementById('remail').value.trim(),
@@ -2122,29 +2204,80 @@ function doLogout(){
 // HOME
 // ══════════════════════════════════════
 function renderSubjects(){
-  document.getElementById('subj-grid').innerHTML=getSubjects().map(s=>{
-    const d=S.user?.subjects?.[s.id]||{},p=d.progress||0,st=d.stars||0;
-    return `<div class="subj-card" style="padding:12px 10px;">
-      <div class="subj-icon">${s.icon}</div>
-      <div class="subj-name">${s.name}</div>
-      <div class="subj-prog"><div class="subj-prog-fill" style="width:${p}%"></div></div>
-      <div class="subj-stars">${'★'.repeat(st)}${'☆'.repeat(5-st)} ${p}%</div>
-      <div style="display:flex;gap:5px;margin-top:8px;">
-        <button onclick="event.stopPropagation();openSubject('${s.id}')" 
-          style="flex:1;background:var(--blue-mid);color:#fff;border:none;padding:6px 4px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;">
-          📚 Study
-        </button>
-        <button onclick="event.stopPropagation();openInstantExam('${s.id}','${s.name}','${s.icon}')" 
-          style="flex:1;background:linear-gradient(135deg,#e65100,#ff6f00);color:#fff;border:none;padding:6px 4px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;">
-          📝 Exam
-        </button>
-      </div>
-    </div>`;
+  const subs = getSubjects();
+  const grid = document.getElementById('subj-grid');
+  if(!grid) return;
+
+  // Subject icon backgrounds — matches screenshot colors
+  const iconBg = {
+    math:'rgba(100,120,240,0.25)',english:'rgba(200,140,40,0.25)',
+    science:'rgba(140,80,220,0.25)',socialsc:'rgba(40,160,120,0.25)',
+    physics:'rgba(80,160,240,0.25)',chem:'rgba(220,80,80,0.25)',
+    bio:'rgba(80,200,120,0.25)',cs:'rgba(80,180,220,0.25)',
+    tamil:'rgba(200,80,80,0.25)',hindi:'rgba(220,120,40,0.25)',
+    history:'rgba(160,120,60,0.25)',geography:'rgba(40,160,100,0.25)',
+    polsci:'rgba(80,120,200,0.25)',economics:'rgba(40,180,160,0.25)',
+    sociology:'rgba(160,80,160,0.25)',accountancy:'rgba(220,160,40,0.25)',
+    bst:'rgba(100,160,220,0.25)',
+  };
+  const iconBorder = {
+    math:'rgba(100,120,240,0.5)',english:'rgba(200,140,40,0.5)',
+    science:'rgba(140,80,220,0.5)',socialsc:'rgba(40,160,120,0.5)',
+    physics:'rgba(80,160,240,0.5)',chem:'rgba(220,80,80,0.5)',
+    bio:'rgba(80,200,120,0.5)',cs:'rgba(80,180,220,0.5)',
+    tamil:'rgba(200,80,80,0.5)',hindi:'rgba(220,120,40,0.5)',
+    history:'rgba(160,120,60,0.5)',geography:'rgba(40,160,100,0.5)',
+    polsci:'rgba(80,120,200,0.5)',economics:'rgba(40,180,160,0.5)',
+    sociology:'rgba(160,80,160,0.5)',accountancy:'rgba(220,160,40,0.5)',
+    bst:'rgba(100,160,220,0.5)',
+  };
+
+  // Pair subjects into rows of 2
+  const rows = [];
+  for(let i=0;i<subs.length;i+=2){
+    rows.push(subs.slice(i,i+2));
+  }
+
+  grid.innerHTML = rows.map(pair=>{
+    const cards = pair.map(s=>{
+      const d=S.user?.subjects?.[s.id]||{};
+      const p=d.progress||0;
+      const st=d.stars||0;
+      const bg=iconBg[s.id]||'rgba(100,100,200,0.2)';
+      const bc=iconBorder[s.id]||'rgba(100,100,200,0.4)';
+      const stars='★'.repeat(st)+'☆'.repeat(5-st);
+      return `<div style="flex:1;background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:14px 12px;min-width:0;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <div style="width:46px;height:46px;border-radius:12px;background:${bg};border:1px solid ${bc};display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">${s.icon}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div>
+            <div style="font-size:10px;color:#ffd600;margin-top:1px;">${stars} ${p}%</div>
+          </div>
+        </div>
+        <div style="height:3px;background:rgba(255,255,255,0.1);border-radius:3px;margin-bottom:10px;overflow:hidden;">
+          <div style="height:100%;width:${p}%;background:linear-gradient(90deg,#ffd600,#ff8f00);border-radius:3px;transition:width .5s;"></div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="event.stopPropagation();openSubject('${s.id}')"
+            style="flex:1;background:linear-gradient(135deg,#1a237e,#3949ab);color:#fff;border:none;padding:8px 4px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;">
+            📚 Study
+          </button>
+          <button onclick="event.stopPropagation();openInstantExam('${s.id}','${s.name}','${s.icon}')"
+            style="flex:1;background:linear-gradient(135deg,#e65100,#ff6f00);color:#fff;border:none;padding:8px 4px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;">
+            📝 Exam
+          </button>
+        </div>
+      </div>`;
+    });
+    // If odd card, add empty placeholder
+    if(pair.length===1) cards.push('<div style="flex:1;"></div>');
+    return `<div style="display:flex;gap:10px;">${cards.join('')}</div>`;
   }).join('');
 }
 function renderLimitBar(){
   const used=S.qToday,left=Math.max(0,S.freeLimit-used);
-  document.getElementById('lb-count').textContent=S.isPaid?'∞ Unlimited':left+' left';
+  const lbCount=document.getElementById('lb-count');
+  if(lbCount)lbCount.innerHTML=S.isPaid?'<span style="color:#ffd600;">⭐ Premium</span> · <span style="color:rgba(255,255,255,0.7);">Unlimited</span>':left+' left';
   const d=document.getElementById('lb-dots');
   if(S.isPaid){d.innerHTML='<span style="font-size:12px;color:var(--green);font-weight:700;">✓ Premium</span>';return;}
   d.innerHTML=Array.from({length:S.freeLimit},(_,i)=>`<div class="lb-dot${i<used?' used':''}"></div>`).join('');
@@ -2252,11 +2385,14 @@ const CHAPTER_TOPICS={
 let SYL={board:'',cls:'',subject:'',chapter:'',topic:'',step:1};
 
 function openSubject(id){
-  // Open syllabus selector instead of direct chat
-  SYL={board:S.user?.board||'CBSE',cls:S.user?.class||'11',subject:'',chapter:'',topic:'',step:1};
-  const sub=SUBJECTS_STATIC.find(s=>s.id===id)||{id,name:id,icon:'📚',qs:[]};
-  if(sub){SYL.subject=sub.name;}
   if(!S.isPaid&&S.qToday>=S.freeLimit){showModal('sub-modal');return;}
+  const nameMap={math:'Mathematics',english:'English',science:'Science',physics:'Physics',chem:'Chemistry',bio:'Biology',cs:'Computer Science',history:'History',geography:'Geography',polsci:'Political Science',economics:'Economics',sociology:'Sociology',accountancy:'Accountancy',bst:'Business Studies',socialsc:'Social Science',tamil:'Tamil',hindi:'Hindi'};
+  const subjectName=nameMap[id]||SUBJECTS_STATIC.find(s=>s.id===id)?.name||id;
+  const subIcon=SUBJECTS_STATIC.find(s=>s.id===id)?.icon||'📚';
+  SYL={board:S.user?.board||'CBSE',cls:String(S.user?.class||'11'),subject:subjectName,chapter:'',topic:'',step:2};
+  const bd=SYLLABUS[SYL.board]||SYLLABUS['CBSE'];
+  const cl=bd[SYL.cls]||bd['11']||{};
+  if(!cl[subjectName])cl[subjectName]={icon:subIcon,chapters:['Introduction','Core Concepts','Important Theorems','Practice Problems','Previous Year Questions']};
   document.getElementById('syllabus-overlay').classList.add('open');
   renderSyllabusStep();
 }
@@ -2535,7 +2671,7 @@ Return ONLY JSON array.`
         messages:[{role:'user',content:prompt}]})});
     const d=await r.json();
     let raw=d.content?.[0]?.text||'[]';
-    raw=raw.replace(/```json|```/g,'').trim();
+    raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
 
     // Parse steps
     try{
@@ -2784,7 +2920,7 @@ Return ONLY JSON array.`;
           ]}]})});
       const d=await r.json();
       let raw=d.content?.[0]?.text||'[]';
-      raw=raw.replace(/```json|```/g,'').trim();
+      raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
       document.getElementById(loadId)?.remove();
       try{
         bbAllSteps=JSON.parse(raw);
@@ -3068,7 +3204,7 @@ async function sendMsg(){
     speakText(rep);
     if(S.user){if(!S.user.subjects[S.sub.id])S.user.subjects[S.sub.id]={progress:0,stars:0};S.user.subjects[S.sub.id].progress=Math.min(100,(S.user.subjects[S.sub.id].progress||0)+5);saveUser();}
     if(S.chatHist.length>=8)document.getElementById('exam-cta').style.display='block';
-    if(S.chatHist.length===6)setTimeout(()=>assignHW(txt),1500);
+    if(S.chatHist.length===20)setTimeout(()=>assignHW(txt),1500);
   }catch(e){ty.classList.remove('show');addMsg('ai','⚠️ Connection error. Please try again.');}
 }
 
@@ -3103,7 +3239,7 @@ async function startExam(){
         messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name}. Topics: ${topics||'general chapter concepts'}. Make questions TOUGH — test deep understanding. Return ONLY a JSON array, no other text:
 [{"q":"question","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"brief explanation"}]`}]})});
     const d=await r.json();let raw=d.content?.[0]?.text||'[]';
-    raw=raw.replace(/```json|```/g,'').trim();
+    raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
     S.examQs=JSON.parse(raw);
   }catch(e){S.examQs=fallbackQs();}
   startTimer();renderExamQ();
@@ -3841,8 +3977,15 @@ function obGoToSlide(idx){
     if(waitSecs)waitSecs.textContent=OB.secs;
     if(OB.secs<=0){
       clearInterval(OB.timer);
-      if(nextBtn){nextBtn.disabled=false;nextBtn.style.background='var(--gold)';nextBtn.style.color='var(--blue-dark)';nextBtn.style.cursor='pointer';}
-      if(waitMsg)waitMsg.innerHTML='<span style="color:#ffd600;font-weight:700;">✅ Tap Next!</span>';
+      // AUTO go to next slide
+      if(idx>=OB.totalSlides-1){
+        const sb=document.getElementById('ob-start-btn');
+        if(sb)sb.style.display='block';
+        setTimeout(()=>closeOnboarding(),2000);
+      } else {
+        OB.slide=idx+1;
+        obGoToSlide(OB.slide);
+      }
     }
   },1000);
   speakOBSlide(idx);
@@ -3915,7 +4058,7 @@ Return ONLY a JSON array:
 [{"q":"question text","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"why this is correct","marks":1}]`}]})});
     const d = await r.json();
     let raw = d.content?.[0]?.text||'[]';
-    raw = raw.replace(/```json|```/g,'').trim();
+    raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
     IE.questions = JSON.parse(raw);
   }catch(e){
     IE.questions = Array(10).fill(null).map((_,i)=>({
@@ -4707,7 +4850,7 @@ Return ONLY this JSON:
         messages:[{role:'user',content:prompt}]})});
     const d = await r.json();
     let raw = d.content?.[0]?.text||'{}';
-    raw = raw.replace(/```json|```/g,'').trim();
+    raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
     const paperData = JSON.parse(raw);
 
     buildExamPaperHTML(paperData, paper.subject, paper.chapters, {
@@ -4804,7 +4947,7 @@ Make questions exam-realistic and curriculum-appropriate. Return ONLY JSON.`;
         messages:[{role:'user',content:prompt}]})});
     const d = await r.json();
     let raw = d.content?.[0]?.text||'{}';
-    raw = raw.replace(/```json|```/g,'').trim();
+    raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
     const paper = JSON.parse(raw);
 
     // Generate the printable HTML
