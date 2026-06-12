@@ -526,8 +526,7 @@ app.get('/api/subscription/:id', async (req, res) => {
 app.post('/api/ai', async (req, res) => {
   try {
     if (!process.env.ANTHROPIC_API_KEY) {
-      console.error('❌ ANTHROPIC_API_KEY not set!');
-      return res.status(500).json({ error: { message: 'API key not configured on server' } });
+      return res.status(500).json({ error: { message: 'API key not configured' } });
     }
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -542,8 +541,65 @@ app.post('/api/ai', async (req, res) => {
     if (data.error) console.error('Anthropic error:', data.error);
     res.json(data);
   } catch (e) {
-    console.error('AI proxy error:', e);
     res.status(500).json({ error: { message: 'AI service error: ' + e.message } });
+  }
+});
+
+// STREAMING AI — words appear as typed
+app.post('/api/ai/stream', async (req, res) => {
+  try {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return res.status(500).json({ error: 'API key not configured' });
+    }
+    // Set streaming headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    const body = { ...req.body, stream: true };
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify(body)
+    });
+
+    // Pipe the stream back to client
+    let fullText = '';
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n');
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6);
+          if (data === '[DONE]') continue;
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
+              fullText += parsed.delta.text;
+              res.write(`data: ${JSON.stringify({ text: parsed.delta.text })}\n\n`);
+            }
+            if (parsed.type === 'message_stop') {
+              res.write(`data: ${JSON.stringify({ done: true, full: fullText })}\n\n`);
+            }
+          } catch(e) {}
+        }
+      }
+    }
+    res.end();
+  } catch (e) {
+    console.error('Stream error:', e);
+    res.write(`data: ${JSON.stringify({ error: e.message })}\n\n`);
+    res.end();
   }
 });
 
