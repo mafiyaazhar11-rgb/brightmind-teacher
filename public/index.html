@@ -556,64 +556,51 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 
 <!-- ══ SPLASH ══ -->
 <div id="splash" class="screen active">
-  <!-- Books with thumbs up logo -->
+  <!-- BrightMind Logo — Books with Star -->
   <div style="animation:iconPop .6s .2s both cubic-bezier(.34,1.56,.64,1);margin-bottom:10px;">
-    <svg width="130" height="130" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
+    <svg width="130" height="120" viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
 
       <!-- SHADOW -->
-      <ellipse cx="65" cy="126" rx="38" ry="6" fill="rgba(0,0,0,.15)"/>
+      <ellipse cx="65" cy="117" rx="42" ry="6" fill="rgba(0,0,0,.2)"/>
 
-      <!-- BOOK 3 (back left) — green -->
-      <rect x="10" y="40" width="32" height="72" rx="4" fill="#388e3c"/>
-      <rect x="10" y="40" width="6" height="72" rx="2" fill="#2e7d32"/>
-      <rect x="12" y="52" width="22" height="2" rx="1" fill="rgba(255,255,255,.4)"/>
-      <rect x="12" y="57" width="18" height="2" rx="1" fill="rgba(255,255,255,.3)"/>
-      <rect x="12" y="62" width="20" height="2" rx="1" fill="rgba(255,255,255,.3)"/>
+      <!-- BOOK 3 — back left — green -->
+      <rect x="6" y="38" width="34" height="70" rx="5" fill="#2e7d32"/>
+      <rect x="6" y="38" width="7" height="70" rx="3" fill="#1b5e20"/>
+      <rect x="16" y="50" width="18" height="2.5" rx="1.2" fill="rgba(255,255,255,.45)"/>
+      <rect x="16" y="56" width="14" height="2" rx="1" fill="rgba(255,255,255,.3)"/>
+      <rect x="16" y="61" width="16" height="2" rx="1" fill="rgba(255,255,255,.25)"/>
 
-      <!-- BOOK 2 (middle) — blue -->
-      <rect x="30" y="28" width="36" height="82" rx="4" fill="#1565c0"/>
-      <rect x="30" y="28" width="7" height="82" rx="2" fill="#0d47a1"/>
-      <!-- book title lines -->
-      <rect x="34" y="42" width="24" height="3" rx="1.5" fill="rgba(255,255,255,.5)"/>
-      <rect x="34" y="49" width="20" height="2" rx="1" fill="rgba(255,255,255,.35)"/>
-      <rect x="34" y="54" width="22" height="2" rx="1" fill="rgba(255,255,255,.3)"/>
-      <rect x="34" y="59" width="18" height="2" rx="1" fill="rgba(255,255,255,.25)"/>
-      <!-- gold star on book -->
-      <polygon points="52,72 54,67 56,72 61,72 57,75 59,80 54,77 49,80 51,75 47,72" fill="#ffd600"/>
+      <!-- BOOK 2 — middle — blue (tallest) -->
+      <rect x="30" y="22" width="40" height="86" rx="5" fill="#1565c0"/>
+      <rect x="30" y="22" width="8" height="86" rx="3" fill="#0d47a1"/>
+      <rect x="40" y="36" width="22" height="3" rx="1.5" fill="rgba(255,255,255,.55)"/>
+      <rect x="40" y="43" width="18" height="2" rx="1" fill="rgba(255,255,255,.35)"/>
+      <rect x="40" y="48" width="20" height="2" rx="1" fill="rgba(255,255,255,.3)"/>
+      <rect x="40" y="53" width="16" height="2" rx="1" fill="rgba(255,255,255,.25)"/>
 
-      <!-- BOOK 1 (front right) — red -->
-      <rect x="58" y="35" width="34" height="76" rx="4" fill="#c62828"/>
-      <rect x="58" y="35" width="7" height="76" rx="2" fill="#b71c1c"/>
-      <rect x="62" y="48" width="22" height="3" rx="1.5" fill="rgba(255,255,255,.5)"/>
-      <rect x="62" y="55" width="18" height="2" rx="1" fill="rgba(255,255,255,.35)"/>
-      <rect x="62" y="60" width="20" height="2" rx="1" fill="rgba(255,255,255,.3)"/>
-      <rect x="62" y="65" width="16" height="2" rx="1" fill="rgba(255,255,255,.25)"/>
+      <!-- BOOK 1 — front right — red -->
+      <rect x="60" y="30" width="36" height="78" rx="5" fill="#c62828"/>
+      <rect x="60" y="30" width="8" height="78" rx="3" fill="#b71c1c"/>
+      <rect x="70" y="44" width="18" height="3" rx="1.5" fill="rgba(255,255,255,.55)"/>
+      <rect x="70" y="51" width="15" height="2" rx="1" fill="rgba(255,255,255,.35)"/>
+      <rect x="70" y="56" width="17" height="2" rx="1" fill="rgba(255,255,255,.3)"/>
+      <rect x="70" y="61" width="13" height="2" rx="1" fill="rgba(255,255,255,.25)"/>
 
-      <!-- THUMBS UP — gold, bold, right side -->
-      <g transform="translate(82,22)">
-        <!-- Wrist/palm -->
-        <rect x="4" y="24" width="26" height="22" rx="6" fill="#ffd600"/>
-        <!-- Thumb up -->
-        <path d="M 14 24 L 14 8 Q 14 2 20 2 Q 26 2 26 8 L 26 24 Z" fill="#ffd600"/>
-        <!-- Thumb tip rounded -->
-        <ellipse cx="20" cy="2" rx="6" ry="4" fill="#ffd600"/>
-        <!-- Fingers folded (3 lines) -->
-        <line x1="4" y1="30" x2="30" y2="30" stroke="#ff8f00" stroke-width="1.5"/>
-        <line x1="4" y1="36" x2="30" y2="36" stroke="#ff8f00" stroke-width="1.5"/>
-        <!-- Thumb outline for depth -->
-        <path d="M 14 24 L 14 8 Q 14 2 20 2 Q 26 2 26 8 L 26 24" fill="none" stroke="#ff8f00" stroke-width="1.5" stroke-linecap="round"/>
-        <!-- Shine on thumb -->
-        <ellipse cx="18" cy="8" rx="3" ry="5" fill="rgba(255,255,255,.3)"/>
-        <!-- Shadow under thumb -->
-        <rect x="4" y="44" width="26" height="4" rx="2" fill="#ff8f00" opacity=".4"/>
+      <!-- GOLD STAR — floating top right, proper 5-point star -->
+      <g transform="translate(88, 8)">
+        <polygon points="18,0 22,13 36,13 25,21 29,34 18,26 7,34 11,21 0,13 14,13"
+          fill="#ffd600" stroke="#ff8f00" stroke-width="1.5" stroke-linejoin="round"/>
+        <!-- Star shine -->
+        <ellipse cx="14" cy="12" rx="5" ry="4" fill="rgba(255,255,255,.3)" transform="rotate(-20,14,12)"/>
       </g>
 
-      <!-- GOLD sparkles around -->
-      <text x="4" y="28" font-size="14" fill="#ffd600" opacity=".9">✦</text>
-      <text x="110" y="75" font-size="10" fill="#ffd600" opacity=".7">✦</text>
-      <text x="6" y="95" font-size="9" fill="rgba(255,255,255,.6)">★</text>
-      <text x="105" y="42" font-size="8" fill="rgba(255,255,255,.5)">★</text>
-      <text x="50" y="18" font-size="10" fill="#ffd600" opacity=".6">✦</text>
+      <!-- Small sparkles -->
+      <circle cx="8" cy="22" r="3" fill="#ffd600" opacity=".8"/>
+      <circle cx="4" cy="30" r="1.8" fill="#ffd600" opacity=".5"/>
+      <circle cx="14" cy="16" r="1.5" fill="#fff" opacity=".6"/>
+      <circle cx="120" cy="55" r="2.5" fill="#ffd600" opacity=".6"/>
+      <circle cx="125" cy="45" r="1.5" fill="#fff" opacity=".5"/>
+
     </svg>
   </div>
 
@@ -698,7 +685,15 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
         </select>
       </div>
       <div class="fg"><label>Class</label>
-        <select id="rc"><option value="">Select Class</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
+        <select id="rc" onchange="toggleStreamField(this.value)"><option value="">Select Class</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
+      </div>
+      <div class="fg" id="stream-field" style="display:none;">
+        <label>Stream</label>
+        <select id="rstream">
+          <option value="science">🔬 Science (Physics, Chemistry, Maths, Bio)</option>
+          <option value="commerce">💰 Commerce (Accountancy, Business, Economics)</option>
+          <option value="arts">🏛️ Arts (History, Geography, Political Science)</option>
+        </select>
       </div>
       <div class="fg"><label>State</label>
         <select id="rs"><option value="">Select State</option><option>Tamil Nadu</option><option>Maharashtra</option><option>Karnataka</option><option>Kerala</option><option>Uttar Pradesh</option><option>Rajasthan</option><option>Gujarat</option><option>West Bengal</option><option>Andhra Pradesh</option><option>Telangana</option><option>Delhi</option><option>Punjab</option><option>Haryana</option><option>Bihar</option><option>Madhya Pradesh</option><option>Other</option></select>
@@ -1656,86 +1651,53 @@ async function apiGet(endpoint) {
 
 // Dynamic subjects based on class
 function getSubjectsForClass(cls, board){
-  const c = parseInt(cls)||11;
-
-  // Class 9 & 10 — Core subjects
+  const c=parseInt(cls)||11;
   if(c<=10){
-    const base = [
-      {id:'math',      name:'Mathematics',    icon:'📐', qs:['Explain quadratic equations','What is Pythagoras theorem?','Explain trigonometry basics','How to solve linear equations?']},
-      {id:'science',   name:'Science',         icon:'🔬', qs:['What is photosynthesis?','Explain Newton laws','What is an atom?','Explain chemical reactions']},
-      {id:'english',   name:'English',         icon:'📖', qs:['How to write an essay?','Active and passive voice','Reading comprehension tips','Letter writing format']},
-      {id:'socialsc',  name:'Social Science',  icon:'🌍', qs:['What is democracy?','Explain the French Revolution','What are natural resources?','Explain globalisation']},
+    const base=[
+      {id:'math',name:'Mathematics',icon:'📐',qs:['Explain quadratic equations','Pythagoras theorem','Trigonometry basics','Linear equations']},
+      {id:'science',name:'Science',icon:'🔬',qs:['What is photosynthesis?','Explain Newton laws','What is an atom?','Chemical reactions']},
+      {id:'english',name:'English',icon:'📖',qs:['How to write an essay?','Active and passive voice','Reading comprehension','Letter writing']},
+      {id:'socialsc',name:'Social Science',icon:'🌍',qs:['What is democracy?','French Revolution','Natural resources','Globalisation']},
     ];
-    // Board-specific language subjects
-    if(board==='TN'||board==='KL'||board==='KA'||board==='AP'||board==='TS'){
-      base.push({id:'tamil',name:board==='KL'?'Malayalam':board==='KA'?'Kannada':board==='AP'||board==='TS'?'Telugu':'Tamil',icon:'📜',qs:['Explain grammar rules','How to write essay?','Poem explanation','Language practice']});
-    } else {
-      base.push({id:'hindi',name:'Hindi',icon:'📜',qs:['संज्ञा क्या है?','निबंध कैसे लिखें?','व्याकरण समझाओ','समास की परिभाषा']});
-    }
+    const langMap={TN:'Tamil',KL:'Malayalam',KA:'Kannada',AP:'Telugu',TS:'Telugu'};
+    if(langMap[board]) base.push({id:'tamil',name:langMap[board],icon:'📜',qs:['Grammar rules','Essay writing','Poem explanation','Language practice']});
+    else base.push({id:'hindi',name:'Hindi',icon:'📜',qs:['संज्ञा क्या है?','निबंध कैसे लिखें?','व्याकरण समझाओ','समास की परिभाषा']});
     return base;
   }
-
-  // Class 11 & 12 — Stream based
-  const common = [
-    {id:'english',name:'English',icon:'📖',qs:['Essay writing tips','Reading comprehension','Grammar rules','How to write report?']},
-  ];
-
-  const science = [
-    {id:'math',    name:'Mathematics', icon:'📐', qs:['What is differentiation?','Explain integration','Matrices explained','Probability basics']},
-    {id:'physics', name:'Physics',     icon:'⚛️', qs:["Newton's laws",'What is kinetic energy?','Explain wave motion','Ohm\'s Law']},
-    {id:'chem',    name:'Chemistry',   icon:'🧪', qs:['What is mole concept?','Periodic table explained','Covalent bonds','Organic chemistry basics']},
-    {id:'bio',     name:'Biology',     icon:'🌱', qs:['Explain cell division','What is photosynthesis?','DNA structure','Genetics basics']},
-    {id:'cs',      name:'Computer Science', icon:'💻', qs:['What is a function in Python?','Explain arrays','What is DBMS?','OOP concepts']},
-  ];
-
-  const commerce = [
-    {id:'accountancy', name:'Accountancy',     icon:'💰', qs:['What is journal entry?','Explain trial balance','What is depreciation?','Partnership accounts']},
-    {id:'bst',         name:'Business Studies', icon:'🏢', qs:['What is marketing?','Types of business organisations','Functions of management','What is entrepreneurship?']},
-    {id:'economics',   name:'Economics',        icon:'📊', qs:['What is GDP?','Explain supply and demand','What is inflation?','Monetary policy explained']},
-    {id:'math',        name:'Mathematics',      icon:'📐', qs:['What is differentiation?','Explain integration','Matrices explained','Statistics basics']},
-    {id:'cs',          name:'Computer Science', icon:'💻', qs:['What is a function in Python?','Explain spreadsheets','What is DBMS?','Internet and networking']},
-  ];
-
-  const arts = [
-    {id:'history',    name:'History',           icon:'🏛️', qs:['Explain colonialism','What is nationalism?','French Revolution summary','India independence movement']},
-    {id:'geography',  name:'Geography',         icon:'🗺️', qs:['What is climate change?','Explain plate tectonics','Types of soil','Water resources']},
-    {id:'polsci',     name:'Political Science',  icon:'⚖️', qs:['What is democracy?','Explain Constitution','Types of government','What are fundamental rights?']},
-    {id:'economics',  name:'Economics',          icon:'📊', qs:['What is GDP?','Explain supply and demand','What is inflation?','Development economics']},
-    {id:'sociology',  name:'Sociology',          icon:'👥', qs:['What is social stratification?','Explain culture','What is globalisation?','Social institutions']},
-    {id:'cs',         name:'Computer Science',   icon:'💻', qs:['What is a function in Python?','Explain arrays','What is DBMS?','Web development basics']},
-  ];
-
-  // Show all streams for Class 11/12 — students can pick what they study
-  const all11_12 = [
-    ...common,
-    ...science.filter(s=>s.id!=='english'),
-    {id:'accountancy',name:'Accountancy',icon:'💰',qs:['What is journal entry?','Explain trial balance','What is depreciation?','Partnership accounts']},
-    {id:'bst',name:'Business Studies',icon:'🏢',qs:['What is marketing?','Types of business','Functions of management','Entrepreneurship']},
-    {id:'economics',name:'Economics',icon:'📊',qs:['What is GDP?','Supply and demand','Inflation explained','Monetary policy']},
-    {id:'history',name:'History',icon:'🏛️',qs:['Colonialism explained','Nationalism in India','French Revolution','World War history']},
-    {id:'geography',name:'Geography',icon:'🗺️',qs:['Climate change','Plate tectonics','Water resources','Population geography']},
-    {id:'polsci',name:'Political Science',icon:'⚖️',qs:['What is democracy?','Indian Constitution','Fundamental rights','Types of government']},
-  ];
-
-  return all11_12;
+  const stream=S.user?.stream||'science';
+  const eng={id:'english',name:'English',icon:'📖',qs:['Essay writing','Reading comprehension','Grammar rules','Report writing']};
+  const langMap={TN:'Tamil',KL:'Malayalam',KA:'Kannada',AP:'Telugu',TS:'Telugu'};
+  const langName=langMap[board];
+  const langSub=langName?{id:'tamil',name:langName,icon:'📜',qs:['Grammar','Poetry','Essay','Comprehension']}:null;
+  let subs=[];
+  if(stream==='science'){
+    subs=[eng,
+      {id:'math',name:'Mathematics',icon:'📐',qs:['Differentiation','Integration','Matrices','Probability']},
+      {id:'physics',name:'Physics',icon:'⚛️',qs:["Newton's laws",'Kinetic energy','Wave motion',"Ohm's Law"]},
+      {id:'chem',name:'Chemistry',icon:'🧪',qs:['Mole concept','Periodic table','Covalent bonds','Organic chemistry']},
+      {id:'bio',name:'Biology',icon:'🌱',qs:['Cell division','Photosynthesis','DNA structure','Genetics']},
+      {id:'cs',name:'Computer Science',icon:'💻',qs:['Python functions','Arrays','DBMS','OOP concepts']},
+    ];
+  }else if(stream==='commerce'){
+    subs=[eng,
+      {id:'math',name:'Mathematics',icon:'📐',qs:['Statistics','Differentiation','Matrices','Probability']},
+      {id:'accountancy',name:'Accountancy',icon:'💰',qs:['Journal entry','Trial balance','Depreciation','Partnership']},
+      {id:'bst',name:'Business Studies',icon:'🏢',qs:['Marketing','Types of business','Management','Entrepreneurship']},
+      {id:'economics',name:'Economics',icon:'📊',qs:['GDP','Supply and demand','Inflation','Monetary policy']},
+      {id:'cs',name:'Computer Science',icon:'💻',qs:['Spreadsheets','DBMS','Internet','Python basics']},
+    ];
+  }else{
+    subs=[eng,
+      {id:'history',name:'History',icon:'🏛️',qs:['Colonialism','Nationalism','French Revolution','World War']},
+      {id:'geography',name:'Geography',icon:'🗺️',qs:['Climate change','Plate tectonics','Water resources','Population']},
+      {id:'polsci',name:'Political Science',icon:'⚖️',qs:['Democracy','Constitution','Fundamental rights','Government types']},
+      {id:'economics',name:'Economics',icon:'📊',qs:['GDP','Supply demand','Inflation','Development']},
+      {id:'sociology',name:'Sociology',icon:'👥',qs:['Social stratification','Culture','Globalisation','Social institutions']},
+    ];
+  }
+  if(langSub) subs.push(langSub);
+  return subs;
 }
-
-const SUBJECTS_STATIC=[
-  {id:'math',      name:'Mathematics',    icon:'📐', qs:['Explain quadratic equations','What is differentiation?','Explain trigonometry','Sets and functions']},
-  {id:'physics',   name:'Physics',        icon:'⚛️', qs:["Newton's laws of motion",'What is kinetic energy?','Explain wave motion',"Ohm's Law explained"]},
-  {id:'chem',      name:'Chemistry',      icon:'🧪', qs:['What is mole concept?','Explain periodic table','Covalent bonds explained','What is oxidation?']},
-  {id:'bio',       name:'Biology',        icon:'🌱', qs:['Explain cell division','What is photosynthesis?','DNA structure explained','What is osmosis?']},
-  {id:'english',   name:'English',        icon:'📖', qs:['How to write an essay?','Active and passive voice','What is a metaphor?','Grammar tips']},
-  {id:'hindi',     name:'Hindi',          icon:'📜', qs:['संज्ञा क्या है?','क्रिया के भेद बताओ','निबंध कैसे लिखें?','समास की परिभाषा']},
-  {id:'socialsc',  name:'Social Science', icon:'🌍', qs:['What is democracy?','French Revolution','Natural resources','Globalisation']},
-  {id:'cs',        name:'Computer Science',icon:'💻',qs:['Python functions','What are arrays?','DBMS explained','OOP concepts']},
-  {id:'accountancy',name:'Accountancy',  icon:'💰', qs:['Journal entry','Trial balance','Depreciation','Partnership accounts']},
-  {id:'bst',       name:'Business Studies',icon:'🏢',qs:['What is marketing?','Types of business','Management functions','Entrepreneurship']},
-  {id:'economics', name:'Economics',     icon:'📊', qs:['What is GDP?','Supply and demand','Inflation','Monetary policy']},
-  {id:'history',   name:'History',       icon:'🏛️', qs:['Colonialism','Nationalism in India','French Revolution','World War']},
-  {id:'geography', name:'Geography',     icon:'🗺️', qs:['Climate change','Plate tectonics','Water resources','Population']},
-  {id:'polsci',    name:'Political Science',icon:'⚖️',qs:['Democracy','Indian Constitution','Fundamental rights','Government types']},
-];
 
 // Get SUBJECTS dynamically based on current student
 function getSubjects(){
@@ -2002,6 +1964,11 @@ async function doResetPassword(){
     alert(res.msg||'Reset failed. Please check your name and try again.');
   }
 }
+function toggleStreamField(cls){
+  const sf=document.getElementById('stream-field');
+  if(sf)sf.style.display=(cls==='11'||cls==='12')?'block':'none';
+}
+
 async function doRegister(){
   const n=document.getElementById('rn').value.trim(),
         email=document.getElementById('remail').value.trim(),
@@ -2258,7 +2225,8 @@ let SYL={board:'',cls:'',subject:'',chapter:'',topic:'',step:1};
 function openSubject(id){
   // Open syllabus selector instead of direct chat
   SYL={board:S.user?.board||'CBSE',cls:S.user?.class||'11',subject:'',chapter:'',topic:'',step:1};
-  const sub=SUBJECTS_STATIC.find(s=>s.id===id)||{id,name:id,icon:'📚',qs:[]};
+  const _dynSubs=getSubjectsForClass(S.user?.class||11,S.user?.board||'CBSE');
+  const sub=_dynSubs.find(s=>s.id===id)||SUBJECTS_STATIC.find(s=>s.id===id)||{id,name:id,icon:'📚',qs:[]};
   if(sub){SYL.subject=sub.name;}
   if(!S.isPaid&&S.qToday>=S.freeLimit){showModal('sub-modal');return;}
   document.getElementById('syllabus-overlay').classList.add('open');
