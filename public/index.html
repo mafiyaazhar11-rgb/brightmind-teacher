@@ -18,17 +18,17 @@ html,body{height:100%;overflow:hidden;}
 body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16px;}
 
 /* ── SCREENS ── */
-.screen{display:none;height:100vh;overflow:hidden;}
+.screen{display:none;height:100vh;overflow:hidden;}.screen#splash{overflow-y:auto !important;}
 .screen.active{display:flex;flex-direction:column;}
 
 /* ══ SPLASH ══ */
-#splash{background:linear-gradient(160deg,#0ea5e9 0%,#0284c7 40%,#0369a1 100%);align-items:center;justify-content:center;flex-direction:column;}
+#splash{background:linear-gradient(160deg,#0ea5e9 0%,#0284c7 40%,#0369a1 100%);align-items:center;justify-content:center;flex-direction:column;overflow-y:auto !important;padding:20px 16px 40px;}
 .splash-icon{width:100px;height:100px;background:var(--gold);border-radius:26px;display:flex;align-items:center;justify-content:center;font-size:52px;margin-bottom:22px;box-shadow:var(--shadow-gold);animation:iconPop .6s .3s both cubic-bezier(.34,1.56,.64,1);}
 .splash-title{font-size:34px;font-weight:900;color:#fff;text-align:center;line-height:1.1;animation:fadeUp .7s .1s both;}
 .splash-title span{color:var(--gold);}
 .splash-tag{font-size:14px;color:rgba(255,255,255,.7);margin-top:10px;text-align:center;animation:fadeUp .7s .2s both;}
 .splash-langs{display:flex;gap:10px;margin-top:16px;animation:fadeUp .7s .3s both;}
-.lang-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;cursor:pointer;transition:all .2s;}
+.lang-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:12px;font-weight:600;padding:5px 14px;border-radius:20px;cursor:pointer;transition:all .2s;position:relative;z-index:2;-webkit-tap-highlight-color:rgba(0,0,0,.1);}
 .splash-btn{margin-top:48px;background:var(--gold);color:var(--blue-dark);font-size:17px;font-weight:800;padding:17px 56px;border-radius:50px;border:none;cursor:pointer;box-shadow:var(--shadow-gold);animation:fadeUp .7s .5s both;active:scale(.97);}
 .splash-login{margin-top:14px;color:rgba(255,255,255,.5);font-size:13px;cursor:pointer;animation:fadeUp .7s .6s both;}
 .splash-login:hover{color:var(--gold);}
@@ -508,7 +508,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 .ob-screenshot{width:100%;background:rgba(255,255,255,.08);border-radius:16px;border:1px solid rgba(255,255,255,.15);overflow:hidden;}
 .ob-fact{width:100%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 14px;font-size:12px;color:#fff;font-weight:600;text-align:center;line-height:1.5;}
 #blackboard-overlay{display:none;position:fixed;inset:0;z-index:65;flex-direction:column;background:#1a1a2e;}
-#blackboard-overlay.open{display:flex;}
+/* blackboard open state controlled via JS */
 .bb-hdr{background:#0d0d1a;padding:0 14px;height:52px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.1);}
 .bb-title{font-size:14px;font-weight:700;color:#fff;flex:1;}
 .bb-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:22px;cursor:pointer;}
@@ -2537,44 +2537,41 @@ async function sendToBlackboard(){
     </div>`;
   canvas.scrollTop=0;
 
+  const langInstruct={en:'Explain in simple friendly English.',ta:'தமிழில் எளிமையாக விளக்கவும். தமிழிலேயே பதில் சொல்லவும்.',hi:'सरल हिंदी में समझाएं।',ml:'ലളിതമായ മലയാളത്തിൽ വിശദീകരിക്കുക.',kn:'ಸರಳ ಕನ್ನಡದಲ್ಲಿ ವಿವರಿಸಿ.',te:'సరళమైన తెలుగులో వివరించండి.'}[S.lang||'en'];
+
   const modePrompts={
-    solve:`Break this problem into clear numbered steps. Write EXACTLY like a teacher at a blackboard.
-Format your response as JSON array:
-[
-  {"step": 1, "title": "UNDERSTAND THE PROBLEM", "content": "What we are given and what we need to find", "speak": "First let us understand what we need to solve"},
-  {"step": 2, "title": "STEP NAME", "content": "The working for this step", "speak": "What teacher says out loud for this step"},
-  ...
-  {"step": N, "title": "FINAL ANSWER ✓", "content": "The complete answer clearly stated", "speak": "The final answer is..."}
-]
-Return ONLY the JSON array. No other text.`,
-    explain:`Explain this concept step by step like a teacher at a blackboard for Class ${S.user?.class||11}.
-Format as JSON array:
-[
-  {"step": 1, "title": "WHAT IS IT?", "content": "Simple definition", "speak": "..."},
-  {"step": 2, "title": "KEY CONCEPT", "content": "Main idea", "speak": "..."},
-  ...
-]
-Return ONLY the JSON array.`,
-    formula:`List formulas for this topic for Class ${S.user?.class||11} as JSON:
-[
-  {"step": 1, "title": "FORMULA NAME", "content": "Formula and what each variable means", "speak": "..."},
-  ...
-]
-Return ONLY JSON array.`,
-    example:`Show a worked example for Class ${S.user?.class||11} as JSON:
-[
-  {"step": 1, "title": "GIVEN", "content": "What is given in the problem", "speak": "..."},
-  ...
-  {"step": N, "title": "ANSWER ✓", "content": "Final answer", "speak": "..."}
-]
-Return ONLY JSON array.`,
-    diagram:`Explain with ASCII diagram for Class ${S.user?.class||11} as JSON:
-[
-  {"step": 1, "title": "THE DIAGRAM", "content": "ASCII art diagram", "speak": "Let me draw this for you"},
-  {"step": 2, "title": "LABEL A", "content": "Explanation of part A", "speak": "..."},
-  ...
-]
-Return ONLY JSON array.`
+    solve:`You are Miss BrightMind, a warm friendly Indian teacher. Solve this on the blackboard.
+STYLE: Talk like a REAL teacher NOT a textbook. Use simple words. Add encouragement. Use real-life examples. Warn about common mistakes kindly. ${langInstruct}
+Return ONLY JSON array:
+[{"step":1,"title":"WHAT ARE WE DOING?","content":"Hey! So we have this problem. Let me tell you what we need to do first — [friendly explanation]","speak":"friendly spoken version"},
+{"step":2,"title":"STEP NAME","content":"Now here is the trick! Think of it like this — [simple analogy]. So we do: [working]","speak":"..."},
+{"step":N,"title":"🎉 ANSWER!","content":"And that is our answer! See? Not so hard once you know the steps! Answer: [final answer]","speak":"..."}]
+Return ONLY JSON.`,
+    explain:`You are Miss BrightMind explaining a concept warmly.
+STYLE: Start with a REAL LIFE EXAMPLE first. Use Indian daily life analogies — cricket, cooking, market. Make it a story not a lecture. ${langInstruct}
+Return ONLY JSON array:
+[{"step":1,"title":"REAL LIFE FIRST!","content":"Before theory — you see this in real life when [relatable example]...","speak":"..."},
+{"step":2,"title":"WHAT IS IT?","content":"So in simple words: [plain explanation without jargon]","speak":"..."},
+{"step":3,"title":"THE KEY IDEA","content":"Main thing to remember: [key point]. Memory trick: [easy trick]","speak":"..."},
+{"step":N,"title":"✅ YOU GOT IT!","content":"So to sum up — [summary]. You now understand this better than students who just memorise!","speak":"..."}]
+Return ONLY JSON.`,
+    formula:`You are Miss BrightMind explaining formulas in a friendly way.
+STYLE: For EACH formula — plain words meaning, memory trick, one simple number example. ${langInstruct}
+Return ONLY JSON array:
+[{"step":1,"title":"FORMULA NAME","content":"The formula: [formula]. Plain meaning: [simple explanation]. Memory trick: [trick]. Example: [numbers]","speak":"..."}]
+Return ONLY JSON.`,
+    example:`You are Miss BrightMind doing a worked example — think out loud like a teacher.
+STYLE: Think aloud at every step. Show working clearly. Point out common mistakes. Celebrate at end. ${langInstruct}
+Return ONLY JSON array:
+[{"step":1,"title":"READ THE QUESTION","content":"Okay! Let us read this carefully. We are given [values]. We need to find [goal]. Let me think...","speak":"..."},
+{"step":N,"title":"🎊 WE GOT IT!","content":"Answer: [answer]. Does this make sense? [verify]. Excellent — well done!","speak":"..."}]
+Return ONLY JSON.`,
+    diagram:`You are Miss BrightMind drawing and explaining a diagram.
+STYLE: Draw ASCII diagram first. Then explain each part like pointing with chalk. Use arrows. ${langInstruct}
+Return ONLY JSON array:
+[{"step":1,"title":"LET ME DRAW THIS!","content":"Watch the board class! [ASCII diagram with labels]","speak":"Let me draw this for you"},
+{"step":2,"title":"THIS PART HERE","content":"See this part? [points to diagram] This is [explanation]","speak":"..."}]
+Return ONLY JSON.`
   };
 
   try{
