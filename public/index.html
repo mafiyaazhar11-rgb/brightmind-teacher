@@ -18,11 +18,11 @@ html,body{height:100%;overflow:hidden;}
 body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16px;}
 
 /* ── SCREENS ── */
-.screen{display:none;height:100vh;overflow:hidden;}
-.screen.active{display:flex;flex-direction:column;}
+.screen{display:none;height:100vh;height:100dvh;overflow:hidden;}
+.screen.active{display:flex;flex-direction:column;height:100vh;height:100dvh;}
 
 /* ══ SPLASH ══ */
-#splash{background:#030820;align-items:center;justify-content:center;flex-direction:column;overflow:hidden;padding:12px 0;position:relative;}
+#splash{background:#030d5a;align-items:center;justify-content:center;flex-direction:column;overflow:hidden;padding:12px 0;position:relative;}
 .splash-icon{width:100px;height:100px;background:var(--gold);border-radius:26px;display:flex;align-items:center;justify-content:center;font-size:52px;margin-bottom:22px;box-shadow:var(--shadow-gold);animation:iconPop .6s .3s both cubic-bezier(.34,1.56,.64,1);}
 .splash-title{font-size:34px;font-weight:900;color:#fff;text-align:center;line-height:1.1;animation:fadeUp .7s .1s both;}
 .splash-title span{color:var(--gold);}
@@ -74,7 +74,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 .page.active{display:block;}
 
 /* BOTTOM NAV */
-.bottomnav{background:rgba(3,8,32,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.1);display:flex;height:60px;flex-shrink:0;box-shadow:0 -4px 24px rgba(0,0,0,0.5);}
+.bottomnav{background:rgba(3,8,32,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.1);display:flex;height:60px;min-height:60px;flex-shrink:0;box-shadow:0 -4px 24px rgba(0,0,0,0.5);}
 .btab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border:none;background:none;color:rgba(255,255,255,0.4);font-size:10px;font-weight:600;transition:all .2s;padding:0;}
 .btab .ti{font-size:22px;transition:transform .2s;}
 .btab.active{color:#ffd600;}
@@ -99,7 +99,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 .subj-prog{margin-top:7px;height:4px;background:var(--gray-mid);border-radius:4px;overflow:hidden;}
 .subj-prog-fill{height:100%;background:var(--gold);border-radius:4px;}
 .subj-stars{font-size:11px;margin-top:5px;color:var(--gold-dark);}
-.upgrade-banner{background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:16px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;cursor:pointer;box-shadow:var(--shadow-gold);}
+.upgrade-banner{background:linear-gradient(135deg,#ffd600,#ff8f00,#ffd600);background-size:200%;animation:goldShimmer 3s ease infinite;border-radius:16px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;cursor:pointer;box-shadow:0 4px 24px rgba(255,214,0,0.35);}
 .ub-left .t{font-size:15px;font-weight:800;color:var(--blue-dark);}
 .ub-left .s{font-size:11px;color:var(--blue-mid);margin-top:2px;}
 .ub-price{font-size:22px;font-weight:900;color:var(--blue-dark);}
@@ -556,83 +556,122 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 
 <!-- ══ SPLASH ══ -->
 <div id="splash" class="screen active">
-  <!-- Books with thumbs up logo -->
-  <div style="animation:iconPop .6s .2s both cubic-bezier(.34,1.56,.64,1);margin-bottom:10px;">
-    <svg width="130" height="130" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
 
-      <!-- SHADOW -->
-      <ellipse cx="65" cy="126" rx="38" ry="6" fill="rgba(0,0,0,.15)"/>
-
-      <!-- BOOK 3 (back left) — green -->
-      <rect x="10" y="40" width="32" height="72" rx="4" fill="#388e3c"/>
-      <rect x="10" y="40" width="6" height="72" rx="2" fill="#2e7d32"/>
-      <rect x="12" y="52" width="22" height="2" rx="1" fill="rgba(255,255,255,.4)"/>
-      <rect x="12" y="57" width="18" height="2" rx="1" fill="rgba(255,255,255,.3)"/>
-      <rect x="12" y="62" width="20" height="2" rx="1" fill="rgba(255,255,255,.3)"/>
-
-      <!-- BOOK 2 (middle) — blue -->
-      <rect x="30" y="28" width="36" height="82" rx="4" fill="#1565c0"/>
-      <rect x="30" y="28" width="7" height="82" rx="2" fill="#0d47a1"/>
-      <!-- book title lines -->
-      <rect x="34" y="42" width="24" height="3" rx="1.5" fill="rgba(255,255,255,.5)"/>
-      <rect x="34" y="49" width="20" height="2" rx="1" fill="rgba(255,255,255,.35)"/>
-      <rect x="34" y="54" width="22" height="2" rx="1" fill="rgba(255,255,255,.3)"/>
-      <rect x="34" y="59" width="18" height="2" rx="1" fill="rgba(255,255,255,.25)"/>
-      <!-- gold star on book -->
-      <polygon points="52,72 54,67 56,72 61,72 57,75 59,80 54,77 49,80 51,75 47,72" fill="#ffd600"/>
-
-      <!-- BOOK 1 (front right) — red -->
-      <rect x="58" y="35" width="34" height="76" rx="4" fill="#c62828"/>
-      <rect x="58" y="35" width="7" height="76" rx="2" fill="#b71c1c"/>
-      <rect x="62" y="48" width="22" height="3" rx="1.5" fill="rgba(255,255,255,.5)"/>
-      <rect x="62" y="55" width="18" height="2" rx="1" fill="rgba(255,255,255,.35)"/>
-      <rect x="62" y="60" width="20" height="2" rx="1" fill="rgba(255,255,255,.3)"/>
-      <rect x="62" y="65" width="16" height="2" rx="1" fill="rgba(255,255,255,.25)"/>
-
-      <!-- THUMBS UP — gold, bold, right side -->
-      <g transform="translate(82,22)">
-        <!-- Wrist/palm -->
-        <rect x="4" y="24" width="26" height="22" rx="6" fill="#ffd600"/>
-        <!-- Thumb up -->
-        <path d="M 14 24 L 14 8 Q 14 2 20 2 Q 26 2 26 8 L 26 24 Z" fill="#ffd600"/>
-        <!-- Thumb tip rounded -->
-        <ellipse cx="20" cy="2" rx="6" ry="4" fill="#ffd600"/>
-        <!-- Fingers folded (3 lines) -->
-        <line x1="4" y1="30" x2="30" y2="30" stroke="#ff8f00" stroke-width="1.5"/>
-        <line x1="4" y1="36" x2="30" y2="36" stroke="#ff8f00" stroke-width="1.5"/>
-        <!-- Thumb outline for depth -->
-        <path d="M 14 24 L 14 8 Q 14 2 20 2 Q 26 2 26 8 L 26 24" fill="none" stroke="#ff8f00" stroke-width="1.5" stroke-linecap="round"/>
-        <!-- Shine on thumb -->
-        <ellipse cx="18" cy="8" rx="3" ry="5" fill="rgba(255,255,255,.3)"/>
-        <!-- Shadow under thumb -->
-        <rect x="4" y="44" width="26" height="4" rx="2" fill="#ff8f00" opacity=".4"/>
-      </g>
-
-      <!-- GOLD sparkles around -->
-      <text x="4" y="28" font-size="14" fill="#ffd600" opacity=".9">✦</text>
-      <text x="110" y="75" font-size="10" fill="#ffd600" opacity=".7">✦</text>
-      <text x="6" y="95" font-size="9" fill="rgba(255,255,255,.6)">★</text>
-      <text x="105" y="42" font-size="8" fill="rgba(255,255,255,.5)">★</text>
-      <text x="50" y="18" font-size="10" fill="#ffd600" opacity=".6">✦</text>
-    </svg>
+  <!-- EXACT MATCH BACKGROUND — bright electric blue -->
+  <div style="position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 30%,#1a4fff 0%,#0a2aaa 35%,#060d5a 65%,#030820 100%);overflow:hidden;">
+    <!-- Light beams -->
+    <div style="position:absolute;top:-20%;left:50%;width:600px;height:600px;background:conic-gradient(from 270deg at 50% 0%,transparent 70deg,rgba(100,160,255,0.12) 90deg,transparent 110deg);transform:translateX(-50%);"></div>
+    <div style="position:absolute;top:0;left:50%;width:3px;height:50%;background:linear-gradient(180deg,rgba(150,200,255,0.5),transparent);transform:translateX(-50%);"></div>
+    <!-- Blue floating orbs -->
+    <div style="position:absolute;left:4%;top:25%;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(80,140,255,0.6),rgba(30,80,255,0.2));box-shadow:0 0 30px rgba(80,140,255,0.4);animation:float1 6s ease-in-out infinite;"></div>
+    <div style="position:absolute;left:7%;top:60%;width:50px;height:50px;border-radius:50%;background:radial-gradient(circle,rgba(150,100,255,0.5),rgba(100,50,200,0.2));box-shadow:0 0 20px rgba(150,100,255,0.4);animation:float2 8s ease-in-out infinite;"></div>
+    <div style="position:absolute;right:4%;top:20%;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(80,140,255,0.5),rgba(30,80,255,0.15));box-shadow:0 0 25px rgba(80,140,255,0.3);animation:float3 7s ease-in-out infinite;"></div>
+    <div style="position:absolute;right:6%;top:55%;width:45px;height:45px;border-radius:50%;background:radial-gradient(circle,rgba(120,80,255,0.4),transparent);animation:float1 9s ease-in-out infinite;"></div>
+    <!-- Glass floating cards -->
+    <div style="position:absolute;left:1%;top:30%;width:68px;height:68px;border-radius:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:30px;animation:float2 9s ease-in-out infinite;backdrop-filter:blur(8px);">🎓</div>
+    <div style="position:absolute;right:1%;top:42%;width:62px;height:62px;border-radius:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:28px;animation:float1 7s ease-in-out infinite;backdrop-filter:blur(8px);">🧠</div>
   </div>
 
-  <div class="splash-title">BrightMind<br><span>Teacher</span></div>
-  <div class="splash-tag">Your AI Teacher, Always There 🎓</div>
-  <div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:16px;margin-bottom:8px;font-weight:600;letter-spacing:1px;">SELECT YOUR LANGUAGE</div>
-  <div class="splash-langs" style="flex-wrap:wrap;justify-content:center;max-width:320px;gap:8px;">
-    <span class="lang-badge" id="lang-en" onclick="setSplashLang('en',this)" style="background:rgba(255,255,255,.95);color:#0369a1;border-color:#fff;font-weight:700;">🇬🇧 English</span>
-    <span class="lang-badge" id="lang-hi" onclick="setSplashLang('hi',this)">हिंदी</span>
-    <span class="lang-badge" id="lang-ta" onclick="setSplashLang('ta',this)">தமிழ்</span>
-    <span class="lang-badge" id="lang-ml" onclick="setSplashLang('ml',this)">മലയാളം</span>
-    <span class="lang-badge" id="lang-kn" onclick="setSplashLang('kn',this)">ಕನ್ನಡ</span>
-    <span class="lang-badge" id="lang-te" onclick="setSplashLang('te',this)">తెలుగు</span>
+  <!-- MAIN GLASS CARD -->
+  <div style="position:relative;z-index:2;width:92%;max-width:520px;margin:auto;background:rgba(15,30,120,0.35);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(100,160,255,0.3);border-radius:28px;padding:32px 26px 28px;box-shadow:0 0 60px rgba(30,80,255,0.2),0 24px 64px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.15);animation:slideUp .5s ease;">
+
+    <!-- TOP GLOW LINE -->
+    <div style="position:absolute;top:0;left:15%;right:15%;height:2px;background:linear-gradient(90deg,transparent,rgba(150,200,255,0.9),transparent);border-radius:2px;"></div>
+
+    <!-- 3D BOOKS LOGO — emoji stack looks 3D -->
+    <div style="text-align:center;margin-bottom:16px;animation:iconPop .6s .2s both cubic-bezier(.34,1.56,.64,1);">
+      <div style="position:relative;display:inline-block;">
+        <!-- Glow halo -->
+        <div style="position:absolute;inset:-20px;background:radial-gradient(ellipse,rgba(100,160,255,0.35),transparent 65%);border-radius:50%;animation:breathe 3s ease-in-out infinite;"></div>
+        <!-- Books emoji — large -->
+        <div style="font-size:78px;line-height:1;position:relative;filter:drop-shadow(0 12px 24px rgba(30,80,255,0.6)) drop-shadow(0 -2px 8px rgba(200,230,255,0.3));">📚</div>
+        <!-- Sparkles -->
+        <div style="position:absolute;top:-12px;left:-10px;font-size:18px;animation:sparkle1 2s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(255,220,100,0.8));">✨</div>
+        <div style="position:absolute;top:-14px;right:-8px;font-size:16px;animation:sparkle2 2.5s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(255,220,100,0.8));">⭐</div>
+        <div style="position:absolute;bottom:-4px;right:-12px;font-size:13px;animation:sparkle1 3s ease-in-out infinite;">✦</div>
+      </div>
+    </div>
+
+    <!-- APP NAME — big bold -->
+    <div style="text-align:center;margin-bottom:6px;">
+      <div style="font-size:38px;font-weight:900;color:#fff;letter-spacing:-0.5px;line-height:1.1;text-shadow:0 0 30px rgba(100,180,255,0.5),0 2px 8px rgba(0,0,0,0.5);">BrightMind <span style="color:#ffd600;text-shadow:0 0 20px rgba(255,214,0,0.7);">Teacher</span></div>
+    </div>
+
+    <!-- TAGLINE -->
+    <div style="text-align:center;margin-bottom:22px;display:flex;align-items:center;justify-content:center;gap:10px;">
+      <div style="height:1px;width:35px;background:linear-gradient(90deg,transparent,rgba(150,200,255,0.5));"></div>
+      <div style="font-size:14px;color:rgba(200,230,255,0.8);font-weight:500;letter-spacing:0.5px;">Your AI Teacher, Always There</div>
+      <div style="height:1px;width:35px;background:linear-gradient(90deg,rgba(150,200,255,0.5),transparent);"></div>
+    </div>
+
+    <!-- LANG LABEL -->
+    <div style="text-align:center;font-size:11px;color:rgba(180,210,255,0.55);font-weight:700;letter-spacing:2px;margin-bottom:14px;">&middot; SELECT YOUR LANGUAGE &middot;</div>
+
+    <!-- LANGUAGE BUTTONS — all in one row -->
+    <div style="display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:24px;">
+      <button id="lang-en" onclick="setSplashLang('en',this)"
+        style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(150,200,255,0.6);background:rgba(100,160,255,0.2);color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);">
+        <span style="width:24px;height:24px;border-radius:50%;background:#1565c0;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">🌐</span>English
+      </button>
+      <button id="lang-hi" onclick="setSplashLang('hi',this)"
+        style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);">
+        <span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#c62828,#e53935);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">हि</span>हिंदी
+      </button>
+      <button id="lang-ta" onclick="setSplashLang('ta',this)"
+        style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);">
+        <span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#880e4f,#c2185b);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">த</span>தமிழ்
+      </button>
+      <button id="lang-ml" onclick="setSplashLang('ml',this)"
+        style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);">
+        <span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#1b5e20,#2e7d32);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">മ</span>മലയാളം
+      </button>
+      <button id="lang-kn" onclick="setSplashLang('kn',this)"
+        style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);">
+        <span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#e65100,#f57c00);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">ಕ</span>ಕನ್ನಡ
+      </button>
+      <button id="lang-te" onclick="setSplashLang('te',this)"
+        style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);">
+        <span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#4a148c,#7b1fa2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">తె</span>తెలుగు
+      </button>
+    </div>
+
+    <!-- GET STARTED BUTTON -->
+    <button onclick="go('auth')"
+      style="width:100%;padding:17px;border-radius:50px;border:none;background:linear-gradient(135deg,#1a5fff,#4488ff,#1a5fff);background-size:200%;font-size:17px;font-weight:800;color:#fff;cursor:pointer;letter-spacing:0.5px;box-shadow:0 8px 40px rgba(26,95,255,0.6),0 0 0 1px rgba(150,200,255,0.2);animation:btnGlow 3s ease-in-out infinite;">
+      Get Started 🚀
+    </button>
+
+    <!-- LOGIN LINK -->
+    <div style="text-align:center;margin-top:14px;font-size:13px;color:rgba(180,210,255,0.6);">
+      Already registered? <span onclick="go('auth')" style="color:#60a5fa;font-weight:700;cursor:pointer;text-decoration:underline;">Login</span>
+    </div>
   </div>
-  <button class="splash-btn" onclick="go('auth')" style="background:#fff;color:#0369a1;margin-top:30px;box-shadow:0 4px 20px rgba(0,0,0,.2);">Get Started 🚀</button>
-  <div class="splash-login" onclick="go('auth')" style="color:rgba(255,255,255,.65);">Already registered? Login</div>
+
+  <!-- FEATURE BAR -->
+  <div style="position:relative;z-index:2;width:92%;max-width:520px;margin:14px auto 0;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
+    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(100,160,255,0.2);border-radius:16px;padding:14px 8px;text-align:center;">
+      <div style="font-size:24px;margin-bottom:6px;filter:drop-shadow(0 0 8px rgba(100,180,255,0.8));">🤖</div>
+      <div style="font-size:11px;font-weight:800;color:#fff;">AI-Powered</div>
+      <div style="font-size:9px;color:rgba(180,210,255,0.55);margin-top:2px;">Personalized Learning</div>
+    </div>
+    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(100,200,120,0.2);border-radius:16px;padding:14px 8px;text-align:center;">
+      <div style="font-size:24px;margin-bottom:6px;filter:drop-shadow(0 0 8px rgba(100,220,100,0.8));">🛡️</div>
+      <div style="font-size:11px;font-weight:800;color:#fff;">Safe & Secure</div>
+      <div style="font-size:9px;color:rgba(180,210,255,0.55);margin-top:2px;">Data protected</div>
+    </div>
+    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,214,0,0.2);border-radius:16px;padding:14px 8px;text-align:center;">
+      <div style="font-size:24px;margin-bottom:6px;filter:drop-shadow(0 0 8px rgba(255,214,0,0.8));">📈</div>
+      <div style="font-size:11px;font-weight:800;color:#fff;">Track Progress</div>
+      <div style="font-size:9px;color:rgba(180,210,255,0.55);margin-top:2px;">Learn. Achieve.</div>
+    </div>
+    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,120,50,0.2);border-radius:16px;padding:14px 8px;text-align:center;">
+      <div style="font-size:24px;margin-bottom:6px;filter:drop-shadow(0 0 8px rgba(255,150,50,0.8));">⚡</div>
+      <div style="font-size:11px;font-weight:800;color:#fff;">Always Available</div>
+      <div style="font-size:9px;color:rgba(180,210,255,0.55);margin-top:2px;">24/7 AI Support</div>
+    </div>
+  </div>
+
 </div>
-
-<!-- ══ AUTH ══ -->
 <div id="auth" class="screen">
   <div class="auth-card">
     <div class="auth-logo"><div class="icon" style="font-size:20px;font-family:serif;font-weight:900;">B</div><div class="name">BrightMind <span>Teacher</span></div></div>
@@ -698,12 +737,13 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
         </select>
       </div>
       <div class="fg"><label>Class</label>
-        <select id="rc"><option value="">Select Class</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
+        <select id="rc" onchange="toggleStreamField(this.value)"><option value="">Select Class</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
       </div>
       <div class="fg"><label>State</label>
         <select id="rs"><option value="">Select State</option><option>Tamil Nadu</option><option>Maharashtra</option><option>Karnataka</option><option>Kerala</option><option>Uttar Pradesh</option><option>Rajasthan</option><option>Gujarat</option><option>West Bengal</option><option>Andhra Pradesh</option><option>Telangana</option><option>Delhi</option><option>Punjab</option><option>Haryana</option><option>Bihar</option><option>Madhya Pradesh</option><option>Other</option></select>
       </div>
       <div class="fg"><label>Password</label><input id="rp" type="password" placeholder="Create password"/></div>
+      <div class="fg" id="stream-field" style="display:none;"><label>Stream (Class 11 &amp; 12)</label><select id="rstream"><option value="science">🔬 Science</option><option value="commerce">💰 Commerce</option><option value="arts">🏛️ Arts</option></select></div>
       <button class="btn-gold" onclick="doRegister()">Create Account ✨</button>
     </div>
     <!-- PARENT LOGIN FORM -->
@@ -1743,13 +1783,13 @@ function getSubjects(){
 }
 
 const LANG_SYS={
-  en:'You are BrightMind Teacher, an expert AI tutor for Indian Class 9-12 students. Explain concepts clearly step by step. Use simple English. Give Indian context examples. Be warm, encouraging and supportive like a good teacher.',
-  hi:'आप BrightMind Teacher हैं, कक्षा 9-12 के भारतीय छात्रों के लिए AI शिक्षक। हिंदी में सरल भाषा में कदम दर कदम समझाएं। भारतीय उदाहरण दें। प्रोत्साहित करें।',
-  ta:'நீங்கள் BrightMind Teacher, வகுப்பு 9-12 மாணவர்களுக்கான AI ஆசிரியர். தமிழில் எளிமையாக படிப்படியாக விளக்கவும். இந்திய உதாரணங்கள் கொடுங்கள். ஊக்கமளியுங்கள்.',
-  ml:'നിങ്ങൾ BrightMind Teacher ആണ്, ക്ലാസ് 9-12 വിദ്യാർഥികൾക്കുള്ള AI അദ്ധ്യാപകൻ. മലയാളത്തിൽ ലളിതമായി ഘട്ടം ഘട്ടമായി വിശദീകരിക്കുക. ഇന്ത്യൻ ഉദാഹരണങ്ങൾ നൽകുക. പ്രോത്സാഹിപ്പിക്കുക.',
-  kn:'ನೀವು BrightMind Teacher, ತರಗತಿ 9-12 ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ AI ಶಿಕ್ಷಕ. ಕನ್ನಡದಲ್ಲಿ ಸರಳವಾಗಿ ಹಂತ ಹಂತವಾಗಿ ವಿವರಿಸಿ. ಭಾರತೀಯ ಉದಾಹರಣೆಗಳನ್ನು ನೀಡಿ. ಪ್ರೋತ್ಸಾಹಿಸಿ.',
-  te:'మీరు BrightMind Teacher, తరగతి 9-12 విద్యార్థులకు AI ఉపాధ్యాయుడు. తెలుగులో సరళంగా దశలవారీగా వివరించండి. భారతీయ ఉదాహరణలు ఇవ్వండి. ప్రోత్సహించండి.'
-};
+  en:'You are Miss BrightMind, a warm friendly Indian teacher. ALWAYS reply in ENGLISH. Use simple words, real-life examples, encourage students. Never sound robotic.',
+  hi:'आप Miss BrightMind हैं। हमेशा केवल हिंदी में जवाब दें। सरल शब्द, असली उदाहरण। IMPORTANT: Reply ONLY in Hindi.',
+  ta:'நீங்கள் Miss BrightMind. எப்போதும் தமிழில் மட்டுமே பதில் சொல்லுங்கள். எளிய வார்த்தைகள். IMPORTANT: Reply ONLY in Tamil.',
+  ml:'നിങ്ങൾ Miss BrightMind ആണ്. എല്ലായ്‌പ്പോഴും മലയാളത്തിൽ മാത്രം. IMPORTANT: Reply ONLY in Malayalam.',
+  kn:'ನೀವು Miss BrightMind. ಯಾವಾಗಲೂ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಉತ್ತರಿಸಿ. IMPORTANT: Reply ONLY in Kannada.',
+  te:'మీరు Miss BrightMind. ఎల్లప్పుడూ తెలుగులో మాత్రమే సమాధానం ఇవ్వండి. IMPORTANT: Reply ONLY in Telugu.',
+}
 const DEMO_LB=[
   {name:'Arjun Kumar',state:'Tamil Nadu',score:98,stars:5,class:'11'},
   {name:'Sneha Patel',state:'Gujarat',score:95,stars:5,class:'11'},
@@ -1959,6 +1999,7 @@ function switchTab(t,el){
 // LANGUAGE SELECTION ON SPLASH
 function setSplashLang(lang, el){
   S.lang=lang;
+  const ls=document.getElementById('lang-sel');if(ls)ls.value=lang;
   document.querySelectorAll('.lang-badge').forEach(b=>{
     b.style.background='rgba(255,255,255,.12)';
     b.style.color='#fff';
@@ -2002,6 +2043,7 @@ async function doResetPassword(){
     alert(res.msg||'Reset failed. Please check your name and try again.');
   }
 }
+function toggleStreamField(cls){var sf=document.getElementById("stream-field");if(sf)sf.style.display=(cls==="11"||cls==="12")?"block":"none";}
 async function doRegister(){
   const n=document.getElementById('rn').value.trim(),
         email=document.getElementById('remail').value.trim(),
@@ -2256,11 +2298,14 @@ const CHAPTER_TOPICS={
 let SYL={board:'',cls:'',subject:'',chapter:'',topic:'',step:1};
 
 function openSubject(id){
-  // Open syllabus selector instead of direct chat
-  SYL={board:S.user?.board||'CBSE',cls:S.user?.class||'11',subject:'',chapter:'',topic:'',step:1};
-  const sub=SUBJECTS_STATIC.find(s=>s.id===id)||{id,name:id,icon:'📚',qs:[]};
-  if(sub){SYL.subject=sub.name;}
   if(!S.isPaid&&S.qToday>=S.freeLimit){showModal('sub-modal');return;}
+  const nameMap={math:'Mathematics',english:'English',science:'Science',physics:'Physics',chem:'Chemistry',bio:'Biology',cs:'Computer Science',history:'History',geography:'Geography',polsci:'Political Science',economics:'Economics',sociology:'Sociology',accountancy:'Accountancy',bst:'Business Studies',socialsc:'Social Science',tamil:'Tamil',hindi:'Hindi',ml:'Malayalam',kn:'Kannada',te:'Telugu'};
+  const subjectName=nameMap[id]||SUBJECTS_STATIC.find(s=>s.id===id)?.name||id;
+  const subIcon=SUBJECTS_STATIC.find(s=>s.id===id)?.icon||'📚';
+  SYL={board:S.user?.board||'CBSE',cls:String(S.user?.class||'11'),subject:subjectName,chapter:'',topic:'',step:2};
+  const bd=SYLLABUS[SYL.board]||SYLLABUS['CBSE'];
+  const cl=bd[SYL.cls]||bd['11']||{};
+  if(!cl[subjectName])cl[subjectName]={icon:subIcon,chapters:['Introduction','Core Concepts','Key Theorems','Practice Problems','Previous Year Questions']};
   document.getElementById('syllabus-overlay').classList.add('open');
   renderSyllabusStep();
 }
@@ -2940,8 +2985,12 @@ function speakText(text){
   const utt=new SpeechSynthesisUtterance(clean);
   utt.rate=speechRate; utt.pitch=1.05; utt.volume=1;
   // Pick best available voice
+  // Always sync language from selector first
+  const langSel=document.getElementById('lang-sel');
+  if(langSel&&langSel.value&&langSel.value!==S.lang) S.lang=langSel.value;
+  const curLang=S.lang||'en';
   const langPrefixes={en:['en-IN','en-GB','en-US','en'],hi:['hi-IN','hi'],ta:['ta-IN','ta'],ml:['ml-IN','ml'],kn:['kn-IN','kn'],te:['te-IN','te']};
-  const langConf=langPrefixes[S.lang]||langPrefixes['en'];
+  const langConf=langPrefixes[curLang]||langPrefixes['en'];
   const langCode=langConf[0];
   utt.lang=langCode;
   const femaleKw=['Female','female','Samantha','Victoria','Karen','Moira','Veena','Zira','Heera','Kalpana','Google UK English Female'];
@@ -3098,7 +3147,7 @@ async function sendMsg(){
     speakText(rep);
     if(S.user){if(!S.user.subjects[S.sub.id])S.user.subjects[S.sub.id]={progress:0,stars:0};S.user.subjects[S.sub.id].progress=Math.min(100,(S.user.subjects[S.sub.id].progress||0)+5);saveUser();}
     if(S.chatHist.length>=8)document.getElementById('exam-cta').style.display='block';
-    if(S.chatHist.length===6)setTimeout(()=>assignHW(txt),1500);
+    if(S.chatHist.length===20)setTimeout(()=>assignHW(txt),1500);
   }catch(e){ty.classList.remove('show');addMsg('ai','⚠️ Connection error. Please try again.');}
 }
 
@@ -3890,6 +3939,7 @@ function speakOBSlide(idx){
   window.speechSynthesis.speak(utt);
 }
 
+function obTapSkip(){if(OB&&OB.timer)clearInterval(OB.timer);window.speechSynthesis.cancel();if(OB&&OB.slide<OB.totalSlides-1){OB.slide++;obGoToSlide(OB.slide);}else{closeOnboarding();}}
 function obNext(){
   window.speechSynthesis.cancel();
   if(OB.slide>=OB.totalSlides-1){closeOnboarding();return;}
@@ -4855,7 +4905,7 @@ function buildExamPaperHTML(paper, subject, chapter, cfg, board){
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>${subject} - ${cfg.label}</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
