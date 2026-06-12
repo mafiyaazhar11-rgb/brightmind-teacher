@@ -1051,14 +1051,17 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
     <button class="chat-back" onclick="closeChat()">←</button>
     <div class="chat-subj-icon" id="chat-icon">📐</div>
     <div class="chat-subj-info"><div class="n" id="chat-sname">Mathematics</div><div class="s" id="chat-ssub">Class 11 · Ask anything!</div></div>
-    <select class="chat-lang" id="lang-sel" onchange="changeLang()">
-      <option value="en">English</option>
-      <option value="hi">हिंदी</option>
-      <option value="ta">தமிழ்</option>
-      <option value="ml">മലയാളം</option>
-      <option value="kn">ಕನ್ನಡ</option>
-      <option value="te">తెలుగు</option>
-    </select>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;margin-left:auto;flex-shrink:0;">
+      <div style="font-size:9px;color:rgba(255,255,255,.6);font-weight:600;letter-spacing:.5px;">🔊 LANGUAGE</div>
+      <select class="chat-lang" id="lang-sel" onchange="changeLang()" style="min-width:90px;">
+        <option value="en">🇬🇧 English</option>
+        <option value="hi">🇮🇳 हिंदी</option>
+        <option value="ta">🇮🇳 தமிழ்</option>
+        <option value="ml">🇮🇳 Malayalam</option>
+        <option value="kn">🇮🇳 Kannada</option>
+        <option value="te">🇮🇳 Telugu</option>
+      </select>
+    </div>
   </div>
 
   <!-- VIRTUAL TEACHER AVATAR -->
@@ -1742,7 +1745,12 @@ function showPage(name,tab){
   if(name==='score')renderScorecard();
   if(name==='papers')initPapersPage();
 }
-function openChat(){document.getElementById('chat-overlay').classList.add('open');}
+function openChat(){
+  document.getElementById('chat-overlay').classList.add('open');
+  // Sync language selector to current language
+  const sel=document.getElementById('lang-sel');
+  if(sel) sel.value=S.lang||'en';
+}
 function closeChat(){document.getElementById('chat-overlay').classList.remove('open');}
 
 // ══════════════════════════════════════
@@ -2148,6 +2156,7 @@ const SYLLABUS={
       Physics:{icon:'⚛️',chapters:['Physical World','Units and Measurements','Motion in a Straight Line','Motion in a Plane','Laws of Motion','Work Energy Power','Systems of Particles','Gravitation','Mechanical Properties of Solids','Mechanical Properties of Fluids','Thermal Properties','Thermodynamics','Kinetic Theory','Oscillations','Waves']},
       Chemistry:{icon:'🧪',chapters:['Some Basic Concepts','Structure of Atom','Classification of Elements','Chemical Bonding','States of Matter','Thermodynamics','Equilibrium','Redox Reactions','Hydrogen','s-Block Elements','p-Block Elements','Organic Chemistry Basics','Hydrocarbons','Environmental Chemistry']},
       Biology:{icon:'🌱',chapters:['The Living World','Biological Classification','Plant Kingdom','Animal Kingdom','Morphology of Flowering Plants','Anatomy of Flowering Plants','Structural Organisation in Animals','Cell Basics','Biomolecules','Cell Cycle','Transport in Plants','Mineral Nutrition','Photosynthesis','Respiration in Plants','Plant Growth','Digestion and Absorption','Breathing','Body Fluids','Circulation','Excretion','Locomotion','Neural Control','Chemical Coordination']},
+      'Computer Science':{icon:'💻',chapters:['Computer Fundamentals','Number Systems','Boolean Logic','Introduction to Python','Python Data Types','Control Flow','Functions in Python','Strings','Lists and Tuples','Dictionaries','File Handling','Exception Handling','Introduction to OOP','Database Concepts','SQL Basics','Networking Basics']},
       English:{icon:'📖',chapters:['Hornbill - Prose','Hornbill - Poems','Snapshots Supplementary','Writing Skills','Grammar - Transformation','Grammar - Error Detection','Reading Comprehension']},
       Accountancy:{icon:'💰',chapters:['Introduction to Accounting','Theory Base of Accounting','Recording of Transactions I','Recording of Transactions II','Bank Reconciliation','Trial Balance','Depreciation','Provisions and Reserves','Bills of Exchange','Financial Statements I','Financial Statements II','Accounts from Incomplete Records','Applications of Computers']},
       'Business Studies':{icon:'🏢',chapters:['Nature and Purpose of Business','Forms of Business Organisation','Private Public and Global Enterprises','Business Services','Emerging Modes of Business','Social Responsibility','Formation of Company','Sources of Business Finance','Small Business','Internal Trade','International Business','E-Commerce']},
@@ -2158,6 +2167,7 @@ const SYLLABUS={
       Physics:{icon:'⚛️',chapters:['Electric Charges and Fields','Electrostatic Potential','Current Electricity','Moving Charges','Magnetism and Matter','Electromagnetic Induction','Alternating Current','Electromagnetic Waves','Ray Optics','Wave Optics','Dual Nature','Atoms','Nuclei','Semiconductor Electronics','Communication Systems']},
       Chemistry:{icon:'🧪',chapters:['Solid State','Solutions','Electrochemistry','Chemical Kinetics','Surface Chemistry','General Principles','p-Block Elements','d and f Block','Coordination Compounds','Haloalkanes','Haloarenes','Alcohols Phenols','Aldehydes Ketones','Carboxylic Acids','Amines','Biomolecules','Polymers','Chemistry in Everyday Life']},
       Biology:{icon:'🌱',chapters:['Reproduction in Organisms','Sexual Reproduction in Flowering Plants','Human Reproduction','Reproductive Health','Principles of Inheritance','Molecular Basis of Inheritance','Evolution','Human Health and Disease','Strategies for Food Production','Microbes in Human Welfare','Biotechnology Principles','Biotechnology Applications','Organisms and Populations','Ecosystem','Biodiversity','Environmental Issues']},
+      'Computer Science':{icon:'💻',chapters:['Python Revision','OOP Concepts','Inheritance and Polymorphism','File Handling','Database and SQL','Advanced SQL','Networking Concepts','Cybersecurity','Stack and Queue','Boolean Algebra','Communication Technologies','Sorting Algorithms','Searching Algorithms','Project Work']},
       English:{icon:'📖',chapters:['Flamingo - Prose','Flamingo - Poetry','Vistas Supplementary','Writing - Article','Writing - Speech','Writing - Report','Grammar Review','Reading Comprehension']},
       Accountancy:{icon:'💰',chapters:['Accounting for Partnership','Change in Profit Sharing','Admission of Partner','Retirement of Partner','Dissolution','Issue of Shares','Issue of Debentures','Redemption of Debentures','Financial Statement Analysis','Cash Flow Statement','Computerised Accounting']},
     }
@@ -2223,12 +2233,18 @@ const CHAPTER_TOPICS={
 let SYL={board:'',cls:'',subject:'',chapter:'',topic:'',step:1};
 
 function openSubject(id){
-  // Open syllabus selector instead of direct chat
-  SYL={board:S.user?.board||'CBSE',cls:S.user?.class||'11',subject:'',chapter:'',topic:'',step:1};
   const _dynSubs=getSubjectsForClass(S.user?.class||11,S.user?.board||'CBSE');
   const sub=_dynSubs.find(s=>s.id===id)||SUBJECTS_STATIC.find(s=>s.id===id)||{id,name:id,icon:'📚',qs:[]};
-  if(sub){SYL.subject=sub.name;}
   if(!S.isPaid&&S.qToday>=S.freeLimit){showModal('sub-modal');return;}
+  // Set subject and jump DIRECTLY to chapter selection (step 2)
+  SYL={board:S.user?.board||'CBSE',cls:S.user?.class||'11',subject:sub.name,chapter:'',topic:'',step:2};
+  // Make sure Computer Science exists in SYLLABUS — add if missing
+  const board=SYLLABUS[SYL.board]||SYLLABUS['CBSE'];
+  const clsData=board[SYL.cls]||board['11']||{};
+  if(!clsData[sub.name]){
+    // Add dynamic subject if not in static syllabus
+    clsData[sub.name]={icon:sub.icon,chapters:['Introduction','Core Concepts','Advanced Topics','Practice Problems','Previous Year Questions']};
+  }
   document.getElementById('syllabus-overlay').classList.add('open');
   renderSyllabusStep();
 }
@@ -2906,13 +2922,48 @@ function speakText(text){
   if(!clean)return;
   lastSpokenText=clean;
   const utt=new SpeechSynthesisUtterance(clean);
-  utt.rate=speechRate; utt.pitch=1.05; utt.volume=1;
-  // Pick best available voice
+  utt.rate=speechRate; utt.pitch=1.1; utt.volume=1;
+
+  // Always read language from selector (in case changed in chat)
+  const langSel=document.getElementById('lang-sel');
+  if(langSel&&langSel.value) S.lang=langSel.value;
+
   const voices=window.speechSynthesis.getVoices();
   const langCodes={en:'en-IN',hi:'hi-IN',ta:'ta-IN',ml:'ml-IN',kn:'kn-IN',te:'te-IN'};
   const langCode=langCodes[S.lang]||'en-IN';
-  const preferred=voices.find(v=>v.lang===langCode)||voices.find(v=>v.lang.startsWith('en'))||voices[0];
-  if(preferred)utt.voice=preferred;
+  const langPrefix=langCode.split('-')[0]; // 'ta', 'hi', etc
+
+  // Female voice keywords
+  const femaleWords=['female','Female','woman','Woman','Samantha','Victoria','Karen','Moira','Veena','Rishi','Google UK English Female','Zira'];
+
+  let voice = null;
+
+  // 1. Try exact language match with female voice
+  voice = voices.find(v=>v.lang===langCode && femaleWords.some(f=>v.name.includes(f)));
+
+  // 2. Try any voice matching the language
+  if(!voice) voice = voices.find(v=>v.lang===langCode);
+
+  // 3. Try language prefix match with female
+  if(!voice) voice = voices.find(v=>v.lang.startsWith(langPrefix) && femaleWords.some(f=>v.name.includes(f)));
+
+  // 4. Try any language prefix match
+  if(!voice) voice = voices.find(v=>v.lang.startsWith(langPrefix));
+
+  // 5. For non-English — use English female as fallback (better than male)
+  if(!voice) voice = voices.find(v=>v.lang.startsWith('en') && femaleWords.some(f=>v.name.includes(f)));
+
+  // 6. Try Google Indian English
+  if(!voice) voice = voices.find(v=>v.lang==='en-IN');
+
+  // 7. Any English voice
+  if(!voice) voice = voices.find(v=>v.lang.startsWith('en'));
+
+  // 8. First available
+  if(!voice && voices.length>0) voice = voices[0];
+
+  if(voice) utt.voice=voice;
+  utt.lang=langCode;
   utt.onstart=()=>setAvatarSpeaking(true,clean);
   utt.onend=()=>setAvatarSpeaking(false);
   utt.onerror=()=>setAvatarSpeaking(false);
