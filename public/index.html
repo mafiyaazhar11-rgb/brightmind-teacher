@@ -39,24 +39,24 @@ body{font-family:'Poppins',sans-serif;background:#030820;font-size:16px;}
 
 /* ══ AUTH ══ */
 #auth{background:radial-gradient(ellipse at 20% 50%,#1a3a8f 0%,#0a1a6e 30%,#060d3d 60%,#030820 100%);align-items:center;justify-content:center;padding:20px;}
-.auth-card{background:rgba(255,255,255,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:28px;padding:32px 28px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.08);animation:slideUp .4s ease;overflow-y:auto;max-height:90vh;}
+.auth-card{background:rgba(10,15,46,0.85);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.15);border-radius:28px;padding:32px 28px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,0.7),0 0 0 1px rgba(255,214,0,0.1);animation:slideUp .4s ease;overflow-y:auto;max-height:90vh;}
 .auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:24px;}
 .auth-logo .icon{width:42px;height:42px;background:var(--gold);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
-.auth-logo .name{font-size:17px;font-weight:800;color:var(--blue-dark);}
+.auth-logo .name{font-size:17px;font-weight:800;color:#fff;}
 .auth-logo .name span{color:var(--blue-bright);}
-.auth-tabs{display:flex;background:var(--gray-light);border-radius:12px;padding:4px;margin-bottom:24px;}
-.auth-tab{flex:1;padding:10px;text-align:center;font-size:14px;font-weight:600;border-radius:10px;cursor:pointer;color:var(--gray-text);border:none;background:transparent;transition:all .2s;}
-.auth-tab.active{background:var(--blue-mid);color:#fff;}
+.auth-tabs{display:flex;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:4px;margin-bottom:24px;}
+.auth-tab{flex:1;padding:10px;text-align:center;font-size:14px;font-weight:600;border-radius:10px;cursor:pointer;color:rgba(255,255,255,0.5);border:none;background:transparent;transition:all .2s;}
+.auth-tab.active{background:linear-gradient(135deg,#1a237e,#3949ab);color:#fff;box-shadow:0 4px 12px rgba(26,35,126,0.4);}
 .auth-form{display:flex;flex-direction:column;gap:14px;}
 .fg{display:flex;flex-direction:column;gap:6px;}
-.fg label{font-size:13px;font-weight:600;color:var(--blue-dark);}
-.fg input,.fg select{padding:13px 16px;border:2px solid var(--gray-mid);border-radius:12px;font-size:15px;font-family:'Poppins',sans-serif;outline:none;background:#fff;color:var(--blue-dark);transition:border .2s;-webkit-appearance:none;}
-.fg input:focus,.fg select:focus{border-color:var(--blue-bright);}
+.fg label{font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);}
+.fg input,.fg select{padding:13px 16px;border:1px solid rgba(255,255,255,0.15);border-radius:12px;font-size:15px;font-family:'Poppins',sans-serif;outline:none;background:rgba(255,255,255,0.08);color:#fff;transition:all .2s;-webkit-appearance:none;}.fg input::placeholder{color:rgba(255,255,255,0.35);}.fg select option{background:#1a237e;color:#fff;}
+.fg input:focus,.fg select:focus{border-color:rgba(255,214,0,0.6);background:rgba(255,255,255,0.12);}
 .btn-main{background:linear-gradient(135deg,var(--blue-mid),var(--blue-bright));color:#fff;font-size:16px;font-weight:700;padding:15px;border-radius:13px;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(21,69,192,.25);transition:transform .15s;width:100%;}
 .btn-main:active{transform:scale(.98);}
 .btn-gold{background:var(--gold);color:var(--blue-dark);font-size:16px;font-weight:700;padding:15px;border-radius:13px;border:none;cursor:pointer;transition:transform .15s;width:100%;}
 .btn-gold:active{transform:scale(.98);}
-.auth-hint{text-align:center;font-size:12px;color:var(--gray-text);margin-top:4px;line-height:1.6;}
+.auth-hint{text-align:center;font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;line-height:1.6;}
 
 /* ══ APP SHELL ══ */
 #app{background:linear-gradient(180deg,#030820 0%,#060d3d 50%,#0a1a6e 100%);}
@@ -615,17 +615,37 @@ body{font-family:'Poppins',sans-serif;background:#030820;font-size:16px;}
     <div style="text-align:center;margin-top:12px;font-size:13px;color:rgba(255,255,255,0.5);">Already registered? <span onclick="go('auth')" style="color:#60a5fa;font-weight:700;cursor:pointer;text-decoration:underline;">Login</span></div>
   </div>
 
-  <!-- FEATURE BAR -->
-  <div style="position:relative;z-index:2;width:92%;max-width:500px;margin:12px auto 0;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;">
-    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:10px 6px;text-align:center;"><div style="font-size:18px;margin-bottom:3px;">🤖</div><div style="font-size:9px;font-weight:700;color:#fff;">AI-Powered</div><div style="font-size:8px;color:rgba(255,255,255,0.45);margin-top:1px;">Personalized</div></div>
-    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:10px 6px;text-align:center;"><div style="font-size:18px;margin-bottom:3px;">🛡️</div><div style="font-size:9px;font-weight:700;color:#fff;">Safe & Secure</div><div style="font-size:8px;color:rgba(255,255,255,0.45);margin-top:1px;">Data protected</div></div>
-    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:10px 6px;text-align:center;"><div style="font-size:18px;margin-bottom:3px;">📈</div><div style="font-size:9px;font-weight:700;color:#fff;">Track Progress</div><div style="font-size:8px;color:rgba(255,255,255,0.45);margin-top:1px;">Learn. Achieve.</div></div>
-    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:10px 6px;text-align:center;"><div style="font-size:18px;margin-bottom:3px;">⚡</div><div style="font-size:9px;font-weight:700;color:#fff;">Always Available</div><div style="font-size:8px;color:rgba(255,255,255,0.45);margin-top:1px;">24/7 AI Support</div></div>
+  <!-- FEATURE BAR — BIGGER & GLOWING -->
+  <div style="position:relative;z-index:2;width:92%;max-width:500px;margin:16px auto 0;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
+    <div style="background:rgba(26,111,255,0.12);backdrop-filter:blur(12px);border:1px solid rgba(26,111,255,0.35);border-radius:18px;padding:16px 8px;text-align:center;box-shadow:0 4px 20px rgba(26,111,255,0.2);transition:all .3s;">
+      <div style="font-size:26px;margin-bottom:7px;filter:drop-shadow(0 0 8px rgba(100,180,255,0.8));">🤖</div>
+      <div style="font-size:11px;font-weight:800;color:#fff;letter-spacing:0.3px;">AI-Powered</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.55);margin-top:3px;">Personalized Learning</div>
+    </div>
+    <div style="background:rgba(0,200,100,0.1);backdrop-filter:blur(12px);border:1px solid rgba(0,200,100,0.3);border-radius:18px;padding:16px 8px;text-align:center;box-shadow:0 4px 20px rgba(0,200,100,0.15);transition:all .3s;">
+      <div style="font-size:26px;margin-bottom:7px;filter:drop-shadow(0 0 8px rgba(0,220,120,0.8));">🛡️</div>
+      <div style="font-size:11px;font-weight:800;color:#fff;letter-spacing:0.3px;">Safe & Secure</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.55);margin-top:3px;">Data protected</div>
+    </div>
+    <div style="background:rgba(255,214,0,0.1);backdrop-filter:blur(12px);border:1px solid rgba(255,214,0,0.3);border-radius:18px;padding:16px 8px;text-align:center;box-shadow:0 4px 20px rgba(255,214,0,0.15);transition:all .3s;">
+      <div style="font-size:26px;margin-bottom:7px;filter:drop-shadow(0 0 8px rgba(255,214,0,0.8));">📈</div>
+      <div style="font-size:11px;font-weight:800;color:#fff;letter-spacing:0.3px;">Track Progress</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.55);margin-top:3px;">Learn. Achieve.</div>
+    </div>
+    <div style="background:rgba(255,100,50,0.1);backdrop-filter:blur(12px);border:1px solid rgba(255,120,50,0.3);border-radius:18px;padding:16px 8px;text-align:center;box-shadow:0 4px 20px rgba(255,100,50,0.15);transition:all .3s;">
+      <div style="font-size:26px;margin-bottom:7px;filter:drop-shadow(0 0 8px rgba(255,150,50,0.8));">⚡</div>
+      <div style="font-size:11px;font-weight:800;color:#fff;letter-spacing:0.3px;">Always Available</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.55);margin-top:3px;">24/7 AI Support</div>
+    </div>
   </div>
 
 </div>
 <div id="auth" class="screen">
-  <div class="auth-card">
+  <!-- Floating orbs same as splash -->
+  <div style="position:absolute;left:3%;top:15%;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(100,160,255,0.4),rgba(30,80,200,0.1));border:1px solid rgba(100,180,255,0.2);animation:float1 6s ease-in-out infinite;pointer-events:none;z-index:0;"></div>
+  <div style="position:absolute;right:3%;top:25%;width:55px;height:55px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(255,214,0,0.2),transparent);border:1px solid rgba(255,214,0,0.15);animation:float3 7s ease-in-out infinite;pointer-events:none;z-index:0;"></div>
+  <div style="position:absolute;left:5%;bottom:20%;width:45px;height:45px;border-radius:50%;background:rgba(100,160,255,0.1);border:1px solid rgba(100,180,255,0.15);animation:float2 8s ease-in-out infinite;pointer-events:none;z-index:0;"></div>
+  <div class="auth-card" style="position:relative;z-index:1;">
     <div class="auth-logo"><div class="icon" style="font-size:20px;font-family:serif;font-weight:900;">B</div><div class="name">BrightMind <span>Teacher</span></div></div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('login',this)">Login</button>
@@ -778,11 +798,9 @@ body{font-family:'Poppins',sans-serif;background:#030820;font-size:16px;}
 
       <!-- FREE LIMIT BAR -->
       <div style="background:rgba(3,8,32,0.6);border-bottom:1px solid rgba(255,255,255,0.06);padding:8px 16px;display:flex;align-items:center;gap:10px;" id="limit-bar">
-        <div style="font-size:11px;color:rgba(255,255,255,0.5);flex:1;">🎁 Free questions today</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);flex:1;" id="limit-label">🎁 Free questions today</div>
         <div class="lb-dots" id="lb-dots"></div>
-        <div style="font-size:11px;font-weight:700;" id="lb-count">
-          <span style="color:#ffd600;">⭐ Premium</span> · <span style="color:rgba(255,255,255,0.7);">Unlimited</span>
-        </div>
+        <div style="font-size:11px;font-weight:700;" id="lb-count">10 left</div>
       </div>
 
       <!-- MAIN CONTENT -->
@@ -2277,9 +2295,19 @@ function renderSubjects(){
 function renderLimitBar(){
   const used=S.qToday,left=Math.max(0,S.freeLimit-used);
   const lbCount=document.getElementById('lb-count');
-  if(lbCount)lbCount.innerHTML=S.isPaid?'<span style="color:#ffd600;">⭐ Premium</span> · <span style="color:rgba(255,255,255,0.7);">Unlimited</span>':left+' left';
+  const lbLabel=document.getElementById('limit-label');
+  const lbBar=document.getElementById('limit-bar');
+  if(S.isPaid){
+    if(lbLabel)lbLabel.innerHTML='<span style="color:#ffd600;font-weight:700;">👑 Premium Member</span>';
+    if(lbCount)lbCount.innerHTML='<span style="color:#a5d6a7;font-weight:800;">✓ Unlimited</span>';
+    if(lbBar)lbBar.style.background='rgba(255,214,0,0.06)';
+  } else {
+    if(lbLabel)lbLabel.textContent='🎁 Free questions today';
+    if(lbCount)lbCount.innerHTML='<span style="color:rgba(255,255,255,0.7);">'+left+' left</span>';
+  }
   const d=document.getElementById('lb-dots');
-  if(S.isPaid){d.innerHTML='<span style="font-size:12px;color:var(--green);font-weight:700;">✓ Premium</span>';return;}
+  if(!d)return;
+  if(S.isPaid){d.innerHTML='';return;}
   d.innerHTML=Array.from({length:S.freeLimit},(_,i)=>`<div class="lb-dot${i<used?' used':''}"></div>`).join('');
 }
 
