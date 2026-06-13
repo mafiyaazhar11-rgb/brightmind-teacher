@@ -2452,9 +2452,48 @@ function renderSyllabusStep(){
   }
 }
 
-function selSubject(name){SYL.subject=name;SYL.step=2;renderSyllabusStep();}
-function selChapter(ch){SYL.chapter=ch;SYL.step=3;renderSyllabusStep();}
-function selTopic(tp){SYL.topic=tp;SYL.step=4;renderSyllabusStep();}
+function selSubject(name){
+  SYL.subject=name;SYL.step=2;renderSyllabusStep();
+  // Miss BrightMind greets student when subject is selected
+  const h=new Date().getHours();
+  const tg=h<12?'Good morning':h<17?'Good afternoon':h<20?'Good evening':'Good night';
+  const greetings={
+    en:`${tg}, dear student! 😊 I am Miss BrightMind, your AI teacher. You have selected ${name}. Please choose your chapter and I will start teaching you step by step!`,
+    ta:`${tg}, மாணவா! 😊 நான் Miss BrightMind, உங்கள் AI ஆசிரியை. நீங்கள் ${name} தேர்வு செய்தீர்கள். உங்கள் பாடத்தைத் தேர்வு செய்யுங்கள், நான் படிப்படியாக கற்பிக்கிறேன்!`,
+    hi:`${tg}, प्रिय छात्र! 😊 मैं Miss BrightMind हूँ, आपकी AI शिक्षिका। आपने ${name} चुना है। अपना अध्याय चुनें और मैं आपको step by step पढ़ाऊँगी!`,
+    ml:`${tg}, പ്രിയ വിദ്യാർത്ഥി! 😊 ഞാൻ Miss BrightMind, നിങ്ങളുടെ AI അദ്ധ്യാപിക. ${name} തിരഞ്ഞെടുത്തതിന് നന്ദി. അദ്ധ്യായം തിരഞ്ഞെടുക്കൂ, ഞാൻ പഠിപ്പിക്കാം!`,
+    kn:`${tg}, ಪ್ರಿಯ ವಿದ್ಯಾರ್ಥಿ! 😊 ನಾನು Miss BrightMind, ನಿಮ್ಮ AI ಶಿಕ್ಷಕಿ. ${name} ಆಯ್ಕೆ ಮಾಡಿದ್ದೀರಿ. ನಿಮ್ಮ ಅಧ್ಯಾಯ ಆಯ್ಕೆ ಮಾಡಿ, ನಾನು ಕಲಿಸುತ್ತೇನೆ!`,
+    te:`${tg}, ప్రియ విద్యార్థి! 😊 నేను Miss BrightMind, మీ AI ఉపాధ్యాయిని. ${name} ఎంచుకున్నారు. మీ అధ్యాయం ఎంచుకోండి, నేను step by step నేర్పిస్తాను!`
+  };
+  const lang=S.lang||'en';
+  const msg=greetings[lang]||greetings['en'];
+  setTimeout(()=>speakText(msg),200);
+  // Show bubble message
+  const bubble=document.getElementById('speech-bubble');
+  if(bubble){bubble.textContent=msg.substring(0,120)+'...';}
+}
+function selChapter(ch){
+  SYL.chapter=ch;SYL.step=3;renderSyllabusStep();
+  const lang=S.lang||'en';
+  const msgs={en:`Great! Chapter: ${ch}. Now choose your topic and I will start teaching!`,
+    ta:`நல்லது! பாடம்: ${ch}. இப்போது தலைப்பை தேர்வு செய்யுங்கள்!`,
+    hi:`बढ़िया! Chapter: ${ch}. अब topic चुनें और मैं पढ़ाना शुरू करूँगी!`,
+    ml:`നല്ലത്! Chapter: ${ch}. ഇനി topic തിരഞ്ഞെടുക്കൂ!`,
+    kn:`ಚೆನ್ನಾಗಿದೆ! Chapter: ${ch}. ಈಗ topic ಆಯ್ಕೆ ಮಾಡಿ!`,
+    te:`బాగుంది! Chapter: ${ch}. ఇప్పుడు topic ఎంచుకోండి!`};
+  setTimeout(()=>speakText(msgs[lang]||msgs['en']),200);
+}
+function selTopic(tp){
+  SYL.topic=tp;SYL.step=4;renderSyllabusStep();
+  const lang=S.lang||'en';
+  const msgs={en:`Topic selected: ${tp}. Tap "Start Learning" and I will teach you the complete lesson!`,
+    ta:`தலைப்பு: ${tp}. "Start Learning" அழுத்துங்கள், நான் முழு பாடமும் கற்பிக்கிறேன்!`,
+    hi:`Topic चुना: ${tp}. "Start Learning" दबाएँ, मैं पूरा lesson पढ़ाऊँगी!`,
+    ml:`Topic: ${tp}. "Start Learning" tap ചെയ്യൂ, ഞാൻ complete lesson പഠിപ്പിക്കാം!`,
+    kn:`Topic: ${tp}. "Start Learning" tap ಮಾಡಿ, ನಾನು complete lesson ಕಲಿಸುತ್ತೇನೆ!`,
+    te:`Topic: ${tp}. "Start Learning" tap చేయండి, నేను complete lesson నేర్పిస్తాను!`};
+  setTimeout(()=>speakText(msgs[lang]||msgs['en']),200);
+}
 
 function updateStepBar(){
   for(let i=1;i<=4;i++){
@@ -2479,34 +2518,78 @@ function startSyllabusChat(){
   S.sub=sub; S.chatHist=[];
   document.getElementById('chat-icon').textContent=sub.icon||'📚';
   document.getElementById('chat-sname').textContent=sub.name;
-  document.getElementById('chat-ssub').textContent=SYL.board+' \u00b7 Class '+SYL.cls+' \u00b7 '+SYL.chapter;
+  document.getElementById('chat-ssub').textContent=SYL.board+' · Class '+SYL.cls+' · '+SYL.chapter;
   document.getElementById('chat-msgs').innerHTML='';
   document.getElementById('exam-cta').style.display='none';
   const topics=CHAPTER_TOPICS[SYL.chapter]||CHAPTER_TOPICS['DEFAULT'];
   document.getElementById('chat-qqs').innerHTML=topics.slice(0,4).map(function(t){
-    return '<div class="qq" onclick="sendQ(\'Explain: '+t.replace(/'/g,"\\'")+'\')">\ud83d\udcda '+t+'</div>';
+    return '<div class="qq" onclick="sendQ(\'Explain: '+t.replace(/'/g,"\\'")+'\'">📚 '+t+'</div>';
   }).join('');
   closeSyllabus();
   openChat();
-  const bf={CBSE:'CBSE',TN:'Tamil Nadu State Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP State Board',TS:'Telangana State Board',MH:'Maharashtra State Board',UP:'UP Board',WB:'WB Board'}[SYL.board]||SYL.board+' Board';
-  addMsg('ai','Opening '+SYL.topic+' from '+SYL.chapter+'...\n\nPreparing your lesson...');
+
+  const bf={CBSE:'CBSE',TN:'Tamil Nadu State Board',KL:'Kerala Board',KA:'Karnataka Board',
+    AP:'AP State Board',TS:'Telangana State Board',MH:'Maharashtra State Board',
+    UP:'UP Board',WB:'WB Board'}[SYL.board]||SYL.board+' Board';
+
+  const h=new Date().getHours();
+  const tg=h<12?'Good morning':h<17?'Good afternoon':h<20?'Good evening':'Good night';
+  const greetMap={
+    en:`${tg}, dear student! 😊 I am Miss BrightMind. Today we will study **${SYL.topic}** from **${SYL.chapter}**. Let me teach you everything step by step as per your ${bf} syllabus. Are you ready? Let's begin! 📖`,
+    ta:`${tg}, மாணவா! 😊 நான் Miss BrightMind. இன்று நாம் **${SYL.topic}** பாடத்தை படிப்போம். ${bf} பாடத்திட்டப்படி படிப்படியாக கற்பிக்கிறேன். தயாரா? ஆரம்பிக்கலாம்! 📖`,
+    hi:`${tg}, प्रिय छात्र! 😊 मैं Miss BrightMind हूँ। आज हम **${SYL.topic}** पढ़ेंगे। ${bf} syllabus के अनुसार step by step पढ़ाऊँगी। तैयार हैं? शुरू करते हैं! 📖`,
+    ml:`${tg}, പ്രിയ വിദ്യാർത്ഥി! 😊 ഞാൻ Miss BrightMind. ഇന്ന് നാം **${SYL.topic}** പഠിക്കും. ${bf} syllabus അനുസരിച്ച് step by step പഠിപ്പിക്കാം. തയ്യാറാണോ? 📖`,
+    kn:`${tg}, ಪ್ರಿಯ ವಿದ್ಯಾರ್ಥಿ! 😊 ನಾನು Miss BrightMind. ಇಂದು ನಾವು **${SYL.topic}** ಅಧ್ಯಯನ ಮಾಡೋಣ. ${bf} syllabus ಪ್ರಕಾರ step by step ಕಲಿಸುತ್ತೇನೆ. ತಯಾರಾ? 📖`,
+    te:`${tg}, ప్రియ విద్యార్థి! 😊 నేను Miss BrightMind. ఈరోజు మనం **${SYL.topic}** చదువుదాం. ${bf} syllabus ప్రకారం step by step నేర్పిస్తాను. సిద్ధంగా ఉన్నారా? 📖`
+  };
+  const lang=S.lang||'en';
+  const greetMsg=greetMap[lang]||greetMap['en'];
+
+  // Show greeting immediately — voice + bubble
+  addMsg('ai', greetMsg);
+  setTimeout(()=>speakText(greetMsg.replace(/[*#_]/g,'').substring(0,300)), 300);
+  const bubble=document.getElementById('speech-bubble');
+  if(bubble) bubble.textContent=`${tg}! Let me teach you ${SYL.topic} step by step! 📖`;
+
+  // After greeting, fetch and deliver FULL lesson sentence by sentence
   setTimeout(async function(){
-    const msgs=document.getElementById('chat-msgs');
-    if(msgs&&msgs.lastChild)msgs.removeChild(msgs.lastChild);
-    const teachPrompt='TEACH me this topic right now like a real classroom teacher:\n\n'
-      +'Subject: '+SYL.subject+'\nBoard: '+bf+'\nClass: '+SYL.cls+'\nChapter: '+SYL.chapter+'\nTopic: '+SYL.topic+'\n\n'
-      +'Use this structure:\n'
-      +'1. One real-life example to introduce (1-2 sentences)\n'
-      +'2. Simple definition (1-2 sentences)\n'
-      +'3. Main explanation point by point (2-3 sentences each)\n'
-      +'4. Two important exam points to remember\n'
-      +'5. One memory tip or trick\n'
-      +'6. End with: "Any questions? Or shall I continue?"\n\n'
-      +'IMPORTANT: Short sentences. Simple words. Talk to me like a teacher, not a textbook. Follow '+bf+' syllabus exactly.';
+    addMsg('ai','📝 Preparing your full lesson...');
+    const teachPrompt=`You are Miss BrightMind, a warm caring ${bf} teacher for Class ${SYL.cls} ${SYL.subject}.
+Topic: "${SYL.topic}" from Chapter: "${SYL.chapter}"
+
+Deliver a COMPLETE classroom lesson in this EXACT structure — sentence by sentence like a real teacher talking:
+
+🎯 INTRODUCTION (2-3 sentences)
+Start with "Class, today we are going to learn about [topic]." Give one real-life example students relate to.
+
+📖 WHAT IS IT? — DEFINITION (2-3 sentences)
+Give the exact ${bf} textbook definition. Then explain it in simple words.
+
+🔑 KEY CONCEPTS — POINT BY POINT (cover ALL important points from ${bf} syllabus)
+Explain each concept in 2-3 simple sentences. Use examples. Be thorough — cover the COMPLETE syllabus for this topic.
+
+⭐ IMPORTANT FOR EXAM (3-4 points)
+List exactly what students must remember for board exams. Mark-worthy points.
+
+💡 MEMORY TIP
+One easy trick or mnemonic to remember this topic.
+
+📝 HOMEWORK — 3 QUESTIONS
+End with exactly 3 homework questions:
+1. One definition question (1 mark)
+2. One short answer question (3 marks)  
+3. One problem/application question (5 marks)
+Say: "Complete these and show me tomorrow! I will correct them for you! 😊"
+
+RULES: Short sentences. Simple words. Talk directly to student — say "you", "we", "let us". Follow ${bf} syllabus EXACTLY. Do not skip any important concept.`;
+
     try{
-      const sys=LANG_SYS[S.lang||'en']+' You are Miss BrightMind, a warm caring teacher for Class '+SYL.cls+' '+SYL.subject+' ('+bf+'). Chapter: '+SYL.chapter+'. Topic: '+SYL.topic+'. Teach sentence by sentence. Use simple words. Give real-life examples. Follow '+bf+' syllabus exactly.';
+      const sys=`${LANG_SYS[lang]||LANG_SYS['en']} You are Miss BrightMind, expert ${bf} teacher for Class ${SYL.cls} ${SYL.subject}. Teach COMPLETE syllabus for "${SYL.topic}" from "${SYL.chapter}". Sentence by sentence. Warm, encouraging, clear. Give homework at end.`;
+      const msgs=document.getElementById('chat-msgs');
+      // Remove "preparing" message
+      if(msgs&&msgs.lastChild)msgs.removeChild(msgs.lastChild);
       const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,system:sys,
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,system:sys,
           messages:[{role:'user',content:teachPrompt}]})});
       const d=await r.json();
       const reply=(d.content&&d.content[0]&&d.content[0].text)||'';
@@ -2514,17 +2597,22 @@ function startSyllabusChat(){
         S.chatHist.push({role:'user',content:teachPrompt});
         S.chatHist.push({role:'assistant',content:reply});
         addMsg('ai',reply);
-        const isMobile=/Android|iPhone|iPad/i.test(navigator.userAgent);speakText(reply.replace(/[#*]/g,'').substring(0,isMobile?600:250));
+        const isMobile=/Android|iPhone|iPad/i.test(navigator.userAgent);
+        speakText(reply.replace(/[#*_🎯📖🔑⭐💡📝]/g,'').substring(0,isMobile?600:300));
         S.qToday=(S.qToday||0)+1;
         const sq=document.getElementById('stat-q');
         if(sq)sq.textContent=(parseInt(sq.textContent)||0)+1;
+        // After lesson, show homework reminder in bubble
+        setTimeout(()=>{
+          if(bubble) bubble.textContent='📝 Homework given! Complete and send me a photo for correction! 😊';
+        },3000);
       }else{
-        addMsg('ai','Let us study '+SYL.topic+'! Ask me anything about this topic.');
+        addMsg('ai',`Let us study ${SYL.topic} from ${SYL.chapter}! Ask me anything and I will teach you step by step.`);
       }
     }catch(e){
-      addMsg('ai','Let us study '+SYL.topic+' from '+SYL.chapter+'! Type your first question and I will teach you step by step.');
+      addMsg('ai',`Let us study ${SYL.topic} from ${SYL.chapter}! Type your first question and I will teach you step by step.`);
     }
-  },400);
+  },1200);
 }
 
 
