@@ -507,9 +507,9 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 .ob-subtitle{font-size:13px;color:rgba(255,255,255,.8);text-align:center;line-height:1.6;}
 .ob-screenshot{width:100%;background:rgba(255,255,255,.08);border-radius:16px;border:1px solid rgba(255,255,255,.15);overflow:hidden;}
 .ob-fact{width:100%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 14px;font-size:12px;color:#fff;font-weight:600;text-align:center;line-height:1.5;}
-#blackboard-overlay{display:none;position:fixed;inset:0;z-index:65;flex-direction:column;background:#1a1a2e;}
+#blackboard-overlay{display:none;position:fixed;inset:0;z-index:65;flex-direction:column;background:linear-gradient(145deg,#0d1117,#1a1a2e);}
 #blackboard-overlay.open{display:flex;}
-.bb-hdr{background:#0d0d1a;padding:0 14px;height:52px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.1);}
+.bb-hdr{background:linear-gradient(135deg,#0d0d1a,#1a1030);padding:0 14px;height:56px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:2px solid rgba(255,214,0,0.2);box-shadow:0 2px 16px rgba(0,0,0,0.4);}
 .bb-title{font-size:14px;font-weight:700;color:#fff;flex:1;}
 .bb-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:22px;cursor:pointer;}
 .bb-tools{display:flex;gap:6px;padding:8px 12px;background:#0d0d1a;flex-shrink:0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid rgba(255,255,255,.1);}
@@ -558,6 +558,8 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 @keyframes slideUp{from{transform:translateY(28px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 @keyframes msgIn{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
 @keyframes tdot{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
+
+.bb-board{flex:1;overflow-y:auto;background:linear-gradient(180deg,#1a3a1a,#142e14);padding:16px;font-family:'Courier New',monospace;-webkit-overflow-scrolling:touch;border-left:8px solid #3d2008;border-right:8px solid #3d2008;border-bottom:12px solid #3d2008;}
 </style>
 </head>
 <body>
@@ -1146,32 +1148,67 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 
 <!-- ══ BLACKBOARD OVERLAY ══ -->
 <div id="blackboard-overlay">
+
+  <!-- HEADER — wood frame top -->
   <div class="bb-hdr">
-    <span style="font-size:18px;">✏️</span>
-    <div class="bb-title" id="bb-title">📐 Miss BrightMind's Blackboard</div>
-    <button class="bb-close" onclick="closeBlackboard()">✕</button>
+    <div style="display:flex;align-items:center;gap:8px;flex:1;">
+      <div style="width:36px;height:36px;background:linear-gradient(135deg,#ffd600,#ff8f00);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 8px rgba(255,214,0,0.4);">🖊️</div>
+      <div>
+        <div style="font-size:11px;color:rgba(255,214,0,0.7);font-weight:600;letter-spacing:1px;">MISS BRIGHTMIND'S</div>
+        <div style="font-size:16px;font-weight:800;color:#fff;" id="bb-title">Blackboard</div>
+      </div>
+    </div>
+    <!-- Stats top right like Image 2 -->
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:5px 10px;text-align:center;display:none;" id="bb-stats">
+        <div style="font-size:11px;color:#ffd600;font-weight:700;" id="bb-q-count">0</div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.5);">Questions</div>
+      </div>
+      <!-- Language selector -->
+      <select id="bb-lang-sel" onchange="S.lang=this.value;document.getElementById('lang-sel').value=this.value;" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+        <option value="en">🌐 English</option>
+        <option value="ta">தமிழ்</option>
+        <option value="hi">हिंदी</option>
+        <option value="ml">മലയാളം</option>
+        <option value="kn">ಕನ್ನಡ</option>
+        <option value="te">తెలుగు</option>
+      </select>
+      <button class="bb-close" onclick="closeBlackboard()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;width:36px;height:36px;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
   </div>
+
+  <!-- MODE TOOLS -->
   <div class="bb-tools">
-    <button class="bb-tool active" onclick="bbMode(this,'solve')">🔢 Solve Step by Step</button>
-    <button class="bb-tool" onclick="bbMode(this,'explain')">📖 Explain Concept</button>
-    <button class="bb-tool" onclick="bbMode(this,'formula')">📐 Show Formulas</button>
-    <button class="bb-tool" onclick="bbMode(this,'example')">✏️ Worked Example</button>
+    <button class="bb-tool active" onclick="bbMode(this,'solve')">🔢 Step by Step</button>
+    <button class="bb-tool" onclick="bbMode(this,'explain')">📖 Explain</button>
+    <button class="bb-tool" onclick="bbMode(this,'formula')">📐 Formulas</button>
+    <button class="bb-tool" onclick="bbMode(this,'example')">✏️ Example</button>
     <button class="bb-tool" onclick="bbMode(this,'diagram')">🔬 Diagram</button>
   </div>
+
+  <!-- BLACKBOARD CANVAS — chalk green -->
   <div class="bb-board" id="bb-canvas">
-    <!-- Blackboard content renders here -->
+    <!-- Welcome shown by showBBWelcome() -->
   </div>
+
+  <!-- FOOTER — wood chalk tray -->
   <div class="bb-footer">
-    <button onclick="document.getElementById('bb-photo-input').click()" 
-      style="width:42px;height:42px;background:rgba(255,255,255,.1);border:1px solid #3a6a3a;border-radius:4px;cursor:pointer;font-size:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;"
-      title="Upload photo to blackboard">📷</button>
+    <!-- Photo upload -->
+    <button onclick="document.getElementById('bb-photo-input').click()"
+      style="width:44px;height:44px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;cursor:pointer;font-size:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;"
+      title="Upload photo question">📷</button>
+    <!-- Gallery upload -->
+    <button onclick="document.getElementById('bb-gallery-input').click()"
+      style="width:44px;height:44px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;cursor:pointer;font-size:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center;"
+      title="Upload from gallery">🖼️</button>
     <input type="file" id="bb-photo-input" accept="image/*" capture="environment" style="display:none;" onchange="handleBBPhotoUpload(event)"/>
-    <input class="bb-ask-inp" id="bb-inp" placeholder="Write your question on the board..." 
+    <input type="file" id="bb-gallery-input" accept="image/*" style="display:none;" onchange="handleBBPhotoUpload(event)"/>
+    <!-- Text input -->
+    <input class="bb-ask-inp" id="bb-inp" placeholder="Ask any question on the board..."
       onkeydown="if(event.key==='Enter')sendToBlackboard()"/>
-    <button class="bb-send" onclick="sendToBlackboard()">✏</button>
+    <button class="bb-send" onclick="sendToBlackboard()" style="background:linear-gradient(135deg,#ffd600,#ff8f00);border:none;width:44px;height:44px;border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(255,214,0,0.4);">✏️</button>
   </div>
 </div>
-
 <!-- ══ PHOTO OVERLAY ══ -->
 <div class="photo-overlay" id="photo-overlay">
   <div class="po-title">📷 Photo Question</div>
@@ -1456,17 +1493,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
       <div style="font-size:11px;color:rgba(255,255,255,.9);margin-top:2px;">Founding member price — Limited time only!</div>
     </div>
     <div class="paywall-plans">
-      <div class="paywall-plan" onclick="selPaywallPlan(this,'single')">
-        <div>
-          <div class="pn">Single Subject</div>
-          <div class="pd">1 subject · Unlimited · AI tutor</div>
-          <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Was ₹249 · Save 52%!</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹249</div>
-          <div class="pp">₹199<small>/mo</small></div>
-        </div>
-      </div>
+
       <div class="paywall-plan hot" onclick="selPaywallPlan(this,'all')">
         <div>
           <div class="pn">All Subjects <span class="hot-tag">BEST</span></div>
@@ -1534,16 +1561,6 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     <!-- STEP 1: SUBJECT PLAN -->
     <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:8px;letter-spacing:1px;">STEP 1 — SELECT PLAN</div>
     <div class="plan-opts" id="plan-opts">
-      <div class="plan-opt" onclick="selPlan(this,'single')">
-        <div>
-          <div class="pn">Single Subject</div>
-          <div class="pd">One subject · Unlimited · History</div>
-          <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Was ₹249 · Save 52%!</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:12px;color:var(--gray-text);text-decoration:line-through;">₹249</div>
-          <div class="pp">₹199<small>/mo</small></div>
-        </div>
       </div>
       <div class="plan-opt sel" onclick="selPlan(this,'all')">
         <div>
@@ -1855,11 +1872,22 @@ function checkPaywall(){
   if(checkTrial(S.user)==='expired'){document.getElementById('paywall-overlay').classList.add('open');return true;}
   return false;
 }
-function selPaywallPlan(el){document.querySelectorAll('.paywall-plan').forEach(p=>p.classList.remove('hot'));el.classList.add('hot');}
+function selPaywallPlan(el,type,duration){
+  ['pw-monthly','pw-quarterly','pw-annual'].forEach(function(id){
+    var b=document.getElementById(id);
+    if(b){b.style.borderColor='rgba(255,255,255,0.15)';b.style.background='rgba(255,255,255,0.05)';}
+  });
+  document.querySelectorAll('.paywall-plan').forEach(function(p){p.classList.remove('hot');});
+  if(el){el.classList.add('hot');el.style.borderColor='rgba(255,214,0,0.8)';el.style.background='rgba(255,214,0,0.12)';}
+  selectedPlanType=type||'all';
+  selectedDuration=duration||'monthly';
+  if(duration==='quarterly')selectedAmount=567;
+  else if(duration==='annual')selectedAmount=2148;
+  else selectedAmount=199;
+}
 function activatePaywall(){
   const plan=document.querySelector('.paywall-plan.hot');
-  const amount=plan?.querySelector('.pp')?.textContent?.includes('199')?199:120;
-  openRazorpay(amount, amount===199?'all':'single');
+  openRazorpay(selectedAmount||199,'all',selectedDuration||'monthly');
 }
 
 // ══════════════════════════════════════
@@ -2500,33 +2528,50 @@ function openBlackboard(){
 }
 
 function showBBWelcome(){
+  const u=S.user;
   const canvas=document.getElementById('bb-canvas');
-  canvas.innerHTML=`
-    <div style="text-align:center;padding:40px 20px 20px;">
-      <div style="font-size:40px;margin-bottom:10px;">✏️</div>
-      <div style="font-family:'Courier New',monospace;font-size:16px;color:#a0d4a0;margin-bottom:6px;">Miss BrightMind's Blackboard</div>
-      <div style="font-family:'Courier New',monospace;font-size:12px;color:rgba(200,255,200,.5);line-height:1.8;">I will explain step by step.<br>Each step waits for you before moving on. 😊</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:8px;max-width:320px;margin:0 auto;padding:0 16px 20px;">
-      <div onclick="quickBBQ('Solve: x² - 5x + 6 = 0')" class="bb-quick-q">📐 Solve: x² - 5x + 6 = 0</div>
-      <div onclick="quickBBQ('Explain Newton\'s Second Law F=ma')" class="bb-quick-q">⚛️ Newton's Second Law</div>
-      <div onclick="quickBBQ('Derive the quadratic formula step by step')" class="bb-quick-q">📐 Derive quadratic formula</div>
-      <div onclick="quickBBQ('Balance: H2 + O2 = H2O')" class="bb-quick-q">🧪 Balance: H₂ + O₂ = H₂O</div>
-      <div onclick="quickBBQ('Explain photosynthesis process')" class="bb-quick-q">🌱 Photosynthesis process</div>
-    </div>`;
-  // add quick-q style
-  if(!document.getElementById('bb-qs-style')){
-    const st=document.createElement('style');
-    st.id='bb-qs-style';
-    st.textContent='.bb-quick-q{background:rgba(255,255,255,.04);border:1px solid #2a4a2a;border-radius:4px;padding:10px 14px;color:rgba(200,255,200,.8);font-size:13px;cursor:pointer;font-family:"Courier New",monospace;transition:background .2s;}.bb-quick-q:active{background:rgba(255,255,255,.1);}';
-    document.head.appendChild(st);
-  }
+  const subs=getSubjects();
+  const rows=subs.map(s=>{
+    const d=u&&u.subjects&&u.subjects[s.id]||{};
+    const p=d.progress||0;
+    const st=d.stars||0;
+    const stars='★'.repeat(st)+'☆'.repeat(5-st);
+    return '<div data-id="'+s.id+'" data-name="'+s.name+'" onclick="openSubjectOnBB(this.dataset.id,this.dataset.name)" style="display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);transition:background .15s;">'
+      +'<span style="font-size:22px;">'+s.icon+'</span>'
+      +'<div style="flex:1;">'
+      +'<div style="font-size:14px;font-weight:700;color:#fff;">'+s.name+'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-top:3px;">'
+      +'<div style="flex:1;height:3px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">'
+      +'<div style="height:100%;width:'+p+'%;background:linear-gradient(90deg,#ffd600,#ff8f00);border-radius:3px;"></div>'
+      +'</div>'
+      +'<span style="font-size:10px;color:#ffd600;font-weight:600;">'+stars+' '+p+'%</span>'
+      +'</div></div>'
+      +'<div style="display:flex;gap:6px;">'
+      +'<button data-id="'+s.id+'" data-name="'+s.name+'" onclick="event.stopPropagation();openSubjectOnBB(this.dataset.id,this.dataset.name)" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">📚 Study</button>'
+      +'<button data-id="'+s.id+'" data-name="'+s.name+'" data-icon="'+s.icon+'" onclick="event.stopPropagation();openInstantExam(this.dataset.id,this.dataset.name,this.dataset.icon)" style="background:rgba(255,107,0,0.3);border:1px solid rgba(255,107,0,0.4);color:#ff8f00;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">📝 Exam</button>'
+      +'</div></div>';
+  }).join('');
+  canvas.innerHTML='<div style="padding:16px 14px;">'
+    +'<div style="text-align:center;margin-bottom:16px;">'
+    +'<div style="font-size:20px;font-weight:900;color:#fff;font-family:serif;">Welcome, '+(u&&u.name?u.name:'Student')+'! 👋</div>'
+    +'<div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:4px;">'+(u&&u.board||'CBSE')+' &bull; Class '+(u&&u.class||11)+' &bull; '+(u&&u.state||'India')+'</div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">'
+    +'<div onclick="var i=document.getElementById(\"bb-inp\");if(i)i.focus();" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:10px;text-align:center;cursor:pointer;"><div style="font-size:18px;">✏️</div><div style="font-size:10px;color:#fff;font-weight:700;margin-top:4px;">Blackboard</div><div style="font-size:9px;color:rgba(255,255,255,0.5);">Step by step</div></div>'
+    +'<div onclick="showPage(\"papers\")" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:10px;text-align:center;cursor:pointer;"><div style="font-size:18px;">📄</div><div style="font-size:10px;color:#fff;font-weight:700;margin-top:4px;">Papers</div><div style="font-size:9px;color:rgba(255,255,255,0.5);">Download now</div></div>'
+    +'<div onclick="closeBlackboard();showPage(\"score\")" style="background:rgba(180,100,220,0.12);border:1px solid rgba(180,100,220,0.3);border-radius:10px;padding:10px;text-align:center;cursor:pointer;"><div style="font-size:18px;">🏆</div><div style="font-size:10px;color:#ce93d8;font-weight:700;margin-top:4px;">My Score</div><div style="font-size:9px;color:rgba(206,147,216,0.6);">Badges & XP</div></div>'
+    +'</div>'
+    +'<div style="font-size:14px;font-weight:800;color:#ffd600;text-align:center;margin-bottom:12px;letter-spacing:1px;">✦ Choose Your Subject ✦</div>'
+    +rows
+    +'</div>';
 }
 
-function closeBlackboard(){
-  document.getElementById('blackboard-overlay').classList.remove('open');
-  window.speechSynthesis.cancel();
+function openSubjectOnBB(id, name){
+  // Close blackboard and open subject study
+  closeBlackboard();
+  openSubject(id);
 }
+
 
 function bbMode(btn, mode){
   document.querySelectorAll('.bb-tool').forEach(b=>b.classList.remove('active'));
