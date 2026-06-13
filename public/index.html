@@ -7,19 +7,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --blue-dark:#0d1b4b;--blue-mid:#1a237e;--blue-bright:#1565c0;
+  --blue-dark:#0a0f2e;--blue-mid:#1a237e;--blue-bright:#3949ab;
   --gold:#ffd600;--gold-dark:#f9a825;--gold-light:#fff9c4;
-  --white:#fff;--gray-light:#f4f6fb;--gray-mid:#e0e4f0;--gray-text:#7a8499;
+  --white:#fff;--gray-light:#f0f2ff;--gray-mid:#e0e4f0;--gray-text:#7a8499;
   --green:#00c853;--red:#f44336;--orange:#ff6f00;
-  --shadow:0 8px 32px rgba(13,27,75,0.13);--shadow-gold:0 4px 24px rgba(255,214,0,0.18);
+  --shadow:0 8px 32px rgba(10,15,46,0.18);--shadow-gold:0 4px 24px rgba(255,214,0,0.22);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;}
-body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16px;}
+body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 
 /* ── SCREENS ── */
 .screen{display:none;height:100vh;height:100dvh;overflow:hidden;}
-.screen.active{display:flex;flex-direction:column;height:100vh;height:100dvh;}
+.screen.active{display:flex;flex-direction:column;}
 
 /* ══ SPLASH ══ */
 #splash{background:#030d5a;align-items:center;justify-content:center;flex-direction:column;overflow:hidden;padding:12px 0;position:relative;}
@@ -34,19 +34,19 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 .splash-login:hover{color:var(--gold);}
 
 /* ══ AUTH ══ */
-#auth{background:linear-gradient(145deg,var(--blue-dark),var(--blue-mid));align-items:center;justify-content:center;padding:20px;}
-.auth-card{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:400px;box-shadow:var(--shadow);animation:slideUp .4s ease;overflow-y:auto;max-height:90vh;}
+#auth{background:radial-gradient(ellipse at 20% 50%,#1a3a8f 0%,#0a1a6e 30%,#060d3d 60%,#030820 100%);align-items:center;justify-content:center;padding:20px;position:relative;overflow:hidden;}
+.auth-card{background:rgba(10,15,46,0.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.15);border-radius:28px;padding:32px 28px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,0.7);animation:slideUp .4s ease;overflow-y:auto;max-height:90vh;}
 .auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:24px;}
 .auth-logo .icon{width:42px;height:42px;background:var(--gold);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
 .auth-logo .name{font-size:17px;font-weight:800;color:var(--blue-dark);}
 .auth-logo .name span{color:var(--blue-bright);}
-.auth-tabs{display:flex;background:var(--gray-light);border-radius:12px;padding:4px;margin-bottom:24px;}
-.auth-tab{flex:1;padding:10px;text-align:center;font-size:14px;font-weight:600;border-radius:10px;cursor:pointer;color:var(--gray-text);border:none;background:transparent;transition:all .2s;}
-.auth-tab.active{background:var(--blue-mid);color:#fff;}
+.auth-tabs{display:flex;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:4px;margin-bottom:24px;}
+.auth-tab{flex:1;padding:10px;text-align:center;font-size:14px;font-weight:600;border-radius:10px;cursor:pointer;color:rgba(255,255,255,0.5);border:none;background:transparent;transition:all .2s;}
+.auth-tab.active{background:linear-gradient(135deg,#1a237e,#3949ab);color:#fff;}
 .auth-form{display:flex;flex-direction:column;gap:14px;}
 .fg{display:flex;flex-direction:column;gap:6px;}
-.fg label{font-size:13px;font-weight:600;color:var(--blue-dark);}
-.fg input,.fg select{padding:13px 16px;border:2px solid var(--gray-mid);border-radius:12px;font-size:15px;font-family:'Poppins',sans-serif;outline:none;background:#fff;color:var(--blue-dark);transition:border .2s;-webkit-appearance:none;}
+.fg label{font-size:13px;font-weight:600;color:rgba(255,255,255,0.8);}
+.fg input,.fg select{padding:13px 16px;border:1px solid rgba(255,255,255,0.15);border-radius:12px;font-size:15px;font-family:'Poppins',sans-serif;outline:none;background:rgba(255,255,255,0.08);color:#fff;transition:all .2s;-webkit-appearance:none;}.fg input::placeholder{color:rgba(255,255,255,0.35);}.fg select option{background:#1a237e;color:#fff;}
 .fg input:focus,.fg select:focus{border-color:var(--blue-bright);}
 .btn-main{background:linear-gradient(135deg,var(--blue-mid),var(--blue-bright));color:#fff;font-size:16px;font-weight:700;padding:15px;border-radius:13px;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(21,69,192,.25);transition:transform .15s;width:100%;}
 .btn-main:active{transform:scale(.98);}
@@ -55,8 +55,8 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 .auth-hint{text-align:center;font-size:12px;color:var(--gray-text);margin-top:4px;line-height:1.6;}
 
 /* ══ APP SHELL ══ */
-#app{background:var(--gray-light);}
-.topnav{background:linear-gradient(90deg,var(--blue-dark),var(--blue-mid));padding:0 16px;height:58px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 12px rgba(13,27,75,.25);}
+#app{background:linear-gradient(180deg,#030820 0%,#0f1535 100%);}
+.topnav{background:rgba(3,8,32,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:0 16px;height:58px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.08);box-shadow:0 2px 24px rgba(0,0,0,0.5);}
 .nav-logo{display:flex;align-items:center;gap:9px;}
 .nav-logo .icon{width:34px;height:34px;background:var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
 .nav-logo .name{font-size:15px;font-weight:800;color:#fff;}
@@ -81,21 +81,21 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 .btab.active .ti{transform:scale(1.18);}
 
 /* ══ HOME ══ */
-.hero{background:linear-gradient(135deg,var(--blue-dark),var(--blue-bright));border-radius:20px;padding:20px;color:#fff;margin-bottom:16px;position:relative;overflow:hidden;}
+.hero{background:linear-gradient(135deg,#0d1b5e,#1a237e);border:1px solid rgba(255,214,0,0.12);border-radius:20px;padding:20px;color:#fff;margin-bottom:0;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
 .hero::before{content:'🎓';position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:70px;opacity:.12;}
 .hero-greet{font-size:12px;opacity:.8;margin-bottom:3px;}
 .hero-name{font-size:22px;font-weight:800;margin-bottom:3px;}
 .hero-sub{font-size:12px;opacity:.75;}
 .hero-stats{display:flex;gap:10px;margin-top:14px;}
-.hstat{background:rgba(255,255,255,.12);border-radius:10px;padding:8px 12px;text-align:center;flex:1;}
+.hstat{background:rgba(255,255,255,0.07);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:8px 12px;text-align:center;flex:1;}
 .hstat .v{font-size:18px;font-weight:800;color:var(--gold);}
 .hstat .l{font-size:10px;opacity:.8;}
 .sec-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
 .subj-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:20px;}
-.subj-card{background:#fff;border-radius:16px;padding:16px 12px;cursor:pointer;box-shadow:0 2px 10px rgba(13,27,75,.07);transition:all .2s;border:2px solid transparent;text-align:center;-webkit-tap-highlight-color:rgba(0,0,0,0);}
+.subj-card{background:linear-gradient(145deg,#0d1547,#0a1035);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.4);transition:all .2s;-webkit-tap-highlight-color:rgba(0,0,0,0);}
 .subj-card:active{transform:scale(.97);border-color:var(--blue-bright);}
 .subj-icon{font-size:34px;margin-bottom:7px;}
-.subj-name{font-size:13px;font-weight:700;color:var(--blue-dark);}
+.subj-name{font-size:14px;font-weight:800;color:#fff;}
 .subj-prog{margin-top:7px;height:4px;background:var(--gray-mid);border-radius:4px;overflow:hidden;}
 .subj-prog-fill{height:100%;background:var(--gold);border-radius:4px;}
 .subj-stars{font-size:11px;margin-top:5px;color:var(--gold-dark);}
@@ -104,15 +104,15 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 .ub-left .s{font-size:11px;color:var(--blue-mid);margin-top:2px;}
 .ub-price{font-size:22px;font-weight:900;color:var(--blue-dark);}
 .ub-price small{font-size:11px;font-weight:500;}
-.limit-bar{background:#fff;border-radius:12px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(13,27,75,.06);}
-.lb-label{font-size:12px;color:var(--gray-text);flex:1;}
+.limit-bar{background:rgba(3,8,32,0.6);border-bottom:1px solid rgba(255,255,255,0.06);padding:8px 16px;margin-bottom:0;display:flex;align-items:center;gap:10px;}
+.lb-label{font-size:12px;color:rgba(255,255,255,0.5);flex:1;}
 .lb-dots{display:flex;gap:4px;}
 .lb-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);}
 .lb-dot.used{background:var(--gray-mid);}
 .lb-count{font-size:13px;font-weight:700;color:var(--blue-mid);}
 
 /* ══ CHAT ══ */
-#chat-overlay{display:none;position:fixed;inset:0;z-index:50;flex-direction:column;background:var(--gray-light);}
+#chat-overlay{display:none;position:fixed;inset:0;z-index:50;flex-direction:column;background:linear-gradient(180deg,#030820,#060d3d);}
 #chat-overlay.open{display:flex;}
 .chat-hdr{background:linear-gradient(90deg,var(--blue-dark),var(--blue-mid));padding:0 14px;height:58px;display:flex;align-items:center;gap:11px;flex-shrink:0;}
 .chat-back{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:6px;line-height:1;}
@@ -121,9 +121,9 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 .chat-subj-info .s{font-size:11px;color:rgba(255,255,255,.7);}
 .chat-lang{margin-left:auto;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.3);font-size:12px;font-weight:600;color:#fff;background:rgba(255,255,255,.15);cursor:pointer;}
 .chat-lang option{color:var(--blue-dark);background:#fff;}
-.chat-qqs{display:flex;gap:7px;padding:8px 14px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;background:var(--gray-light);}
+.chat-qqs{display:flex;gap:7px;padding:8px 14px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;background:rgba(3,8,32,0.6);border-bottom:1px solid rgba(255,255,255,0.06);}
 .chat-qqs::-webkit-scrollbar{display:none;}
-.qq{white-space:nowrap;padding:6px 13px;background:var(--gold-light);border:1px solid var(--gold);border-radius:20px;font-size:12px;font-weight:600;color:var(--blue-dark);cursor:pointer;flex-shrink:0;}
+.qq{white-space:nowrap;padding:6px 13px;background:rgba(255,214,0,0.12);border:1px solid rgba(255,214,0,0.35);border-radius:20px;font-size:12px;font-weight:600;color:#ffd600;cursor:pointer;flex-shrink:0;}
 .qq:active{background:var(--gold);}
 .chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:11px;-webkit-overflow-scrolling:touch;}
 .msg{display:flex;gap:9px;max-width:88%;animation:msgIn .22s ease;}
@@ -132,8 +132,8 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 .msg.ai .msg-av{background:var(--blue-mid);}
 .msg.user .msg-av{background:var(--gold);font-size:12px;font-weight:700;color:var(--blue-dark);}
 .msg-bub{padding:11px 14px;border-radius:17px;font-size:14px;line-height:1.6;}
-.msg.ai .msg-bub{background:#fff;color:var(--blue-dark);border-bottom-left-radius:4px;box-shadow:0 2px 8px rgba(13,27,75,.08);}
-.msg.user .msg-bub{background:var(--blue-mid);color:#fff;border-bottom-right-radius:4px;}
+.msg.ai .msg-bub{background:rgba(255,255,255,0.95);color:#0a0f2e;border-bottom-left-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,0.3);}
+.msg.user .msg-bub{background:linear-gradient(135deg,#1a237e,#3949ab);color:#fff;border-bottom-right-radius:6px;box-shadow:0 4px 16px rgba(26,35,126,0.5);}
 .msg-time{font-size:10px;opacity:.5;margin-top:3px;}
 .typing{display:none;align-items:center;gap:9px;padding:0 14px 6px;}
 .typing.show{display:flex;}
@@ -143,8 +143,8 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 .tdots span:nth-child(3){animation-delay:.4s;}
 .exam-cta{margin:6px 14px;background:linear-gradient(135deg,var(--orange),#ff8f00);color:#fff;border:none;border-radius:13px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;width:calc(100% - 28px);box-shadow:0 4px 14px rgba(255,111,0,.3);display:none;}
 .exam-cta:active{transform:scale(.98);}
-.chat-input-bar{background:#fff;padding:10px 14px;border-top:1px solid var(--gray-mid);display:flex;gap:9px;align-items:flex-end;flex-shrink:0;}
-.chat-inp{flex:1;padding:11px 14px;border:2px solid var(--gray-mid);border-radius:22px;font-size:14px;font-family:'Poppins',sans-serif;outline:none;resize:none;max-height:90px;transition:border .2s;-webkit-appearance:none;}
+.chat-input-bar{background:rgba(3,8,32,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:10px 14px 14px;border-top:1px solid rgba(255,255,255,0.08);display:flex;gap:9px;align-items:flex-end;flex-shrink:0;}
+.chat-inp{flex:1;padding:11px 14px;border:1px solid rgba(255,255,255,0.15);border-radius:22px;font-size:14px;font-family:'Poppins',sans-serif;outline:none;resize:none;max-height:90px;transition:all .2s;-webkit-appearance:none;background:rgba(255,255,255,0.07);color:#fff;}.chat-inp::placeholder{color:rgba(255,255,255,0.35);}
 .chat-inp:focus{border-color:var(--blue-bright);}
 .chat-send{width:44px;height:44px;background:var(--blue-mid);color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:19px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .chat-send:active{background:var(--blue-bright);transform:scale(.95);}
@@ -274,14 +274,14 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 .admin-hdr{background:linear-gradient(135deg,#1a0533,#3a0a6b);padding:18px 16px;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .admin-title{font-size:19px;font-weight:800;}
 .admin-badge{background:var(--gold);color:var(--blue-dark);font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;}
-.admin-body{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;background:transparent;}
+.admin-body{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;}
 .revenue-card{background:linear-gradient(135deg,#1b5e20,#2e7d32);border-radius:16px;padding:18px;color:#fff;margin-bottom:16px;}
 .rc-label{font-size:13px;opacity:.8;margin-bottom:3px;}
 .rc-amount{font-size:38px;font-weight:900;color:var(--gold);}
 .rc-sub{font-size:12px;opacity:.7;margin-top:3px;}
 .admin-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
 .asc{background:rgba(255,255,255,0.06);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:15px;}
-.asc-label{font-size:11px;color:rgba(255,255,255,0.55);margin-bottom:5px;font-weight:600;}
+.asc-label{font-size:11px;color:rgba(255,255,255,0.55);margin-bottom:5px;}
 .asc-val{font-size:26px;font-weight:900;color:var(--blue-dark);}
 .asc-val.green{color:var(--green);}
 .asc-val.gold{color:var(--gold-dark);}
@@ -546,6 +546,14 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 
 /* ══ ANIMATIONS ══ */
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+@keyframes goldShimmer{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.6;}50%{transform:scale(1.15);opacity:1;}}
+@keyframes float1{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+@keyframes float2{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+@keyframes float3{0%,100%{transform:translateY(0);}50%{transform:translateY(-16px);}}
+@keyframes sparkle1{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(.6);}}
+@keyframes sparkle2{0%,100%{opacity:.6;transform:scale(1);}50%{opacity:1;transform:scale(1.4);}}
+@keyframes btnGlow{0%,100%{box-shadow:0 8px 40px rgba(26,95,255,.6);}50%{box-shadow:0 8px 60px rgba(26,95,255,.9),0 0 32px rgba(100,180,255,.4);}}
 @keyframes iconPop{from{transform:scale(0);}to{transform:scale(1);}}
 @keyframes slideUp{from{transform:translateY(28px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 @keyframes msgIn{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
@@ -556,121 +564,47 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 
 <!-- ══ SPLASH ══ -->
 <div id="splash" class="screen active">
-
-  <!-- EXACT MATCH BACKGROUND — bright electric blue -->
   <div style="position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 30%,#1a4fff 0%,#0a2aaa 35%,#060d5a 65%,#030820 100%);overflow:hidden;">
-    <!-- Light beams -->
-    <div style="position:absolute;top:-20%;left:50%;width:600px;height:600px;background:conic-gradient(from 270deg at 50% 0%,transparent 70deg,rgba(100,160,255,0.12) 90deg,transparent 110deg);transform:translateX(-50%);"></div>
     <div style="position:absolute;top:0;left:50%;width:3px;height:50%;background:linear-gradient(180deg,rgba(150,200,255,0.5),transparent);transform:translateX(-50%);"></div>
-    <!-- Blue floating orbs -->
-    <div style="position:absolute;left:4%;top:25%;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(80,140,255,0.6),rgba(30,80,255,0.2));box-shadow:0 0 30px rgba(80,140,255,0.4);animation:float1 6s ease-in-out infinite;"></div>
-    <div style="position:absolute;left:7%;top:60%;width:50px;height:50px;border-radius:50%;background:radial-gradient(circle,rgba(150,100,255,0.5),rgba(100,50,200,0.2));box-shadow:0 0 20px rgba(150,100,255,0.4);animation:float2 8s ease-in-out infinite;"></div>
-    <div style="position:absolute;right:4%;top:20%;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(80,140,255,0.5),rgba(30,80,255,0.15));box-shadow:0 0 25px rgba(80,140,255,0.3);animation:float3 7s ease-in-out infinite;"></div>
-    <div style="position:absolute;right:6%;top:55%;width:45px;height:45px;border-radius:50%;background:radial-gradient(circle,rgba(120,80,255,0.4),transparent);animation:float1 9s ease-in-out infinite;"></div>
-    <!-- Glass floating cards -->
-    <div style="position:absolute;left:1%;top:30%;width:68px;height:68px;border-radius:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:30px;animation:float2 9s ease-in-out infinite;backdrop-filter:blur(8px);">🎓</div>
-    <div style="position:absolute;right:1%;top:42%;width:62px;height:62px;border-radius:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:28px;animation:float1 7s ease-in-out infinite;backdrop-filter:blur(8px);">🧠</div>
+    <div style="position:absolute;left:4%;top:25%;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(80,140,255,0.5),rgba(30,80,255,0.2));box-shadow:0 0 30px rgba(80,140,255,0.3);animation:float1 6s ease-in-out infinite;"></div>
+    <div style="position:absolute;right:4%;top:20%;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(80,140,255,0.4),rgba(30,80,255,0.15));animation:float3 7s ease-in-out infinite;"></div>
+    <div style="position:absolute;left:2%;top:38%;width:64px;height:64px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:28px;animation:float2 9s ease-in-out infinite;">🎓</div>
+    <div style="position:absolute;right:2%;top:46%;width:60px;height:60px;border-radius:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:26px;animation:float1 7s ease-in-out infinite;">🧠</div>
   </div>
-
-  <!-- MAIN GLASS CARD -->
   <div style="position:relative;z-index:2;width:92%;max-width:520px;margin:auto;background:rgba(15,30,120,0.35);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(100,160,255,0.3);border-radius:28px;padding:32px 26px 28px;box-shadow:0 0 60px rgba(30,80,255,0.2),0 24px 64px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.15);animation:slideUp .5s ease;">
-
-    <!-- TOP GLOW LINE -->
     <div style="position:absolute;top:0;left:15%;right:15%;height:2px;background:linear-gradient(90deg,transparent,rgba(150,200,255,0.9),transparent);border-radius:2px;"></div>
-
-    <!-- 3D BOOKS LOGO — emoji stack looks 3D -->
-    <div style="text-align:center;margin-bottom:16px;animation:iconPop .6s .2s both cubic-bezier(.34,1.56,.64,1);">
+    <div style="text-align:center;margin-bottom:14px;animation:iconPop .6s .2s both cubic-bezier(.34,1.56,.64,1);">
       <div style="position:relative;display:inline-block;">
-        <!-- Glow halo -->
-        <div style="position:absolute;inset:-20px;background:radial-gradient(ellipse,rgba(100,160,255,0.35),transparent 65%);border-radius:50%;animation:breathe 3s ease-in-out infinite;"></div>
-        <!-- Books emoji — large -->
-        <div style="font-size:78px;line-height:1;position:relative;filter:drop-shadow(0 12px 24px rgba(30,80,255,0.6)) drop-shadow(0 -2px 8px rgba(200,230,255,0.3));">📚</div>
-        <!-- Sparkles -->
-        <div style="position:absolute;top:-12px;left:-10px;font-size:18px;animation:sparkle1 2s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(255,220,100,0.8));">✨</div>
-        <div style="position:absolute;top:-14px;right:-8px;font-size:16px;animation:sparkle2 2.5s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(255,220,100,0.8));">⭐</div>
-        <div style="position:absolute;bottom:-4px;right:-12px;font-size:13px;animation:sparkle1 3s ease-in-out infinite;">✦</div>
+        <div style="position:absolute;inset:-18px;background:radial-gradient(ellipse,rgba(100,160,255,0.3),transparent 65%);border-radius:50%;animation:breathe 3s ease-in-out infinite;"></div>
+        <div style="font-size:76px;line-height:1;position:relative;filter:drop-shadow(0 12px 24px rgba(30,80,255,0.6));">📚</div>
+        <div style="position:absolute;top:-12px;left:-10px;font-size:18px;animation:sparkle1 2s ease-in-out infinite;">✨</div>
+        <div style="position:absolute;top:-14px;right:-8px;font-size:16px;animation:sparkle2 2.5s ease-in-out infinite;">⭐</div>
       </div>
     </div>
-
-    <!-- APP NAME — big bold -->
-    <div style="text-align:center;margin-bottom:6px;">
-      <div style="font-size:38px;font-weight:900;color:#fff;letter-spacing:-0.5px;line-height:1.1;text-shadow:0 0 30px rgba(100,180,255,0.5),0 2px 8px rgba(0,0,0,0.5);">BrightMind <span style="color:#ffd600;text-shadow:0 0 20px rgba(255,214,0,0.7);">Teacher</span></div>
+    <div style="text-align:center;font-size:36px;font-weight:900;color:#fff;line-height:1.1;margin-bottom:6px;text-shadow:0 0 30px rgba(100,180,255,0.4);">BrightMind <span style="color:#ffd600;text-shadow:0 0 20px rgba(255,214,0,0.7);">Teacher</span></div>
+    <div style="text-align:center;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:10px;">
+      <div style="height:1px;width:30px;background:linear-gradient(90deg,transparent,rgba(150,200,255,0.5));"></div>
+      <div style="font-size:13px;color:rgba(200,230,255,0.8);font-weight:500;">Your AI Teacher, Always There</div>
+      <div style="height:1px;width:30px;background:linear-gradient(90deg,rgba(150,200,255,0.5),transparent);"></div>
     </div>
-
-    <!-- TAGLINE -->
-    <div style="text-align:center;margin-bottom:22px;display:flex;align-items:center;justify-content:center;gap:10px;">
-      <div style="height:1px;width:35px;background:linear-gradient(90deg,transparent,rgba(150,200,255,0.5));"></div>
-      <div style="font-size:14px;color:rgba(200,230,255,0.8);font-weight:500;letter-spacing:0.5px;">Your AI Teacher, Always There</div>
-      <div style="height:1px;width:35px;background:linear-gradient(90deg,rgba(150,200,255,0.5),transparent);"></div>
+    <div style="text-align:center;font-size:10px;color:rgba(180,210,255,0.5);font-weight:700;letter-spacing:2px;margin-bottom:12px;">&middot; SELECT YOUR LANGUAGE &middot;</div>
+    <div style="display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:22px;">
+      <button id="lang-en" onclick="setSplashLang('en',this)" style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(150,200,255,0.6);background:rgba(100,160,255,0.2);color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);"><span style="width:24px;height:24px;border-radius:50%;background:#1565c0;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">🌐</span>English</button>
+      <button id="lang-hi" onclick="setSplashLang('hi',this)" style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);"><span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#c62828,#e53935);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">हि</span>हिंदी</button>
+      <button id="lang-ta" onclick="setSplashLang('ta',this)" style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);"><span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#880e4f,#c2185b);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">த</span>தமிழ்</button>
+      <button id="lang-ml" onclick="setSplashLang('ml',this)" style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);"><span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#1b5e20,#2e7d32);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">മ</span>മലയാളം</button>
+      <button id="lang-kn" onclick="setSplashLang('kn',this)" style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);"><span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#e65100,#f57c00);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">ಕ</span>ಕನ್ನಡ</button>
+      <button id="lang-te" onclick="setSplashLang('te',this)" style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);"><span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#4a148c,#7b1fa2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">తె</span>తెలుగు</button>
     </div>
-
-    <!-- LANG LABEL -->
-    <div style="text-align:center;font-size:11px;color:rgba(180,210,255,0.55);font-weight:700;letter-spacing:2px;margin-bottom:14px;">&middot; SELECT YOUR LANGUAGE &middot;</div>
-
-    <!-- LANGUAGE BUTTONS — all in one row -->
-    <div style="display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:24px;">
-      <button id="lang-en" onclick="setSplashLang('en',this)"
-        style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(150,200,255,0.6);background:rgba(100,160,255,0.2);color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);">
-        <span style="width:24px;height:24px;border-radius:50%;background:#1565c0;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;">🌐</span>English
-      </button>
-      <button id="lang-hi" onclick="setSplashLang('hi',this)"
-        style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);">
-        <span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#c62828,#e53935);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">हि</span>हिंदी
-      </button>
-      <button id="lang-ta" onclick="setSplashLang('ta',this)"
-        style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);">
-        <span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#880e4f,#c2185b);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">த</span>தமிழ்
-      </button>
-      <button id="lang-ml" onclick="setSplashLang('ml',this)"
-        style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);">
-        <span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#1b5e20,#2e7d32);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">മ</span>മലയാളം
-      </button>
-      <button id="lang-kn" onclick="setSplashLang('kn',this)"
-        style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);">
-        <span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#e65100,#f57c00);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">ಕ</span>ಕನ್ನಡ
-      </button>
-      <button id="lang-te" onclick="setSplashLang('te',this)"
-        style="display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);">
-        <span style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#4a148c,#7b1fa2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">తె</span>తెలుగు
-      </button>
-    </div>
-
-    <!-- GET STARTED BUTTON -->
-    <button onclick="go('auth')"
-      style="width:100%;padding:17px;border-radius:50px;border:none;background:linear-gradient(135deg,#1a5fff,#4488ff,#1a5fff);background-size:200%;font-size:17px;font-weight:800;color:#fff;cursor:pointer;letter-spacing:0.5px;box-shadow:0 8px 40px rgba(26,95,255,0.6),0 0 0 1px rgba(150,200,255,0.2);animation:btnGlow 3s ease-in-out infinite;">
-      Get Started 🚀
-    </button>
-
-    <!-- LOGIN LINK -->
-    <div style="text-align:center;margin-top:14px;font-size:13px;color:rgba(180,210,255,0.6);">
-      Already registered? <span onclick="go('auth')" style="color:#60a5fa;font-weight:700;cursor:pointer;text-decoration:underline;">Login</span>
-    </div>
+    <button onclick="go('auth')" style="width:100%;padding:17px;border-radius:50px;border:none;background:linear-gradient(135deg,#1a5fff,#4488ff,#1a5fff);background-size:200%;font-size:17px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 8px 40px rgba(26,95,255,0.6);animation:btnGlow 3s ease-in-out infinite;">Get Started 🚀</button>
+    <div style="text-align:center;margin-top:12px;font-size:13px;color:rgba(180,210,255,0.6);">Already registered? <span onclick="go('auth')" style="color:#60a5fa;font-weight:700;cursor:pointer;text-decoration:underline;">Login</span></div>
   </div>
-
-  <!-- FEATURE BAR -->
   <div style="position:relative;z-index:2;width:92%;max-width:520px;margin:14px auto 0;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;">
-    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(100,160,255,0.2);border-radius:16px;padding:14px 8px;text-align:center;">
-      <div style="font-size:24px;margin-bottom:6px;filter:drop-shadow(0 0 8px rgba(100,180,255,0.8));">🤖</div>
-      <div style="font-size:11px;font-weight:800;color:#fff;">AI-Powered</div>
-      <div style="font-size:9px;color:rgba(180,210,255,0.55);margin-top:2px;">Personalized Learning</div>
-    </div>
-    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(100,200,120,0.2);border-radius:16px;padding:14px 8px;text-align:center;">
-      <div style="font-size:24px;margin-bottom:6px;filter:drop-shadow(0 0 8px rgba(100,220,100,0.8));">🛡️</div>
-      <div style="font-size:11px;font-weight:800;color:#fff;">Safe & Secure</div>
-      <div style="font-size:9px;color:rgba(180,210,255,0.55);margin-top:2px;">Data protected</div>
-    </div>
-    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,214,0,0.2);border-radius:16px;padding:14px 8px;text-align:center;">
-      <div style="font-size:24px;margin-bottom:6px;filter:drop-shadow(0 0 8px rgba(255,214,0,0.8));">📈</div>
-      <div style="font-size:11px;font-weight:800;color:#fff;">Track Progress</div>
-      <div style="font-size:9px;color:rgba(180,210,255,0.55);margin-top:2px;">Learn. Achieve.</div>
-    </div>
-    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,120,50,0.2);border-radius:16px;padding:14px 8px;text-align:center;">
-      <div style="font-size:24px;margin-bottom:6px;filter:drop-shadow(0 0 8px rgba(255,150,50,0.8));">⚡</div>
-      <div style="font-size:11px;font-weight:800;color:#fff;">Always Available</div>
-      <div style="font-size:9px;color:rgba(180,210,255,0.55);margin-top:2px;">24/7 AI Support</div>
-    </div>
+    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(100,160,255,0.2);border-radius:16px;padding:14px 8px;text-align:center;"><div style="font-size:24px;margin-bottom:6px;filter:drop-shadow(0 0 8px rgba(100,180,255,0.8));">🤖</div><div style="font-size:11px;font-weight:800;color:#fff;">AI-Powered</div><div style="font-size:9px;color:rgba(180,210,255,0.55);margin-top:2px;">Personalized</div></div>
+    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(100,200,120,0.2);border-radius:16px;padding:14px 8px;text-align:center;"><div style="font-size:24px;margin-bottom:6px;filter:drop-shadow(0 0 8px rgba(100,220,100,0.8));">🛡️</div><div style="font-size:11px;font-weight:800;color:#fff;">Safe & Secure</div><div style="font-size:9px;color:rgba(180,210,255,0.55);margin-top:2px;">Data protected</div></div>
+    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,214,0,0.2);border-radius:16px;padding:14px 8px;text-align:center;"><div style="font-size:24px;margin-bottom:6px;filter:drop-shadow(0 0 8px rgba(255,214,0,0.8));">📈</div><div style="font-size:11px;font-weight:800;color:#fff;">Track Progress</div><div style="font-size:9px;color:rgba(180,210,255,0.55);margin-top:2px;">Learn. Achieve.</div></div>
+    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,120,50,0.2);border-radius:16px;padding:14px 8px;text-align:center;"><div style="font-size:24px;margin-bottom:6px;filter:drop-shadow(0 0 8px rgba(255,150,50,0.8));">⚡</div><div style="font-size:11px;font-weight:800;color:#fff;">Always Available</div><div style="font-size:9px;color:rgba(180,210,255,0.55);margin-top:2px;">24/7 AI Support</div></div>
   </div>
-
 </div>
 <div id="auth" class="screen">
   <div class="auth-card">
@@ -737,13 +671,12 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
         </select>
       </div>
       <div class="fg"><label>Class</label>
-        <select id="rc" onchange="toggleStreamField(this.value)"><option value="">Select Class</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
+        <select id="rc"><option value="">Select Class</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
       </div>
       <div class="fg"><label>State</label>
         <select id="rs"><option value="">Select State</option><option>Tamil Nadu</option><option>Maharashtra</option><option>Karnataka</option><option>Kerala</option><option>Uttar Pradesh</option><option>Rajasthan</option><option>Gujarat</option><option>West Bengal</option><option>Andhra Pradesh</option><option>Telangana</option><option>Delhi</option><option>Punjab</option><option>Haryana</option><option>Bihar</option><option>Madhya Pradesh</option><option>Other</option></select>
       </div>
       <div class="fg"><label>Password</label><input id="rp" type="password" placeholder="Create password"/></div>
-      <div class="fg" id="stream-field" style="display:none;"><label>Stream (Class 11 &amp; 12)</label><select id="rstream"><option value="science">🔬 Science</option><option value="commerce">💰 Commerce</option><option value="arts">🏛️ Arts</option></select></div>
       <button class="btn-gold" onclick="doRegister()">Create Account ✨</button>
     </div>
     <!-- PARENT LOGIN FORM -->
@@ -775,92 +708,101 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
     <!-- HOME -->
     <div id="pg-home" class="page active">
 
-      <!-- PREMIUM HERO -->
-      <div class="hero" style="padding:20px 18px 24px;position:relative;overflow:hidden;">
-        <!-- decorative circles -->
-        <div style="position:absolute;top:-30px;right:-30px;width:130px;height:130px;background:rgba(255,255,255,.06);border-radius:50%;"></div>
-        <div style="position:absolute;top:10px;right:20px;width:70px;height:70px;background:rgba(255,255,255,.05);border-radius:50%;"></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div>
-            <div style="font-size:12px;color:rgba(255,255,255,.7);font-weight:500;" id="hero-greet-time">Good morning! ☀️</div>
-            <div style="font-size:22px;font-weight:800;color:#fff;margin-top:2px;" id="hero-name">Welcome!</div>
-            <div style="font-size:12px;color:rgba(255,255,255,.75);margin-top:2px;" id="hero-sub">Class 11 · Tamil Nadu</div>
-          </div>
-          <!-- XP pill -->
-          <div style="background:rgba(255,255,255,.15);border-radius:20px;padding:6px 14px;text-align:center;">
-            <div style="font-size:16px;font-weight:800;color:#ffd600;" id="hero-xp">0</div>
-            <div style="font-size:9px;color:rgba(255,255,255,.7);font-weight:600;">XP</div>
-          </div>
-        </div>
-        <!-- stats row -->
-        <div style="display:flex;gap:8px;">
-          <div style="flex:1;background:rgba(255,255,255,.12);border-radius:12px;padding:10px 8px;text-align:center;">
-            <div style="font-size:20px;font-weight:800;color:#fff;" id="stat-q">0</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.7);">Questions</div>
-          </div>
-          <div style="flex:1;background:rgba(255,255,255,.12);border-radius:12px;padding:10px 8px;text-align:center;">
-            <div style="font-size:20px;font-weight:800;color:#fff;" id="stat-ex">0</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.7);">Exams</div>
-          </div>
-          <div style="flex:1;background:rgba(255,255,255,.12);border-radius:12px;padding:10px 8px;text-align:center;">
-            <div style="font-size:20px;font-weight:800;color:#ffd600;" id="stat-rank">#—</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.7);">My Rank</div>
-          </div>
-          <div style="flex:1;background:rgba(255,255,255,.12);border-radius:12px;padding:10px 8px;text-align:center;">
-            <div style="font-size:20px;font-weight:800;color:#69f0ae;" id="stat-streak">0🔥</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.7);">Streak</div>
-          </div>
-        </div>
+  <!-- ══ HERO HEADER ══ -->
+  <div style="background:linear-gradient(135deg,#0d1b5e,#1a237e);border-bottom:1px solid rgba(255,214,0,0.12);padding:18px 16px 14px;margin:-16px -16px 0;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:rgba(255,214,0,0.05);border-radius:50%;"></div>
+    <div style="position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;background:rgba(255,255,255,0.03);border-radius:50%;"></div>
+    <!-- Greeting + XP -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;">
+      <div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.55);font-weight:500;" id="hero-greet-time">Good morning! ☀️</div>
+        <div style="font-size:22px;font-weight:900;color:#fff;margin-top:2px;letter-spacing:-0.3px;" id="hero-name">Hello, Student! 👋</div>
+        <div style="font-size:12px;color:rgba(255,214,0,0.85);margin-top:3px;font-weight:600;" id="hero-sub">TN · Class 9 · Tamil Nadu</div>
       </div>
-
-      <!-- FREE LIMIT BAR -->
-      <div class="limit-bar" id="limit-bar" style="margin:0;border-radius:0;">
-        <div class="lb-label">Free questions today</div>
-        <div class="lb-dots" id="lb-dots"></div>
-        <div class="lb-count" id="lb-count">10 left</div>
-      </div>
-
-      <!-- QUICK ACTION CARDS -->
-      <div style="padding:14px 14px 4px;">
-        <div id="trial-banner-wrap"></div>
-
-        <!-- UPGRADE BANNER — only for free users -->
-        <div id="upgrade-banner-home" class="upgrade-banner" onclick="showModal('sub-modal')" style="margin-bottom:14px;">
-          <div class="ub-left">
-            <div class="t">🎉 Launch Offer — Till Aug 31!</div>
-            <div class="s">All subjects · Unlimited · Exams · ₹399 → ₹199</div>
-          </div>
-          <div class="ub-price">₹199<small>/mo</small></div>
-        </div>
-
-        <!-- QUICK ACTIONS ROW -->
-        <div style="display:flex;gap:10px;margin-bottom:14px;">
-          <div onclick="document.getElementById('blackboard-overlay').classList.add('open');showBBWelcome();"
-            style="flex:1;background:linear-gradient(135deg,#0d2b0d,#1a4a1a);border-radius:14px;padding:14px 12px;cursor:pointer;text-align:center;box-shadow:0 3px 12px rgba(0,0,0,.15);">
-            <div style="font-size:26px;margin-bottom:6px;">🖊️</div>
-            <div style="font-size:12px;font-weight:700;color:#a0ffa0;">Blackboard</div>
-            <div style="font-size:10px;color:rgba(160,255,160,.6);margin-top:2px;">Step by step</div>
-          </div>
-          <div onclick="showPage('papers',document.querySelector('.btab:nth-child(3)'))"
-            style="flex:1;background:linear-gradient(135deg,#1b5e20,#2e7d32);border-radius:14px;padding:14px 12px;cursor:pointer;text-align:center;box-shadow:0 3px 12px rgba(0,0,0,.15);">
-            <div style="font-size:26px;margin-bottom:6px;">📄</div>
-            <div style="font-size:12px;font-weight:700;color:#a5d6a7;">Papers</div>
-            <div style="font-size:10px;color:rgba(165,214,167,.6);margin-top:2px;">Download now</div>
-          </div>
-          <div onclick="showPage('score',document.querySelector('.btab:nth-child(4)'))"
-            style="flex:1;background:linear-gradient(135deg,#4a148c,#7b1fa2);border-radius:14px;padding:14px 12px;cursor:pointer;text-align:center;box-shadow:0 3px 12px rgba(0,0,0,.15);">
-            <div style="font-size:26px;margin-bottom:6px;">🏆</div>
-            <div style="font-size:12px;font-weight:700;color:#ce93d8;">My Score</div>
-            <div style="font-size:10px;color:rgba(206,147,216,.6);margin-top:2px;">Badges & XP</div>
-          </div>
-        </div>
-
-        <!-- SUBJECTS TITLE -->
-        <div style="font-size:14px;font-weight:700;color:var(--blue-dark);margin-bottom:10px;">📚 Choose Your Subject</div>
-        <div class="subj-grid" id="subj-grid"></div>
+      <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#ffd600,#ff8f00);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(255,214,0,0.4);flex-shrink:0;">
+        <div style="font-size:15px;font-weight:900;color:#0a0c2e;line-height:1;" id="hero-xp">0</div>
+        <div style="font-size:8px;font-weight:800;color:#0a0c2e;opacity:0.7;">XP</div>
       </div>
     </div>
-    <!-- LEADERBOARD -->
+    <!-- 4 STAT BOXES -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;">
+      <div style="background:rgba(102,126,234,0.15);border:1px solid rgba(102,126,234,0.3);border-radius:12px;padding:10px 6px;text-align:center;">
+        <div style="font-size:20px;margin-bottom:2px;">❓</div>
+        <div style="font-size:18px;font-weight:800;color:#fff;line-height:1;" id="stat-q">0</div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.55);margin-top:2px;">Questions</div>
+      </div>
+      <div style="background:rgba(79,195,247,0.12);border:1px solid rgba(79,195,247,0.25);border-radius:12px;padding:10px 6px;text-align:center;">
+        <div style="font-size:20px;margin-bottom:2px;">📝</div>
+        <div style="font-size:18px;font-weight:800;color:#fff;line-height:1;" id="stat-ex">0</div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.55);margin-top:2px;">Exams</div>
+      </div>
+      <div style="background:rgba(255,214,0,0.12);border:1px solid rgba(255,214,0,0.3);border-radius:12px;padding:10px 6px;text-align:center;">
+        <div style="font-size:20px;margin-bottom:2px;">👑</div>
+        <div style="font-size:18px;font-weight:800;color:#ffd600;line-height:1;" id="stat-rank">#—</div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.55);margin-top:2px;">My Rank</div>
+      </div>
+      <div style="background:rgba(255,107,53,0.12);border:1px solid rgba(255,107,53,0.25);border-radius:12px;padding:10px 6px;text-align:center;">
+        <div style="font-size:20px;margin-bottom:2px;">🔥</div>
+        <div style="font-size:18px;font-weight:800;color:#ff6b35;line-height:1;" id="stat-streak">0</div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.55);margin-top:2px;">Streak</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIMIT BAR -->
+  <div style="background:rgba(3,8,32,0.7);padding:8px 16px;display:flex;align-items:center;gap:10px;margin:0 -16px;border-bottom:1px solid rgba(255,255,255,0.06);" id="limit-bar">
+    <div style="font-size:11px;color:rgba(255,255,255,0.5);flex:1;" id="limit-label">🎁 Free Demo</div>
+    <div class="lb-dots" id="lb-dots"></div>
+    <div style="font-size:11px;font-weight:700;" id="lb-count">5 left</div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div style="padding:14px 0 0;">
+    <div id="trial-banner-wrap"></div>
+
+    <!-- UPGRADE BANNER -->
+    <div id="upgrade-banner-home" onclick="showModal('sub-modal')" style="background:linear-gradient(135deg,#ffd600,#ff8f00,#ffd600);background-size:200%;animation:goldShimmer 3s ease infinite;border-radius:14px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 20px rgba(255,214,0,0.3);" id="upgrade-home-wrap">
+      <div>
+        <div style="font-size:13px;font-weight:800;color:#0a0c2e;">🎉 Launch Offer — Till Aug 31!</div>
+        <div style="font-size:10px;color:rgba(10,12,46,0.7);margin-top:2px;">All subjects · Unlimited · ₹399 → ₹199/mo</div>
+      </div>
+      <div style="font-size:20px;font-weight:900;color:#0a0c2e;">₹199</div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div onclick="document.getElementById('blackboard-overlay').classList.add('open');showBBWelcome();"
+        style="background:linear-gradient(135deg,#1a3a1a,#2d5a2d);border:1px solid rgba(100,200,100,0.2);border-radius:16px;padding:16px 10px;cursor:pointer;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+        <div style="width:44px;height:44px;background:rgba(100,200,100,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:24px;">🖊️</div>
+        <div style="font-size:12px;font-weight:800;color:#a0ffa0;">Blackboard</div>
+        <div style="font-size:9px;color:rgba(160,255,160,0.6);margin-top:2px;">Step by step</div>
+      </div>
+      <div onclick="showPage('papers',document.querySelector('.btab:nth-child(3)'))"
+        style="background:linear-gradient(135deg,#1a3a2a,#2d5a3d);border:1px solid rgba(100,200,150,0.2);border-radius:16px;padding:16px 10px;cursor:pointer;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+        <div style="width:44px;height:44px;background:rgba(100,200,150,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:24px;">📄</div>
+        <div style="font-size:12px;font-weight:800;color:#a5d6a7;">Papers</div>
+        <div style="font-size:9px;color:rgba(165,214,167,0.6);margin-top:2px;">Download now</div>
+      </div>
+      <div onclick="showPage('score',document.querySelector('.btab:nth-child(4)'))"
+        style="background:linear-gradient(135deg,#2a1a3a,#4a2a6a);border:1px solid rgba(180,100,220,0.2);border-radius:16px;padding:16px 10px;cursor:pointer;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+        <div style="width:44px;height:44px;background:rgba(180,100,220,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:24px;">🏆</div>
+        <div style="font-size:12px;font-weight:800;color:#ce93d8;">My Score</div>
+        <div style="font-size:9px;color:rgba(206,147,216,0.6);margin-top:2px;">Badges & XP</div>
+      </div>
+    </div>
+
+    <!-- SUBJECT SECTION TITLE -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <span style="font-size:18px;">👑</span>
+      <span style="font-size:15px;font-weight:800;color:#fff;">Choose Your Subject</span>
+      <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(255,214,0,0.3),transparent);"></div>
+    </div>
+
+    <!-- SUBJECT GRID -->
+    <div id="subj-grid" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+  </div>
+</div>
     <div id="pg-lb" class="page">
       <div class="my-rank-banner">
         <div><div class="mrb-label">Your Current Rank</div><div class="mrb-name" id="mrb-name">—</div></div>
@@ -1352,10 +1294,10 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
     <div class="sec-title">📋 Admin Tabs</div>
     <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;">
       <button onclick="showAdminTab('students',this)" id="tab-students" style="background:var(--blue-mid);color:#fff;border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">👥 Students</button>
-      <button onclick="showAdminTab('revenue',this)" id="tab-revenue" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.65);border:1px solid rgba(255,255,255,0.15);padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💰 Revenue</button>
-      <button onclick="showAdminTab('sessions',this)" id="tab-sessions" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.65);border:1px solid rgba(255,255,255,0.15);padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">⏱ Sessions</button>
-      <button onclick="showAdminTab('audit',this)" id="tab-audit" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.65);border:1px solid rgba(255,255,255,0.15);padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📋 Audit Log</button>
-      <button onclick="showAdminTab('support',this)" id="tab-support" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.65);border:1px solid rgba(255,255,255,0.15);padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💬 Support</button>
+      <button onclick="showAdminTab('revenue',this)" id="tab-revenue" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💰 Revenue</button>
+      <button onclick="showAdminTab('sessions',this)" id="tab-sessions" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">⏱ Sessions</button>
+      <button onclick="showAdminTab('audit',this)" id="tab-audit" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📋 Audit Log</button>
+      <button onclick="showAdminTab('support',this)" id="tab-support" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💬 Support</button>
     </div>
     <div id="adm-tab-students">
       <div class="sec-title">👥 All Students</div>
@@ -1504,73 +1446,48 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 
 <!-- ══ PAYWALL ══ -->
 <div id="paywall-overlay">
-  <div class="paywall-card" style="background:linear-gradient(145deg,#0a0f2e,#1a237e);border:1px solid rgba(255,214,0,0.2);">
+  <div class="paywall-card">
     <div class="paywall-icon">🔒</div>
-    <div class="paywall-title" style="color:#fff;">Your Free Trial Ended!</div>
-    <div class="paywall-sub" style="color:rgba(255,255,255,0.7);">Subscribe now to continue — cheaper than one tuition class!</div>
-
-    <!-- OFFER BANNER -->
-    <div style="background:linear-gradient(135deg,#ff6f00,#ff8f00,#ff6f00);background-size:200%;animation:goldShimmer 3s ease infinite;border-radius:12px;padding:10px 14px;text-align:center;margin-bottom:14px;">
+    <div class="paywall-title">Your Free Trial Ended!</div>
+    <div class="paywall-sub">You have used your free day. Subscribe now to continue learning with your AI teacher — cheaper than one tuition class!</div>
+    <div style="background:linear-gradient(135deg,#ff6f00,#ff8f00);border-radius:12px;padding:10px 14px;text-align:center;margin-bottom:12px;">
       <div style="font-size:13px;font-weight:800;color:#fff;">🎉 LAUNCH OFFER — Valid till 31st August 2026!</div>
       <div style="font-size:11px;color:rgba(255,255,255,.9);margin-top:2px;">Founding member price — Limited time only!</div>
     </div>
-
-    <!-- PLANS — only All Subjects, 3 durations -->
-    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
-
-      <!-- Monthly -->
-      <div onclick="selPaywallPlan(this,'all','monthly')" id="pw-monthly"
-        style="border:2px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.05);transition:all .2s;">
+    <div class="paywall-plans">
+      <div class="paywall-plan" onclick="selPaywallPlan(this,'single')">
         <div>
-          <div style="font-size:14px;font-weight:800;color:#fff;">All Subjects <span style="background:#ffd600;color:#0a0f2e;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:4px;">BEST</span></div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">All subjects · Exams · Leaderboard · Rank Card</div>
+          <div class="pn">Single Subject</div>
+          <div class="pd">1 subject · Unlimited · AI tutor</div>
+          <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Was ₹249 · Save 52%!</div>
         </div>
         <div style="text-align:right;">
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹399</div>
-          <div style="font-size:22px;font-weight:900;color:#ffd600;">₹199<span style="font-size:11px;font-weight:500;">/mo</span></div>
+          <div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹249</div>
+          <div class="pp">₹120<small>/mo</small></div>
         </div>
       </div>
-
-      <!-- Quarterly — 5% off -->
-      <div onclick="selPaywallPlan(this,'all','quarterly')" id="pw-quarterly"
-        style="border:2px solid rgba(255,214,0,0.5);border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:rgba(255,214,0,0.08);transition:all .2s;">
+      <div class="paywall-plan hot" onclick="selPaywallPlan(this,'all')">
         <div>
-          <div style="font-size:14px;font-weight:800;color:#fff;">Quarterly (3 months) <span style="background:#4caf50;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:4px;">5% OFF</span></div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">₹189/mo × 3 · Save ₹30 total</div>
+          <div class="pn">All Subjects <span class="hot-tag">BEST</span></div>
+          <div class="pd">All subjects · Exams · Leaderboard · Rank Card</div>
+          <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Was ₹399 · Save 50%!</div>
         </div>
         <div style="text-align:right;">
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹597</div>
-          <div style="font-size:22px;font-weight:900;color:#ffd600;">₹567<span style="font-size:11px;font-weight:500;">/3mo</span></div>
+          <div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹399</div>
+          <div class="pp">₹199<small>/mo</small></div>
         </div>
       </div>
-
-      <!-- Annual — 10% off -->
-      <div onclick="selPaywallPlan(this,'all','annual')" id="pw-annual"
-        style="border:2px solid rgba(100,200,100,0.4);border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:rgba(100,200,100,0.07);transition:all .2s;">
-        <div>
-          <div style="font-size:14px;font-weight:800;color:#fff;">Annual (12 months) <span style="background:#2196f3;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:4px;">10% OFF</span></div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">₹179/mo × 12 · Save ₹240 total</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹2388</div>
-          <div style="font-size:22px;font-weight:900;color:#4caf50;">₹2148<span style="font-size:11px;font-weight:500;">/yr</span></div>
-        </div>
-      </div>
-
     </div>
-
-    <!-- FEATURES -->
-    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;margin-bottom:14px;text-align:left;">
-      <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-bottom:4px;">✅ Unlimited AI tutor questions</div>
-      <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-bottom:4px;">✅ Chapter exams with AI grading</div>
-      <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-bottom:4px;">✅ Personal rank card — share on WhatsApp</div>
-      <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-bottom:4px;">✅ State + All India leaderboard</div>
-      <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-bottom:4px;">✅ XP points, levels, badges</div>
-      <div style="color:rgba(255,255,255,0.8);font-size:12px;">✅ Parent progress report</div>
+    <div class="paywall-features">
+      <div class="pf-row"><span>✅</span> Unlimited AI tutor questions</div>
+      <div class="pf-row"><span>✅</span> Chapter exams with AI grading</div>
+      <div class="pf-row"><span>✅</span> Personal rank card — share on WhatsApp</div>
+      <div class="pf-row"><span>✅</span> State + All India leaderboard</div>
+      <div class="pf-row"><span>✅</span> XP points, levels, badges</div>
+      <div class="pf-row"><span>✅</span> Parent progress report</div>
     </div>
-
-    <button class="btn-main" onclick="activatePaywall()" style="background:linear-gradient(135deg,#ffd600,#ff8f00);color:#0a0f2e;font-weight:800;box-shadow:0 4px 20px rgba(255,214,0,0.4);">Subscribe with Razorpay →</button>
-    <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:10px;">Cancel anytime · Secure payment</div>
+    <button class="btn-main" onclick="activatePaywall()">Subscribe with Razorpay →</button>
+    <div style="font-size:11px;color:var(--gray-text);margin-top:10px;">Cancel anytime · Secure payment</div>
   </div>
 </div>
 
@@ -1616,7 +1533,17 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
     <!-- STEP 1: SUBJECT PLAN -->
     <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:8px;letter-spacing:1px;">STEP 1 — SELECT PLAN</div>
     <div class="plan-opts" id="plan-opts">
-
+      <div class="plan-opt" onclick="selPlan(this,'single')">
+        <div>
+          <div class="pn">Single Subject</div>
+          <div class="pd">One subject · Unlimited · History</div>
+          <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Was ₹249 · Save 52%!</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;color:var(--gray-text);text-decoration:line-through;">₹249</div>
+          <div class="pp">₹120<small>/mo</small></div>
+        </div>
+      </div>
       <div class="plan-opt sel" onclick="selPlan(this,'all')">
         <div>
           <div class="pn">All Subjects <span class="best-val">BEST VALUE</span></div>
@@ -1631,7 +1558,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
     </div>
 
     <!-- STEP 2: DURATION -->
-    <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);margin-bottom:8px;letter-spacing:1px;">STEP 2 — SELECT DURATION</div>
+    <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:8px;letter-spacing:1px;">STEP 2 — SELECT DURATION</div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="duration-opts">
       <div class="plan-opt sel" onclick="selDuration(this,'monthly')" id="dur-monthly">
         <div>
@@ -1683,7 +1610,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 // ══════════════════════════════════════
 // ── API CONFIG ──────────────────────────────────
 const API_URL = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
-  ? 'https://brightmindteacher.com'
+  ? 'https://brightmind-teacher.onrender.com'   // change to your Render URL
   : window.location.origin;
 
 // ── API HELPERS ──────────────────────────────────
@@ -1798,13 +1725,13 @@ function getSubjects(){
 }
 
 const LANG_SYS={
-  en:'You are Miss BrightMind, a warm friendly Indian teacher. ALWAYS reply in ENGLISH. Use simple words, real-life examples, encourage students. Never sound robotic.',
-  hi:'आप Miss BrightMind हैं। हमेशा केवल हिंदी में जवाब दें। सरल शब्द, असली उदाहरण। IMPORTANT: Reply ONLY in Hindi.',
-  ta:'நீங்கள் Miss BrightMind. எப்போதும் தமிழில் மட்டுமே பதில் சொல்லுங்கள். எளிய வார்த்தைகள். IMPORTANT: Reply ONLY in Tamil.',
-  ml:'നിങ്ങൾ Miss BrightMind ആണ്. എല്ലായ്‌പ്പോഴും മലയാളത്തിൽ മാത്രം. IMPORTANT: Reply ONLY in Malayalam.',
-  kn:'ನೀವು Miss BrightMind. ಯಾವಾಗಲೂ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಉತ್ತರಿಸಿ. IMPORTANT: Reply ONLY in Kannada.',
-  te:'మీరు Miss BrightMind. ఎల్లప్పుడూ తెలుగులో మాత్రమే సమాధానం ఇవ్వండి. IMPORTANT: Reply ONLY in Telugu.',
-}
+  en:'You are BrightMind Teacher, an expert AI tutor for Indian Class 9-12 students. Explain concepts clearly step by step. Use simple English. Give Indian context examples. Be warm, encouraging and supportive like a good teacher.',
+  hi:'आप BrightMind Teacher हैं, कक्षा 9-12 के भारतीय छात्रों के लिए AI शिक्षक। हिंदी में सरल भाषा में कदम दर कदम समझाएं। भारतीय उदाहरण दें। प्रोत्साहित करें।',
+  ta:'நீங்கள் BrightMind Teacher, வகுப்பு 9-12 மாணவர்களுக்கான AI ஆசிரியர். தமிழில் எளிமையாக படிப்படியாக விளக்கவும். இந்திய உதாரணங்கள் கொடுங்கள். ஊக்கமளியுங்கள்.',
+  ml:'നിങ്ങൾ BrightMind Teacher ആണ്, ക്ലാസ് 9-12 വിദ്യാർഥികൾക്കുള്ള AI അദ്ധ്യാപകൻ. മലയാളത്തിൽ ലളിതമായി ഘട്ടം ഘട്ടമായി വിശദീകരിക്കുക. ഇന്ത്യൻ ഉദാഹരണങ്ങൾ നൽകുക. പ്രോത്സാഹിപ്പിക്കുക.',
+  kn:'ನೀವು BrightMind Teacher, ತರಗತಿ 9-12 ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ AI ಶಿಕ್ಷಕ. ಕನ್ನಡದಲ್ಲಿ ಸರಳವಾಗಿ ಹಂತ ಹಂತವಾಗಿ ವಿವರಿಸಿ. ಭಾರತೀಯ ಉದಾಹರಣೆಗಳನ್ನು ನೀಡಿ. ಪ್ರೋತ್ಸಾಹಿಸಿ.',
+  te:'మీరు BrightMind Teacher, తరగతి 9-12 విద్యార్థులకు AI ఉపాధ్యాయుడు. తెలుగులో సరళంగా దశలవారీగా వివరించండి. భారతీయ ఉదాహరణలు ఇవ్వండి. ప్రోత్సహించండి.'
+};
 const DEMO_LB=[
   {name:'Arjun Kumar',state:'Tamil Nadu',score:98,stars:5,class:'11'},
   {name:'Sneha Patel',state:'Gujarat',score:95,stars:5,class:'11'},
@@ -1892,43 +1819,47 @@ function getGradeLabel(g){return g>=9.5?'Outstanding 🌟':g>=9?'Excellent A+':g
 // ══════════════════════════════════════
 function checkTrial(u){
   if(u.isPaid)return'paid';
-  const diff=(new Date()-new Date(u.regOn||Date.now()))/(1000*60*60);
-  return diff<=24?'trial':'expired';
+  const diff=(new Date()-new Date(u.regOn||Date.now()))/(1000*60); // minutes
+  return diff<=30?'demo':'expired';
 }
 function renderTrialBanner(u){
   const wrap=document.getElementById('trial-banner-wrap');if(!wrap)return;
   const st=checkTrial(u);
   if(st==='paid'){wrap.innerHTML='';return;}
-  if(st==='trial'){
-    const exp=new Date(new Date(u.regOn||Date.now()).getTime()+24*3600000);
-    const left=Math.max(0,exp-new Date());
-    const h=Math.floor(left/3600000),m=Math.floor((left%3600000)/60000);
-    wrap.innerHTML=`<div class="trial-banner"><div class="tl"><div class="tt">🎉 Free Trial Active!</div><div class="ts">Full access — ends in ${h}h ${m}m</div></div><div class="trial-timer"><div class="tv">${h}h ${m}m</div><div class="tl2">REMAINING</div></div></div>`;
+  if(st==='demo'){
+    const regTime=new Date(u.regOn||Date.now()).getTime();
+    const left=Math.max(0,(regTime+30*60*1000)-Date.now());
+    const m=Math.floor(left/60000),s=Math.floor((left%60000)/1000);
+    const qLeft=Math.max(0,S.freeLimit-S.qToday);
+    const phoLeft=Math.max(0,1-(S.photoUsed||0));
+    const papLeft=Math.max(0,1-(S.papersDownloaded||0));
+    wrap.innerHTML='<div class="trial-banner" style="background:linear-gradient(135deg,#0d47a1,#1565c0);border:1px solid rgba(255,214,0,0.2);">'
+      +'<div class="tl"><div class="tt" style="color:#fff;">🎓 Free Demo Active</div>'
+      +'<div class="ts" style="color:rgba(255,255,255,0.75);">'+qLeft+'Q · '+phoLeft+' photo · '+papLeft+' paper · '+m+'m '+String(s).padStart(2,'0')+'s</div></div>'
+      +'<div class="trial-timer" style="background:rgba(255,214,0,0.15);border:1px solid rgba(255,214,0,0.4);">'
+      +'<div class="tv" style="color:#ffd600;font-weight:900;">'+m+':'+String(s).padStart(2,'0')+'</div>'
+      +'<div class="tl2" style="color:rgba(255,255,255,0.6);">DEMO</div></div></div>';
   }else{
-    wrap.innerHTML=`<div class="trial-banner" onclick="document.getElementById('paywall-overlay').classList.add('open')" style="cursor:pointer;"><div class="tl"><div class="tt">⏰ Free Trial Ended</div><div class="ts">Subscribe from ₹199/month to continue</div></div><div class="trial-timer" style="background:var(--gold);"><div class="tv" style="color:var(--blue-dark);font-size:13px;">Subscribe</div><div class="tl2" style="color:var(--blue-dark);">NOW</div></div></div>`;
+    wrap.innerHTML='<div class="trial-banner" onclick="document.getElementById(\'paywall-overlay\').classList.add(\'open\')" style="cursor:pointer;background:linear-gradient(135deg,#7f0000,#b71c1c);">'
+      +'<div class="tl"><div class="tt" style="color:#fff;">⏰ Free Demo Ended!</div>'
+      +'<div class="ts" style="color:rgba(255,255,255,0.8);">Subscribe ₹199/mo — Unlimited access</div></div>'
+      +'<div class="trial-timer" style="background:#ffd600;">'
+      +'<div class="tv" style="color:#0a0f2e;font-size:12px;font-weight:900;">Subscribe</div>'
+      +'<div class="tl2" style="color:#0a0f2e;">NOW</div></div></div>';
   }
 }
+
 function checkPaywall(){
   if(!S.user||S.user.isPaid)return false;
   if(checkTrial(S.user)==='expired'){document.getElementById('paywall-overlay').classList.add('open');return true;}
   return false;
 }
-function selPaywallPlan(el,type,duration){
-  ['pw-monthly','pw-quarterly','pw-annual'].forEach(function(id){
-    var b=document.getElementById(id);
-    if(b){b.style.borderColor='rgba(255,255,255,0.15)';b.style.background='rgba(255,255,255,0.05)';}
-  });
-  if(el){el.style.borderColor='rgba(255,214,0,0.8)';el.style.background='rgba(255,214,0,0.12)';}
-  selectedPlanType=type||'all';
-  selectedDuration=duration||'monthly';
-  if(duration==='quarterly')selectedAmount=567;
-  else if(duration==='annual')selectedAmount=2148;
-  else selectedAmount=199;
-}
+function selPaywallPlan(el){document.querySelectorAll('.paywall-plan').forEach(p=>p.classList.remove('hot'));el.classList.add('hot');}
 function activatePaywall(){
-  openRazorpay(selectedAmount||199, 'all', selectedDuration||'monthly');
+  const plan=document.querySelector('.paywall-plan.hot');
+  const amount=plan?.querySelector('.pp')?.textContent?.includes('199')?199:120;
+  openRazorpay(amount, amount===199?'all':'single');
 }
-
 
 // ══════════════════════════════════════
 // SCORECARD & RANK CARD
@@ -2007,7 +1938,7 @@ function showRankCard(){
 function closeRankCard(){document.getElementById('rankcard-overlay').classList.remove('open');}
 function shareRankCard(){
   const u=S.user;if(!u)return;
-  const text=`🧠 BrightMind Teacher\n\n👤 ${u.name}\n📚 Class ${u.class} · ${u.board||'CBSE'}\n\n🏆 GPA: ${computeGPA(u)}/10\n📍 ${u.state} Rank: #${computeStateRank(u)}\n🇮🇳 All India Rank: #${rank(u)}\n🔥 Streak: ${u.streak||0} days\n⭐ Stars: ${u.stars||0}\n\nJoin BrightMind Teacher — AI Tutor from ₹199/month!`;
+  const text=`🧠 BrightMind Teacher\n\n👤 ${u.name}\n📚 Class ${u.class} · ${u.board||'CBSE'}\n\n🏆 GPA: ${computeGPA(u)}/10\n📍 ${u.state} Rank: #${computeStateRank(u)}\n🇮🇳 All India Rank: #${rank(u)}\n🔥 Streak: ${u.streak||0} days\n⭐ Stars: ${u.stars||0}\n\nJoin BrightMind Teacher — AI Tutor from ₹120/month!`;
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
 
@@ -2024,35 +1955,33 @@ function switchTab(t,el){
 // LANGUAGE SELECTION ON SPLASH
 function setSplashLang(lang, el){
   S.lang=lang;
-  // Sync lang selector in chat
-  const ls=document.getElementById('lang-sel');
-  if(ls)ls.value=lang;
-
-  // Reset ALL lang buttons — both old .lang-badge and new id-based
-  document.querySelectorAll('.lang-badge').forEach(b=>{
-    b.style.background='rgba(255,255,255,0.07)';
-    b.style.color='rgba(255,255,255,0.85)';
-    b.style.borderColor='rgba(255,255,255,0.2)';
-    b.style.boxShadow='none';
-  });
+  // Reset ALL buttons by ID
   ['lang-en','lang-hi','lang-ta','lang-ml','lang-kn','lang-te'].forEach(function(id){
-    const b=document.getElementById(id);
+    var b=document.getElementById(id);
     if(!b)return;
-    b.style.background='rgba(255,255,255,0.07)';
+    b.style.background='rgba(255,255,255,0.06)';
     b.style.color='rgba(255,255,255,0.85)';
-    b.style.borderColor='rgba(255,255,255,0.2)';
+    b.style.borderColor='rgba(255,255,255,0.15)';
     b.style.boxShadow='none';
     b.style.transform='scale(1)';
   });
-
-  // Highlight ONLY the selected one
+  // Also reset old .lang-badge class (fallback)
+  document.querySelectorAll('.lang-badge').forEach(function(b){
+    b.style.background='rgba(255,255,255,0.06)';
+    b.style.color='rgba(255,255,255,0.85)';
+    b.style.borderColor='rgba(255,255,255,0.15)';
+  });
+  // Highlight ONLY selected
   if(el){
     el.style.background='rgba(255,214,0,0.2)';
     el.style.color='#fff';
     el.style.borderColor='rgba(255,214,0,0.9)';
-    el.style.boxShadow='0 0 16px rgba(255,214,0,0.3)';
-    el.style.transform='scale(1.05)';
+    el.style.boxShadow='0 0 16px rgba(255,214,0,0.25)';
+    el.style.transform='scale(1.04)';
   }
+  // Sync chat selector
+  var sel=document.getElementById('lang-sel');
+  if(sel)sel.value=lang;
 }
 
 // FORGOT PASSWORD
@@ -2085,7 +2014,6 @@ async function doResetPassword(){
     alert(res.msg||'Reset failed. Please check your name and try again.');
   }
 }
-function toggleStreamField(cls){var sf=document.getElementById("stream-field");if(sf)sf.style.display=(cls==="11"||cls==="12")?"block":"none";}
 async function doRegister(){
   const n=document.getElementById('rn').value.trim(),
         email=document.getElementById('remail').value.trim(),
@@ -2130,7 +2058,7 @@ function mapStudent(s){
   };
 }
 function loginUser(u){
-  S.user=u;S.isPaid=u.isPaid||false;S.qToday=u.qToday||0;S.freeLimit=10;S.photoUsed=u.photoUsed||0;S.photoLimit=2;S.papersDownloaded=parseInt(localStorage.getItem('bmt_papers_'+u.id)||'0');
+  S.user=u;S.isPaid=u.isPaid||false;S.qToday=u.qToday||0;S.freeLimit=5;S.photoUsed=parseInt(localStorage.getItem('bmt_photo_'+u.id)||'0');S.photoLimit=1;S.papersDownloaded=parseInt(localStorage.getItem('bmt_papers_'+u.id)||'0');S.papersLimit=1;
   document.getElementById('nav-av').textContent=u.name[0].toUpperCase();
   document.getElementById('nav-uname').textContent=u.name;
   document.getElementById('hero-name').textContent='Hello, '+u.name+'! 👋';
@@ -2158,12 +2086,11 @@ function loginUser(u){
   }
   // Check renewal reminder for paid students
   if(u.isPaid) setTimeout(()=>checkRenewalReminder(u), 2000);
-  // Start free session timer — 1 hour then blocked
+  // 30-min demo timer
   if(!u.isPaid){
-    S.sessionStart=Date.now();
     S.sessionTimer=setInterval(()=>{
-      const elapsed=(Date.now()-S.sessionStart)/(1000*60); // minutes
-      if(elapsed>=60){
+      renderTrialBanner(S.user);
+      if(checkTrial(S.user)==='expired'){
         clearInterval(S.sessionTimer);
         // Force logout — show paywall
         window.speechSynthesis.cancel();
@@ -2180,7 +2107,7 @@ function loginUser(u){
             <div class="paywall-plans">
               <div class="paywall-plan" onclick="selPaywallPlan(this,'single')">
                 <div><div class="pn">Single Subject</div><div class="pd">Was ₹249 · Save 52%!</div></div>
-                
+                <div style="text-align:right;"><div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹249</div><div class="pp">₹120<small>/mo</small></div></div>
               </div>
               <div class="paywall-plan hot" onclick="selPaywallPlan(this,'all')">
                 <div><div class="pn">All Subjects <span class="hot-tag">BEST</span></div><div class="pd">Was ₹399 · Save 50%!</div></div>
@@ -2213,8 +2140,6 @@ function renderSubjects(){
   const subs=getSubjects();
   const grid=document.getElementById('subj-grid');
   if(!grid)return;
-
-  // Icon backgrounds per subject — matches Image 2 colored circles
   const iconBg={
     math:'linear-gradient(135deg,#3949ab,#5c6bc0)',
     science:'linear-gradient(135deg,#6a1b9a,#9c27b0)',
@@ -2234,19 +2159,16 @@ function renderSubjects(){
     accountancy:'linear-gradient(135deg,#e65100,#ff6f00)',
     bst:'linear-gradient(135deg,#1565c0,#1e88e5)',
   };
-
-  // Pair subjects 2 per row
   const rows=[];
-  for(let i=0;i<subs.length;i+=2) rows.push(subs.slice(i,i+2));
-
+  for(var i=0;i<subs.length;i+=2) rows.push(subs.slice(i,i+2));
   grid.innerHTML=rows.map(function(pair){
-    const cards=pair.map(function(s){
-      const d=S.user&&S.user.subjects&&S.user.subjects[s.id]||{};
-      const p=d.progress||0;
-      const st=d.stars||0;
-      const bg=iconBg[s.id]||'linear-gradient(135deg,#3949ab,#5c6bc0)';
-      const stars='★'.repeat(st)+'☆'.repeat(5-st);
-      return '<div style="flex:1;background:linear-gradient(145deg,#0d1547,#0a1035);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 12px;min-width:0;">'
+    var cards=pair.map(function(s){
+      var d=S.user&&S.user.subjects&&S.user.subjects[s.id]||{};
+      var p=d.progress||0;
+      var st=d.stars||0;
+      var bg=iconBg[s.id]||'linear-gradient(135deg,#3949ab,#5c6bc0)';
+      var stars='★'.repeat(st)+'☆'.repeat(5-st);
+      return '<div style="flex:1;background:linear-gradient(145deg,#0d1547,#0a1035);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 12px;min-width:0;box-shadow:0 4px 20px rgba(0,0,0,0.3);">'
         +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
         +'<div style="width:52px;height:52px;border-radius:14px;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,0.3);">'+s.icon+'</div>'
         +'<div style="flex:1;min-width:0;">'
@@ -2254,21 +2176,19 @@ function renderSubjects(){
         +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;">'
         +'<div style="font-size:10px;color:#ffd600;">'+stars+'</div>'
         +'<div style="font-size:11px;font-weight:800;color:#ffd600;">'+p+'%</div>'
-        +'</div>'
-        +'</div></div>'
+        +'</div></div></div>'
         +'<div style="height:4px;background:rgba(255,255,255,0.1);border-radius:4px;margin-bottom:10px;overflow:hidden;">'
         +'<div style="height:100%;width:'+p+'%;background:linear-gradient(90deg,#ffd600,#ff8f00);border-radius:4px;transition:width .8s;"></div>'
         +'</div>'
         +'<div style="display:flex;gap:6px;">'
-        +'<button onclick="event.stopPropagation();openSubject(this.dataset.id)" data-id="'+s.id+'" style="flex:1;background:linear-gradient(135deg,#1a237e,#3949ab);color:#fff;border:none;padding:9px 4px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">📚 Study</button>'
-        +'<button onclick="event.stopPropagation();openInstantExam(this.dataset.id,this.dataset.name,this.dataset.icon)" data-id="'+s.id+'" data-name="'+s.name+'" data-icon="'+s.icon+'" style="flex:1;background:linear-gradient(135deg,#e65100,#ff6f00);color:#fff;border:none;padding:9px 4px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">📝 Exam</button>'
+        +'<button data-id="'+s.id+'" onclick="openSubject(this.dataset.id)" style="flex:1;background:linear-gradient(135deg,#1a237e,#3949ab);color:#fff;border:none;padding:9px 4px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">📚 Study</button>'
+        +'<button data-id="'+s.id+'" data-name="'+s.name+'" data-icon="'+s.icon+'" onclick="openInstantExam(this.dataset.id,this.dataset.name,this.dataset.icon)" style="flex:1;background:linear-gradient(135deg,#e65100,#ff6f00);color:#fff;border:none;padding:9px 4px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">📝 Exam</button>'
         +'</div></div>';
     });
     if(pair.length===1) cards.push('<div style="flex:1;"></div>');
     return '<div style="display:flex;gap:10px;">'+cards.join('')+'</div>';
   }).join('');
 }
-
 
 function renderLimitBar(){
   const used=S.qToday,left=Math.max(0,S.freeLimit-used);
@@ -2380,14 +2300,11 @@ const CHAPTER_TOPICS={
 let SYL={board:'',cls:'',subject:'',chapter:'',topic:'',step:1};
 
 function openSubject(id){
+  // Open syllabus selector instead of direct chat
+  SYL={board:S.user?.board||'CBSE',cls:S.user?.class||'11',subject:'',chapter:'',topic:'',step:1};
+  const sub=SUBJECTS_STATIC.find(s=>s.id===id)||{id,name:id,icon:'📚',qs:[]};
+  if(sub){SYL.subject=sub.name;}
   if(!S.isPaid&&S.qToday>=S.freeLimit){showModal('sub-modal');return;}
-  const nameMap={math:'Mathematics',english:'English',science:'Science',physics:'Physics',chem:'Chemistry',bio:'Biology',cs:'Computer Science',history:'History',geography:'Geography',polsci:'Political Science',economics:'Economics',sociology:'Sociology',accountancy:'Accountancy',bst:'Business Studies',socialsc:'Social Science',tamil:'Tamil',hindi:'Hindi',ml:'Malayalam',kn:'Kannada',te:'Telugu'};
-  const subjectName=nameMap[id]||SUBJECTS_STATIC.find(s=>s.id===id)?.name||id;
-  const subIcon=SUBJECTS_STATIC.find(s=>s.id===id)?.icon||'📚';
-  SYL={board:S.user?.board||'CBSE',cls:String(S.user?.class||'11'),subject:subjectName,chapter:'',topic:'',step:2};
-  const bd=SYLLABUS[SYL.board]||SYLLABUS['CBSE'];
-  const cl=bd[SYL.cls]||bd['11']||{};
-  if(!cl[subjectName])cl[subjectName]={icon:subIcon,chapters:['Introduction','Core Concepts','Key Theorems','Practice Problems','Previous Year Questions']};
   document.getElementById('syllabus-overlay').classList.add('open');
   renderSyllabusStep();
 }
@@ -2881,10 +2798,18 @@ function bbFinished(){
 async function handleBBPhotoUpload(event){
   const file=event.target.files[0];
   if(!file)return;
+  // Free demo: 1 photo only
+  if(!S.isPaid&&(S.photoUsed||0)>=1){
+    event.target.value='';
+    showModal('sub-modal');
+    setTimeout(()=>alert('Free demo allows 1 photo question only.\nSubscribe for unlimited photo questions!'),300);
+    return;
+  }
   const reader=new FileReader();
   reader.onload=async(e)=>{
     const base64=e.target.result.split(',')[1];
     const mediaType=file.type||'image/jpeg';
+    S.photoUsed=(S.photoUsed||0)+1;localStorage.setItem('bmt_photo_'+(S.user&&S.user.id||'x'),S.photoUsed);
     addToPhotoGallery(e.target.result, 'Blackboard photo question');
     const canvas=document.getElementById('bb-canvas');
     // Show photo on blackboard
@@ -3067,43 +2992,15 @@ function speakText(text){
   const utt=new SpeechSynthesisUtterance(clean);
   utt.rate=speechRate; utt.pitch=1.05; utt.volume=1;
   // Pick best available voice
-  // Always sync language from selector first
-  const langSel=document.getElementById('lang-sel');
-  if(langSel&&langSel.value&&langSel.value!==S.lang) S.lang=langSel.value;
-  const curLang=S.lang||'en';
-  const langPrefixes={en:['en-IN','en-GB','en-US','en'],hi:['hi-IN','hi'],ta:['ta-IN','ta'],ml:['ml-IN','ml'],kn:['kn-IN','kn'],te:['te-IN','te']};
-  const langConf=langPrefixes[curLang]||langPrefixes['en'];
-  const langCode=langConf[0];
-  utt.lang=langCode;
-  const femaleKw=['Female','female','Samantha','Victoria','Karen','Moira','Veena','Zira','Heera','Kalpana','Google UK English Female'];
-  const trySpeak=()=>{
-    const voices=window.speechSynthesis.getVoices();
-    let voice=null;
-    // Level 1: exact lang + female
-    for(const lc of langConf){if(!voice)voice=voices.find(v=>v.lang===lc&&femaleKw.some(f=>v.name.includes(f)));}
-    // Level 2: exact lang any
-    for(const lc of langConf){if(!voice)voice=voices.find(v=>v.lang===lc);}
-    // Level 3: prefix + female
-    for(const lc of langConf){if(!voice)voice=voices.find(v=>v.lang.startsWith(lc.split('-')[0])&&femaleKw.some(f=>v.name.includes(f)));}
-    // Level 4: prefix any
-    for(const lc of langConf){if(!voice)voice=voices.find(v=>v.lang.startsWith(lc.split('-')[0]));}
-    // Level 5: Indian English female fallback
-    if(!voice)voice=voices.find(v=>v.lang==='en-IN'&&femaleKw.some(f=>v.name.includes(f)));
-    if(!voice)voice=voices.find(v=>v.lang==='en-IN');
-    // Level 6: any English female
-    if(!voice)voice=voices.find(v=>v.lang.startsWith('en')&&femaleKw.some(f=>v.name.includes(f)));
-    // Level 7: any English
-    if(!voice)voice=voices.find(v=>v.lang.startsWith('en'));
-    // Level 8: first available
-    if(!voice&&voices.length>0)voice=voices[0];
-    if(voice)utt.voice=voice;
-    utt.onstart=()=>setAvatarSpeaking(true,clean);
-    utt.onend=()=>setAvatarSpeaking(false);
-    utt.onerror=()=>setAvatarSpeaking(false);
-    window.speechSynthesis.speak(utt);
-  };
-  if(window.speechSynthesis.getVoices().length>0){trySpeak();}
-  else{window.speechSynthesis.onvoiceschanged=()=>{window.speechSynthesis.onvoiceschanged=null;trySpeak();};}
+  const voices=window.speechSynthesis.getVoices();
+  const langCodes={en:'en-IN',hi:'hi-IN',ta:'ta-IN',ml:'ml-IN',kn:'kn-IN',te:'te-IN'};
+  const langCode=langCodes[S.lang]||'en-IN';
+  const preferred=voices.find(v=>v.lang===langCode)||voices.find(v=>v.lang.startsWith('en'))||voices[0];
+  if(preferred)utt.voice=preferred;
+  utt.onstart=()=>setAvatarSpeaking(true,clean);
+  utt.onend=()=>setAvatarSpeaking(false);
+  utt.onerror=()=>setAvatarSpeaking(false);
+  window.speechSynthesis.speak(utt);
 }
 
 function toggleVoice(){
@@ -3199,9 +3096,7 @@ function changeLang(){
     kn:'ನಮಸ್ಕಾರ! ಭಾಷೆ ಕನ್ನಡಕ್ಕೆ ಬದಲಾಯಿತು. ಏನಾದರೂ ಕೇಳಿ! 😊',
     te:'నమస్కారం! భాష తెలుగుకి మారింది. ఏదైనా అడగండి! 😊'
   };
-  const msg=greet[S.lang]||'Language changed! Ask me anything 😊';
-  addMsg('ai',msg);
-  setTimeout(()=>speakText(msg),300);
+  addMsg('ai', greet[S.lang]||'Language changed! Ask me anything 😊');
 }
 
 async function sendMsg(){
@@ -3229,7 +3124,7 @@ async function sendMsg(){
     speakText(rep);
     if(S.user){if(!S.user.subjects[S.sub.id])S.user.subjects[S.sub.id]={progress:0,stars:0};S.user.subjects[S.sub.id].progress=Math.min(100,(S.user.subjects[S.sub.id].progress||0)+5);saveUser();}
     if(S.chatHist.length>=8)document.getElementById('exam-cta').style.display='block';
-    if(S.chatHist.length===20)setTimeout(()=>assignHW(txt),1500);
+    if(S.chatHist.length===6)setTimeout(()=>assignHW(txt),1500);
   }catch(e){ty.classList.remove('show');addMsg('ai','⚠️ Connection error. Please try again.');}
 }
 
@@ -3868,50 +3763,43 @@ function loadRazorpay(){
 async function openRazorpay(amount, plan, subscription_type='monthly'){
   if(!S.user){alert('Please login first!');return;}
   const loaded=await loadRazorpay();
-  if(!loaded){alert('Payment system could not load. Please check your internet and try again.');return;}
+  if(!loaded){alert('Payment system could not load. Please check internet and try again.');return;}
+
+  // Create order first — prevents QR auto-refund issue
+  const orderRes=await apiPost('/api/payment/create-order',{
+    amount, plan,
+    student_id:S.user.id,
+    student_name:S.user.name,
+    subscription_type
+  });
+  if(!orderRes.ok){alert('Could not initiate payment. Please try again in a moment.');return;}
 
   const planNames={all:'All Subjects — BrightMind Teacher',single:'Single Subject — BrightMind Teacher'};
-  const baseOptions={
+  const options={
     key:'rzp_live_T0ELMmLSIlgcLq',
     amount:amount*100,
     currency:'INR',
+    order_id:orderRes.order_id,
     name:'BrightMind Teacher',
-    description:planNames[plan]||'BrightMind Teacher Premium',
+    description:planNames[plan]||'BrightMind Teacher Subscription',
     prefill:{name:S.user.name, contact:''},
     notes:{
       student_id:String(S.user.id),
       student_name:S.user.name,
-      plan:plan, class:String(S.user.class), state:S.user.state
+      plan, class:S.user.class, state:S.user.state
     },
     theme:{color:'#1a237e'},
-    modal:{ondismiss:function(){console.log('Payment modal closed');}},
     handler:async function(response){
       await verifyPayment(response, amount, plan, subscription_type);
     }
   };
-
-  // Try to get order_id — but don't block if it fails
-  try{
-    const orderRes=await apiPost('/api/payment/create-order',{
-      amount, plan,
-      student_id:S.user.id,
-      student_name:S.user.name,
-      subscription_type
-    });
-    if(orderRes&&orderRes.ok&&orderRes.order_id){
-      baseOptions.order_id=orderRes.order_id;
-    }
-  }catch(e){
-    console.warn('Order creation skipped:', e);
-    // Continue without order_id — Razorpay still works!
-  }
-
-  const rzp=new window.Razorpay(baseOptions);
+  const rzp=new window.Razorpay(options);
   rzp.on('payment.failed',function(response){
-    alert('Payment failed! '+response.error.description+'\nPlease try again.');
+    alert('Payment failed! Reason: '+response.error.description+'\nPlease try again.');
   });
   rzp.open();
 }
+
 async function verifyPayment(response, amount, plan, subscription_type='monthly'){
   try{
     const bubble=document.getElementById('speech-bubble');
@@ -4028,7 +3916,6 @@ function speakOBSlide(idx){
   window.speechSynthesis.speak(utt);
 }
 
-function obTapSkip(){if(OB&&OB.timer)clearInterval(OB.timer);window.speechSynthesis.cancel();if(OB&&OB.slide<OB.totalSlides-1){OB.slide++;obGoToSlide(OB.slide);}else{closeOnboarding();}}
 function obNext(){
   window.speechSynthesis.cancel();
   if(OB.slide>=OB.totalSlides-1){closeOnboarding();return;}
@@ -4626,7 +4513,7 @@ function switchPaperTab2(tab, btn){
   document.querySelectorAll('#ptab2-model,#ptab2-generate').forEach(b=>{
     b.style.background='var(--gray-light)';b.style.color='var(--blue-dark)';
   });
-  btn.style.background='linear-gradient(135deg,#1a237e,#3949ab)';btn.style.color='#fff';
+  btn.style.background='var(--blue-mid)';btn.style.color='#fff';
   if(tab==='model')renderModelPapers2('all');
 }
 
@@ -4634,7 +4521,7 @@ function filterPapers2(type, btn){
   document.querySelectorAll('#paper-type-filter2 button').forEach(b=>{
     b.style.background='var(--gray-light)';b.style.color='var(--blue-dark)';
   });
-  btn.style.background='linear-gradient(135deg,#1a237e,#3949ab)';btn.style.color='#fff';
+  btn.style.background='var(--blue-mid)';btn.style.color='#fff';
   renderModelPapers2(type);
 }
 
@@ -4810,6 +4697,7 @@ function renderModelPapers(typeFilter){
 }
 
 async function downloadModelPaper(paperId){
+  if(!S.isPaid&&(S.papersDownloaded||0)>=1){showModal('sub-modal');alert('Free demo allows 1 paper download. Subscribe for unlimited!');return;}
   const paper = MODEL_PAPERS.find(p=>p.id===paperId);
   if(!paper){alert('Paper not found!');return;}
 
@@ -5565,13 +5453,11 @@ window.addEventListener('popstate', function(e) {
 // Push state on load so back button works
 history.pushState(null,'',location.href);
 
-// Init: select English by default on splash
-(function(){
-  setTimeout(function(){
-    var enBtn=document.getElementById('lang-en');
-    if(enBtn) setSplashLang('en',enBtn);
-  },100);
-})();
+// Auto-select English on splash load
+setTimeout(function(){
+  var en=document.getElementById('lang-en');
+  if(en) setSplashLang('en',en);
+},200);
 
 function save(){} // no-op — using API now
 </script>
