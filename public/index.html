@@ -1668,7 +1668,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 // ══════════════════════════════════════
 // ── API CONFIG ──────────────────────────────────
 const API_URL = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
-  ? 'https://brightmind-teacher.onrender.com'   // change to your Render URL
+  ? 'https://brightmindteacher.com'
   : window.location.origin;
 
 // ── API HELPERS ──────────────────────────────────
@@ -3786,44 +3786,50 @@ function loadRazorpay(){
 async function openRazorpay(amount, plan, subscription_type='monthly'){
   if(!S.user){alert('Please login first!');return;}
   const loaded=await loadRazorpay();
-  if(!loaded){alert('Payment system could not load. Please check internet and try again.');return;}
-
-  // Create order first — prevents QR auto-refund issue
-  const orderRes=await apiPost('/api/payment/create-order',{
-    amount, plan,
-    student_id:S.user.id,
-    student_name:S.user.name,
-    subscription_type
-  });
-  if(!orderRes.ok){alert('Could not initiate payment. Please try again in a moment.');return;}
+  if(!loaded){alert('Payment system could not load. Please check your internet and try again.');return;}
 
   const planNames={all:'All Subjects — BrightMind Teacher',single:'Single Subject — BrightMind Teacher'};
-  const options={
+  const baseOptions={
     key:'rzp_live_T0ELMmLSIlgcLq',
     amount:amount*100,
     currency:'INR',
     name:'BrightMind Teacher',
-    description:planNames[plan]||'BrightMind Teacher Subscription',
+    description:planNames[plan]||'BrightMind Teacher Premium',
     prefill:{name:S.user.name, contact:''},
     notes:{
       student_id:String(S.user.id),
       student_name:S.user.name,
-      plan, class:S.user.class, state:S.user.state
+      plan:plan, class:String(S.user.class), state:S.user.state
     },
     theme:{color:'#1a237e'},
+    modal:{ondismiss:function(){console.log('Payment modal closed');}},
     handler:async function(response){
       await verifyPayment(response, amount, plan, subscription_type);
     }
   };
-  // Only add order_id if we got one
-  if(orderRes.order_id) options.order_id=orderRes.order_id;
-  const rzp=new window.Razorpay(options);
+
+  // Try to get order_id — but don't block if it fails
+  try{
+    const orderRes=await apiPost('/api/payment/create-order',{
+      amount, plan,
+      student_id:S.user.id,
+      student_name:S.user.name,
+      subscription_type
+    });
+    if(orderRes&&orderRes.ok&&orderRes.order_id){
+      baseOptions.order_id=orderRes.order_id;
+    }
+  }catch(e){
+    console.warn('Order creation skipped:', e);
+    // Continue without order_id — Razorpay still works!
+  }
+
+  const rzp=new window.Razorpay(baseOptions);
   rzp.on('payment.failed',function(response){
-    alert('Payment failed! Reason: '+response.error.description+'\nPlease try again.');
+    alert('Payment failed! '+response.error.description+'\nPlease try again.');
   });
   rzp.open();
 }
-
 async function verifyPayment(response, amount, plan, subscription_type='monthly'){
   try{
     const bubble=document.getElementById('speech-bubble');
