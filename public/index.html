@@ -671,12 +671,13 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
         </select>
       </div>
       <div class="fg"><label>Class</label>
-        <select id="rc"><option value="">Select Class</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
+        <select id="rc" onchange="toggleStreamField(this.value)"><option value="">Select Class</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
       </div>
       <div class="fg"><label>State</label>
         <select id="rs"><option value="">Select State</option><option>Tamil Nadu</option><option>Maharashtra</option><option>Karnataka</option><option>Kerala</option><option>Uttar Pradesh</option><option>Rajasthan</option><option>Gujarat</option><option>West Bengal</option><option>Andhra Pradesh</option><option>Telangana</option><option>Delhi</option><option>Punjab</option><option>Haryana</option><option>Bihar</option><option>Madhya Pradesh</option><option>Other</option></select>
       </div>
       <div class="fg"><label>Password</label><input id="rp" type="password" placeholder="Create password"/></div>
+      <div class="fg" id="stream-field" style="display:none;"><label>Stream (Class 11 &amp; 12)</label><select id="rstream"><option value="science">🔬 Science</option><option value="commerce">💰 Commerce</option><option value="arts">🏛️ Arts</option></select></div>
       <button class="btn-gold" onclick="doRegister()">Create Account ✨</button>
     </div>
     <!-- PARENT LOGIN FORM -->
@@ -1463,7 +1464,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
         </div>
         <div style="text-align:right;">
           <div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹249</div>
-          <div class="pp">₹120<small>/mo</small></div>
+          <div class="pp">₹199<small>/mo</small></div>
         </div>
       </div>
       <div class="paywall-plan hot" onclick="selPaywallPlan(this,'all')">
@@ -1541,7 +1542,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
         </div>
         <div style="text-align:right;">
           <div style="font-size:12px;color:var(--gray-text);text-decoration:line-through;">₹249</div>
-          <div class="pp">₹120<small>/mo</small></div>
+          <div class="pp">₹199<small>/mo</small></div>
         </div>
       </div>
       <div class="plan-opt sel" onclick="selPlan(this,'all')">
@@ -1725,13 +1726,13 @@ function getSubjects(){
 }
 
 const LANG_SYS={
-  en:'You are BrightMind Teacher, an expert AI tutor for Indian Class 9-12 students. Explain concepts clearly step by step. Use simple English. Give Indian context examples. Be warm, encouraging and supportive like a good teacher.',
-  hi:'आप BrightMind Teacher हैं, कक्षा 9-12 के भारतीय छात्रों के लिए AI शिक्षक। हिंदी में सरल भाषा में कदम दर कदम समझाएं। भारतीय उदाहरण दें। प्रोत्साहित करें।',
-  ta:'நீங்கள் BrightMind Teacher, வகுப்பு 9-12 மாணவர்களுக்கான AI ஆசிரியர். தமிழில் எளிமையாக படிப்படியாக விளக்கவும். இந்திய உதாரணங்கள் கொடுங்கள். ஊக்கமளியுங்கள்.',
-  ml:'നിങ്ങൾ BrightMind Teacher ആണ്, ക്ലാസ് 9-12 വിദ്യാർഥികൾക്കുള്ള AI അദ്ധ്യാപകൻ. മലയാളത്തിൽ ലളിതമായി ഘട്ടം ഘട്ടമായി വിശദീകരിക്കുക. ഇന്ത്യൻ ഉദാഹരണങ്ങൾ നൽകുക. പ്രോത്സാഹിപ്പിക്കുക.',
-  kn:'ನೀವು BrightMind Teacher, ತರಗತಿ 9-12 ವಿದ್ಯಾರ್ಥಿಗಳಿಗೆ AI ಶಿಕ್ಷಕ. ಕನ್ನಡದಲ್ಲಿ ಸರಳವಾಗಿ ಹಂತ ಹಂತವಾಗಿ ವಿವರಿಸಿ. ಭಾರತೀಯ ಉದಾಹರಣೆಗಳನ್ನು ನೀಡಿ. ಪ್ರೋತ್ಸಾಹಿಸಿ.',
-  te:'మీరు BrightMind Teacher, తరగతి 9-12 విద్యార్థులకు AI ఉపాధ్యాయుడు. తెలుగులో సరళంగా దశలవారీగా వివరించండి. భారతీయ ఉదాహరణలు ఇవ్వండి. ప్రోత్సహించండి.'
-};
+  en:'You are Miss BrightMind, a warm friendly Indian teacher. ALWAYS reply in ENGLISH only. Use simple words, real examples, encourage students.',
+  hi:'आप Miss BrightMind हैं। हमेशा केवल हिंदी में जवाब दें। IMPORTANT: Reply ONLY in Hindi.',
+  ta:'நீங்கள் Miss BrightMind. எப்போதும் தமிழில் மட்டுமே பதில் சொல்லுங்கள். IMPORTANT: Reply ONLY in Tamil.',
+  ml:'നിങ്ങൾ Miss BrightMind. എല്ലായ്‌പ്പോഴും മലയാളത്തിൽ മാത്രം. IMPORTANT: Reply ONLY in Malayalam.',
+  kn:'ನೀವು Miss BrightMind. ಯಾವಾಗಲೂ ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ. IMPORTANT: Reply ONLY in Kannada.',
+  te:'మీరు Miss BrightMind. ఎల్లప్పుడూ తెలుగులో మాత్రమే. IMPORTANT: Reply ONLY in Telugu.',
+}
 const DEMO_LB=[
   {name:'Arjun Kumar',state:'Tamil Nadu',score:98,stars:5,class:'11'},
   {name:'Sneha Patel',state:'Gujarat',score:95,stars:5,class:'11'},
@@ -1936,9 +1937,38 @@ function showRankCard(){
   document.getElementById('rankcard-overlay').classList.add('open');
 }
 function closeRankCard(){document.getElementById('rankcard-overlay').classList.remove('open');}
+function downloadRankCard(){
+  const u=S.user;if(!u)return;
+  const gpa=computeGPA(u),xp=u.xp||0,lvl=getLevel(xp),stRank=computeStateRank(u),inRank=rank(u);
+  const date=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+  const ini=u.name[0].toUpperCase();
+  const bf={CBSE:'CBSE',TN:'Tamil Nadu Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board'}[u.board]||u.board||'CBSE';
+  const cr=Math.max(1,Math.floor(inRank/3));
+  var h='<!DOCTYPE html><html><head><meta charset="UTF-8">';
+  h+='<style>*{margin:0;padding:0;box-sizing:border-box;}body{background:#030820;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:Arial,sans-serif;padding:24px;}.card{width:360px;background:linear-gradient(145deg,#0a0f2e,#1a237e,#283593);border-radius:28px;padding:28px 20px;text-align:center;border:1px solid rgba(255,214,0,.3);box-shadow:0 24px 64px rgba(0,0,0,.8);}.tl{height:3px;background:linear-gradient(90deg,transparent,#ffd600,transparent);margin-bottom:16px;}.logo{font-size:10px;letter-spacing:3px;color:rgba(255,214,0,.85);font-weight:700;margin-bottom:14px;}.av{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#ffd600,#ff8f00);font-size:32px;font-weight:900;color:#0a0f2e;display:flex;align-items:center;justify-content:center;margin:0 auto;box-shadow:0 0 0 4px rgba(255,214,0,.25);}.lp{display:inline-block;margin:8px 0;background:linear-gradient(135deg,#ffd600,#ff8f00);color:#0a0f2e;font-size:10px;font-weight:800;padding:3px 10px;border-radius:10px;}.nm{font-size:22px;font-weight:900;color:#fff;margin-top:10px;}.mt{font-size:11px;color:rgba(255,255,255,.6);margin-top:4px;}.dv{height:1px;background:linear-gradient(90deg,transparent,rgba(255,214,0,.4),transparent);margin:16px 0;}.ranks{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:14px;}.rb{border-radius:12px;padding:12px 4px;}.rs{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);}.rc{background:rgba(255,214,0,.12);border:1px solid rgba(255,214,0,.3);}.rn{font-size:22px;font-weight:900;color:#ffd600;}.rl{font-size:9px;color:rgba(255,255,255,.5);margin-top:3px;}.stats{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:14px;}.sb{background:rgba(255,255,255,.07);border-radius:10px;padding:9px 4px;}.sv{font-size:16px;font-weight:800;color:#fff;}.sl{font-size:9px;color:rgba(255,255,255,.45);margin-top:2px;}.chips{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}.chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,.8);font-weight:600;}.ft{font-size:10px;color:rgba(255,255,255,.3);letter-spacing:1px;}.btn{display:block;margin:20px auto 0;background:linear-gradient(135deg,#ffd600,#ff8f00);color:#0a0f2e;border:none;padding:12px 32px;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;}@media print{.btn{display:none;}}</style></head><body><div class="card"><div class="tl"></div>';
+  h+='<div class="logo">🧠 BRIGHTMIND TEACHER</div><div class="av">'+ini+'</div><div class="lp">'+lvl.icon+' '+lvl.name+'</div>';
+  h+='<div class="nm">'+u.name+'</div><div class="mt">'+bf+' &middot; Class '+u.class+' &middot; '+u.state+'</div>';
+  h+='<div class="dv"></div><div class="ranks">';
+  h+='<div class="rb rs"><div class="rn">#'+stRank+'</div><div class="rl">'+u.state+' Rank</div></div>';
+  h+='<div class="rb rc"><div class="rn">#'+inRank+'</div><div class="rl">&#127470;&#127475; All India</div></div>';
+  h+='<div class="rb rs"><div class="rn">#'+cr+'</div><div class="rl">Class '+u.class+'</div></div>';
+  h+='</div><div class="stats">';
+  h+='<div class="sb"><div class="sv">'+gpa+'</div><div class="sl">GPA</div></div>';
+  h+='<div class="sb"><div class="sv">'+(u.stars||0)+'</div><div class="sl">Stars</div></div>';
+  h+='<div class="sb"><div class="sv">'+(u.streak||0)+'</div><div class="sl">Streak</div></div>';
+  h+='<div class="sb"><div class="sv">'+xp+'</div><div class="sl">XP</div></div>';
+  h+='</div><div class="chips">';
+  h+='<div class="chip">&#128218; '+(u.totalQ||0)+' Qs</div>';
+  h+='<div class="chip">&#127885; '+((u.badges||[]).length)+' Badges</div>';
+  h+='<div class="chip">&#128197; '+date+'</div>';
+  h+='</div><div class="dv"></div><div class="ft">brightmindteacher.com &middot; AI Tutor</div></div>';
+  h+='<button class="btn" onclick="window.print()">&#128438; Save as PDF</button></body></html>';
+  const w=window.open('','_blank');if(w){w.document.write(h);w.document.close();}
+}
+
 function shareRankCard(){
   const u=S.user;if(!u)return;
-  const text=`🧠 BrightMind Teacher\n\n👤 ${u.name}\n📚 Class ${u.class} · ${u.board||'CBSE'}\n\n🏆 GPA: ${computeGPA(u)}/10\n📍 ${u.state} Rank: #${computeStateRank(u)}\n🇮🇳 All India Rank: #${rank(u)}\n🔥 Streak: ${u.streak||0} days\n⭐ Stars: ${u.stars||0}\n\nJoin BrightMind Teacher — AI Tutor from ₹120/month!`;
+  const text=`🧠 BrightMind Teacher\n\n👤 ${u.name}\n📚 Class ${u.class} · ${u.board||'CBSE'}\n\n🏆 GPA: ${computeGPA(u)}/10\n📍 ${u.state} Rank: #${computeStateRank(u)}\n🇮🇳 All India Rank: #${rank(u)}\n🔥 Streak: ${u.streak||0} days\n⭐ Stars: ${u.stars||0}\n\nJoin BrightMind Teacher — AI Tutor from ₹199/month!`;
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
 
@@ -2014,6 +2044,7 @@ async function doResetPassword(){
     alert(res.msg||'Reset failed. Please check your name and try again.');
   }
 }
+function toggleStreamField(cls){var sf=document.getElementById("stream-field");if(sf)sf.style.display=(cls==="11"||cls==="12")?"block":"none";}
 async function doRegister(){
   const n=document.getElementById('rn').value.trim(),
         email=document.getElementById('remail').value.trim(),
@@ -2107,7 +2138,7 @@ function loginUser(u){
             <div class="paywall-plans">
               <div class="paywall-plan" onclick="selPaywallPlan(this,'single')">
                 <div><div class="pn">Single Subject</div><div class="pd">Was ₹249 · Save 52%!</div></div>
-                <div style="text-align:right;"><div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹249</div><div class="pp">₹120<small>/mo</small></div></div>
+                <div style="text-align:right;"><div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹249</div><div class="pp">₹199<small>/mo</small></div></div>
               </div>
               <div class="paywall-plan hot" onclick="selPaywallPlan(this,'all')">
                 <div><div class="pn">All Subjects <span class="hot-tag">BEST</span></div><div class="pd">Was ₹399 · Save 50%!</div></div>
@@ -2300,11 +2331,14 @@ const CHAPTER_TOPICS={
 let SYL={board:'',cls:'',subject:'',chapter:'',topic:'',step:1};
 
 function openSubject(id){
-  // Open syllabus selector instead of direct chat
-  SYL={board:S.user?.board||'CBSE',cls:S.user?.class||'11',subject:'',chapter:'',topic:'',step:1};
-  const sub=SUBJECTS_STATIC.find(s=>s.id===id)||{id,name:id,icon:'📚',qs:[]};
-  if(sub){SYL.subject=sub.name;}
   if(!S.isPaid&&S.qToday>=S.freeLimit){showModal('sub-modal');return;}
+  const nameMap={math:'Mathematics',english:'English',science:'Science',physics:'Physics',chem:'Chemistry',bio:'Biology',cs:'Computer Science',history:'History',geography:'Geography',polsci:'Political Science',economics:'Economics',sociology:'Sociology',accountancy:'Accountancy',bst:'Business Studies',socialsc:'Social Science',tamil:'Tamil',hindi:'Hindi'};
+  const subjectName=nameMap[id]||SUBJECTS_STATIC.find(s=>s.id===id)?.name||id;
+  const subIcon=SUBJECTS_STATIC.find(s=>s.id===id)?.icon||'📚';
+  SYL={board:S.user?.board||'CBSE',cls:String(S.user?.class||'11'),subject:subjectName,chapter:'',topic:'',step:2};
+  const bd=SYLLABUS[SYL.board]||SYLLABUS['CBSE'];
+  const cl=bd[SYL.cls]||bd['11']||{};
+  if(!cl[subjectName])cl[subjectName]={icon:subIcon,chapters:['Introduction','Core Concepts','Key Theorems','Practice Problems','Previous Year Questions']};
   document.getElementById('syllabus-overlay').classList.add('open');
   renderSyllabusStep();
 }
@@ -2583,7 +2617,7 @@ Return ONLY JSON array.`
         messages:[{role:'user',content:prompt}]})});
     const d=await r.json();
     let raw=d.content?.[0]?.text||'[]';
-    raw=raw.replace(/```json|```/g,'').trim();
+    raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
 
     // Parse steps
     try{
@@ -2840,7 +2874,7 @@ Return ONLY JSON array.`;
           ]}]})});
       const d=await r.json();
       let raw=d.content?.[0]?.text||'[]';
-      raw=raw.replace(/```json|```/g,'').trim();
+      raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
       document.getElementById(loadId)?.remove();
       try{
         bbAllSteps=JSON.parse(raw);
@@ -2992,15 +3026,33 @@ function speakText(text){
   const utt=new SpeechSynthesisUtterance(clean);
   utt.rate=speechRate; utt.pitch=1.05; utt.volume=1;
   // Pick best available voice
-  const voices=window.speechSynthesis.getVoices();
-  const langCodes={en:'en-IN',hi:'hi-IN',ta:'ta-IN',ml:'ml-IN',kn:'kn-IN',te:'te-IN'};
-  const langCode=langCodes[S.lang]||'en-IN';
-  const preferred=voices.find(v=>v.lang===langCode)||voices.find(v=>v.lang.startsWith('en'))||voices[0];
-  if(preferred)utt.voice=preferred;
-  utt.onstart=()=>setAvatarSpeaking(true,clean);
-  utt.onend=()=>setAvatarSpeaking(false);
-  utt.onerror=()=>setAvatarSpeaking(false);
-  window.speechSynthesis.speak(utt);
+  const langSel=document.getElementById('lang-sel');
+  if(langSel&&langSel.value) S.lang=langSel.value;
+  const curLang=S.lang||'en';
+  const langPrefixes={en:['en-IN','en-GB','en-US','en'],hi:['hi-IN','hi'],ta:['ta-IN','ta'],ml:['ml-IN','ml'],kn:['kn-IN','kn'],te:['te-IN','te']};
+  const langConf=langPrefixes[curLang]||langPrefixes['en'];
+  const langCode=langConf[0];
+  utt.lang=langCode;
+  const femaleKw=['Female','female','Samantha','Victoria','Karen','Moira','Veena','Zira','Heera','Kalpana'];
+  const trySpeak=()=>{
+    const voices=window.speechSynthesis.getVoices();
+    let voice=null;
+    for(const lc of langConf){if(!voice)voice=voices.find(v=>v.lang===lc&&femaleKw.some(f=>v.name.includes(f)));}
+    for(const lc of langConf){if(!voice)voice=voices.find(v=>v.lang===lc);}
+    for(const lc of langConf){if(!voice)voice=voices.find(v=>v.lang.startsWith(lc.split('-')[0])&&femaleKw.some(f=>v.name.includes(f)));}
+    for(const lc of langConf){if(!voice)voice=voices.find(v=>v.lang.startsWith(lc.split('-')[0]));}
+    if(!voice)voice=voices.find(v=>v.lang==='en-IN'&&femaleKw.some(f=>v.name.includes(f)));
+    if(!voice)voice=voices.find(v=>v.lang.startsWith('en')&&femaleKw.some(f=>v.name.includes(f)));
+    if(!voice)voice=voices.find(v=>v.lang.startsWith('en'));
+    if(!voice&&voices.length>0)voice=voices[0];
+    if(voice)utt.voice=voice;
+    utt.onstart=()=>setAvatarSpeaking(true,clean);
+    utt.onend=()=>setAvatarSpeaking(false);
+    utt.onerror=()=>setAvatarSpeaking(false);
+    window.speechSynthesis.speak(utt);
+  };
+  if(window.speechSynthesis.getVoices().length>0){trySpeak();}
+  else{window.speechSynthesis.onvoiceschanged=()=>{window.speechSynthesis.onvoiceschanged=null;trySpeak();};}
 }
 
 function toggleVoice(){
@@ -3124,7 +3176,7 @@ async function sendMsg(){
     speakText(rep);
     if(S.user){if(!S.user.subjects[S.sub.id])S.user.subjects[S.sub.id]={progress:0,stars:0};S.user.subjects[S.sub.id].progress=Math.min(100,(S.user.subjects[S.sub.id].progress||0)+5);saveUser();}
     if(S.chatHist.length>=8)document.getElementById('exam-cta').style.display='block';
-    if(S.chatHist.length===6)setTimeout(()=>assignHW(txt),1500);
+    if(S.chatHist.length===20)setTimeout(()=>assignHW(txt),1500);
   }catch(e){ty.classList.remove('show');addMsg('ai','⚠️ Connection error. Please try again.');}
 }
 
@@ -3159,7 +3211,7 @@ async function startExam(){
         messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name}. Topics: ${topics||'general chapter concepts'}. Make questions TOUGH — test deep understanding. Return ONLY a JSON array, no other text:
 [{"q":"question","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"brief explanation"}]`}]})});
     const d=await r.json();let raw=d.content?.[0]?.text||'[]';
-    raw=raw.replace(/```json|```/g,'').trim();
+    raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
     S.examQs=JSON.parse(raw);
   }catch(e){S.examQs=fallbackQs();}
   startTimer();renderExamQ();
@@ -3916,6 +3968,7 @@ function speakOBSlide(idx){
   window.speechSynthesis.speak(utt);
 }
 
+function obTapSkip(){if(OB&&OB.timer)clearInterval(OB.timer);window.speechSynthesis.cancel();if(OB&&OB.slide<OB.totalSlides-1){OB.slide++;obGoToSlide(OB.slide);}else{closeOnboarding();}}
 function obNext(){
   window.speechSynthesis.cancel();
   if(OB.slide>=OB.totalSlides-1){closeOnboarding();return;}
@@ -3971,7 +4024,7 @@ Return ONLY a JSON array:
 [{"q":"question text","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"why this is correct","marks":1}]`}]})});
     const d = await r.json();
     let raw = d.content?.[0]?.text||'[]';
-    raw = raw.replace(/```json|```/g,'').trim();
+    raw = raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
     IE.questions = JSON.parse(raw);
   }catch(e){
     IE.questions = Array(10).fill(null).map((_,i)=>({
@@ -4764,7 +4817,7 @@ Return ONLY this JSON:
         messages:[{role:'user',content:prompt}]})});
     const d = await r.json();
     let raw = d.content?.[0]?.text||'{}';
-    raw = raw.replace(/```json|```/g,'').trim();
+    raw = raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
     const paperData = JSON.parse(raw);
 
     buildExamPaperHTML(paperData, paper.subject, paper.chapters, {
@@ -4861,7 +4914,7 @@ Make questions exam-realistic and curriculum-appropriate. Return ONLY JSON.`;
         messages:[{role:'user',content:prompt}]})});
     const d = await r.json();
     let raw = d.content?.[0]?.text||'{}';
-    raw = raw.replace(/```json|```/g,'').trim();
+    raw = raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
     const paper = JSON.parse(raw);
 
     // Generate the printable HTML
