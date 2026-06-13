@@ -2530,27 +2530,58 @@ function updateCrumbs(){
 }
 
 function startSyllabusChat(){
-  const sub=SUBJECTS_STATIC.find(s=>s.name===SYL.subject)||{id:SYL.subject.toLowerCase(),name:SYL.subject,icon:SYLLABUS[SYL.board]?.[SYL.cls]?.[SYL.subject]?.icon||'📚',qs:[]};
-  S.sub=sub;S.chatHist=[];
+  const sub=SUBJECTS_STATIC.find(s=>s.name===SYL.subject)||{id:SYL.subject.toLowerCase(),name:SYL.subject,icon:'📚',qs:[]};
+  S.sub=sub; S.chatHist=[];
   document.getElementById('chat-icon').textContent=sub.icon||'📚';
   document.getElementById('chat-sname').textContent=sub.name;
-  document.getElementById('chat-ssub').textContent=SYL.board+' · Class '+SYL.cls+' · '+SYL.chapter;
-  // Build quick questions based on topic
-  const topics=CHAPTER_TOPICS[SYL.chapter]||CHAPTER_TOPICS['DEFAULT'];
-  document.getElementById('chat-qqs').innerHTML=topics.slice(0,4).map(t=>
-    `<div class="qq" onclick="sendQ('Explain: ${t.replace(/'/g,"\\'")}')">Explain: ${t}</div>`).join('');
+  document.getElementById('chat-ssub').textContent=SYL.board+' \u00b7 Class '+SYL.cls+' \u00b7 '+SYL.chapter;
   document.getElementById('chat-msgs').innerHTML='';
   document.getElementById('exam-cta').style.display='none';
+  const topics=CHAPTER_TOPICS[SYL.chapter]||CHAPTER_TOPICS['DEFAULT'];
+  document.getElementById('chat-qqs').innerHTML=topics.slice(0,4).map(function(t){
+    return '<div class="qq" onclick="sendQ(\'Explain: '+t.replace(/'/g,"\\'")+'\')">\ud83d\udcda '+t+'</div>';
+  }).join('');
   closeSyllabus();
   openChat();
-  // Opening message with full context
-  const boardFull={CBSE:'CBSE',ICSE:'ICSE',TN:'Tamil Nadu State Board',KL:'Kerala Board (SCERT)',KA:'Karnataka Board (KSEEB)',AP:'AP State Board',TS:'Telangana State Board',MH:'Maharashtra State Board',UP:'UP Board',WB:'WB Board',GJ:'Gujarat Board',RJ:'Rajasthan Board',OTHER:'State Board'}[SYL.board]||SYL.board+' Board';
-  const greeting=`Hello ${S.user?.name||'Student'}! 👋\n\nI'm your BrightMind Teacher for:\n\n📚 **${SYL.subject}** — ${boardFull}\n📖 **Chapter:** ${SYL.chapter}\n🎯 **Topic:** ${SYL.topic}\n\nI'll teach you exactly as per your syllabus, step by step. Let's begin! 😊\n\nShall I start explaining **${SYL.topic}**?`;
-  addMsg('ai',greeting);
-  const bubble=document.getElementById('speech-bubble');
-  if(bubble)bubble.textContent=`Teaching ${SYL.subject} — ${SYL.topic.substring(0,30)}`;
-  setTimeout(()=>speakText(`Hello ${S.user?.name||'Student'}! I am your BrightMind Teacher for ${SYL.subject}. Today we will study ${SYL.topic} from ${SYL.chapter}. Shall I begin?`),600);
+  const bf={CBSE:'CBSE',TN:'Tamil Nadu State Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP State Board',TS:'Telangana State Board',MH:'Maharashtra State Board',UP:'UP Board',WB:'WB Board'}[SYL.board]||SYL.board+' Board';
+  addMsg('ai','Opening '+SYL.topic+' from '+SYL.chapter+'...\n\nPreparing your lesson...');
+  setTimeout(async function(){
+    const msgs=document.getElementById('chat-msgs');
+    if(msgs&&msgs.lastChild)msgs.removeChild(msgs.lastChild);
+    const teachPrompt='TEACH me this topic right now like a real classroom teacher:\n\n'
+      +'Subject: '+SYL.subject+'\nBoard: '+bf+'\nClass: '+SYL.cls+'\nChapter: '+SYL.chapter+'\nTopic: '+SYL.topic+'\n\n'
+      +'Use this structure:\n'
+      +'1. One real-life example to introduce (1-2 sentences)\n'
+      +'2. Simple definition (1-2 sentences)\n'
+      +'3. Main explanation point by point (2-3 sentences each)\n'
+      +'4. Two important exam points to remember\n'
+      +'5. One memory tip or trick\n'
+      +'6. End with: "Any questions? Or shall I continue?"\n\n'
+      +'IMPORTANT: Short sentences. Simple words. Talk to me like a teacher, not a textbook. Follow '+bf+' syllabus exactly.';
+    try{
+      const sys=LANG_SYS[S.lang||'en']+' You are Miss BrightMind, a warm caring teacher for Class '+SYL.cls+' '+SYL.subject+' ('+bf+'). Chapter: '+SYL.chapter+'. Topic: '+SYL.topic+'. Teach sentence by sentence. Use simple words. Give real-life examples. Follow '+bf+' syllabus exactly.';
+      const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,system:sys,
+          messages:[{role:'user',content:teachPrompt}]})});
+      const d=await r.json();
+      const reply=(d.content&&d.content[0]&&d.content[0].text)||'';
+      if(reply){
+        S.chatHist.push({role:'user',content:teachPrompt});
+        S.chatHist.push({role:'assistant',content:reply});
+        addMsg('ai',reply);
+        speakText(reply.replace(/[#*]/g,'').substring(0,400));
+        S.qToday=(S.qToday||0)+1;
+        const sq=document.getElementById('stat-q');
+        if(sq)sq.textContent=(parseInt(sq.textContent)||0)+1;
+      }else{
+        addMsg('ai','Let us study '+SYL.topic+'! Ask me anything about this topic.');
+      }
+    }catch(e){
+      addMsg('ai','Let us study '+SYL.topic+' from '+SYL.chapter+'! Type your first question and I will teach you step by step.');
+    }
+  },400);
 }
+
 
 function onBoardChange(){
   const board=document.getElementById('rboard').value;
@@ -3898,56 +3929,122 @@ function showRenewalReminder(user, daysLeft, sub){
 // ══════════════════════════════════════
 // RAZORPAY PAYMENT
 // ══════════════════════════════════════
+// Preload Razorpay on page start (mobile needs this)
+(function(){
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',preloadRazorpay);
+  }else{
+    preloadRazorpay();
+  }
+})();
+
+function preloadRazorpay(){
+  if(window.Razorpay)return;
+  const s=document.createElement('script');
+  s.src='https://checkout.razorpay.com/v1/checkout.js';
+  s.async=true;
+  document.head.appendChild(s);
+}
+
 function loadRazorpay(){
-  return new Promise(resolve=>{
+  return new Promise(function(resolve){
     if(window.Razorpay){resolve(true);return;}
-    const s=document.createElement('script');
-    s.src='https://checkout.razorpay.com/v1/checkout.js';
-    s.onload=()=>resolve(true);
-    s.onerror=()=>resolve(false);
-    document.head.appendChild(s);
+    // Already loading — wait up to 10 seconds
+    const s=document.querySelector('script[src*="razorpay"]');
+    if(s){
+      let waited=0;
+      const check=setInterval(function(){
+        waited+=200;
+        if(window.Razorpay){clearInterval(check);resolve(true);}
+        else if(waited>=10000){clearInterval(check);resolve(false);}
+      },200);
+      return;
+    }
+    // Load fresh
+    const ns=document.createElement('script');
+    ns.src='https://checkout.razorpay.com/v1/checkout.js';
+    ns.onload=function(){resolve(true);};
+    ns.onerror=function(){resolve(false);};
+    document.head.appendChild(ns);
   });
 }
 
 async function openRazorpay(amount, plan, subscription_type='monthly'){
   if(!S.user){alert('Please login first!');return;}
-  const loaded=await loadRazorpay();
-  if(!loaded){alert('Razorpay could not load. Check internet and try again.');return;}
 
-  const planNames={all:'All Subjects — BrightMind Teacher',single:'Single Subject — BrightMind Teacher'};
+  // Show loading indicator on the button
+  const payBtns=document.querySelectorAll('[onclick*="activatePaywall"],[onclick*="subscribePlan"]');
+  payBtns.forEach(b=>{b.textContent='Loading... ⏳';b.disabled=true;});
+
+  const loaded=await loadRazorpay();
+
+  // Restore buttons
+  payBtns.forEach(b=>{b.textContent='Subscribe with Razorpay →';b.disabled=false;});
+
+  if(!loaded||!window.Razorpay){
+    // Fallback: open Razorpay payment link directly
+    const fallbackUrl='https://rzp.io/l/brightmindteacher';
+    if(confirm('Opening payment page...\n\nTap OK to continue.')){
+      window.open('https://pages.razorpay.com/brightmindteacher','_blank');
+    }
+    return;
+  }
+
   const options={
     key:'rzp_live_T0ELMmLSIlgcLq',
     amount:amount*100,
     currency:'INR',
     name:'BrightMind Teacher',
-    description:planNames[plan]||'BrightMind Teacher Premium',
-    prefill:{name:S.user.name,contact:''},
-    notes:{student_id:String(S.user.id),student_name:S.user.name,plan,class:String(S.user.class||''),state:S.user.state||''},
+    description:'All Subjects — Unlimited Access',
+    prefill:{name:S.user.name||'',contact:''},
+    notes:{
+      student_id:String(S.user.id||''),
+      student_name:S.user.name||'',
+      plan:plan||'all',
+      class:String(S.user.class||''),
+      state:S.user.state||''
+    },
     theme:{color:'#1a237e'},
-    modal:{ondismiss:function(){console.log('Payment closed');}},
+    modal:{
+      ondismiss:function(){console.log('Payment closed by user');},
+      backdropclose:false,
+      escape:false,
+      handleback:true
+    },
+    config:{display:{language:'en'}},
     handler:async function(response){
       await verifyPayment(response,amount,plan,subscription_type);
     }
   };
 
-  // Try to get order_id — but never block payment if it fails
+  // Try to get order_id — never block if fails
   try{
     const orderRes=await Promise.race([
-      apiPost('/api/payment/create-order',{amount,plan,student_id:S.user.id,student_name:S.user.name,subscription_type}),
+      apiPost('/api/payment/create-order',{
+        amount,plan,
+        student_id:S.user.id,
+        student_name:S.user.name,
+        subscription_type
+      }),
       new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),5000))
     ]);
     if(orderRes&&orderRes.ok&&orderRes.order_id){
       options.order_id=orderRes.order_id;
     }
   }catch(e){
-    console.warn('Order creation skipped, proceeding without order_id:', e.message);
+    console.warn('Order skipped:',e.message);
   }
 
-  const rzp=new window.Razorpay(options);
-  rzp.on('payment.failed',function(response){
-    alert('Payment failed: '+response.error.description+'\nPlease try again.');
-  });
-  rzp.open();
+  try{
+    const rzp=new window.Razorpay(options);
+    rzp.on('payment.failed',function(response){
+      alert('Payment failed: '+(response.error&&response.error.description||'Unknown error')+'\nPlease try again.');
+    });
+    rzp.open();
+  }catch(err){
+    console.error('Razorpay open error:',err);
+    alert('Could not open payment. Please try:\n1. Refresh the page\n2. Try again\n3. Use a different browser');
+  }
 }
 
 async function verifyPayment(response, amount, plan, subscription_type='monthly'){
