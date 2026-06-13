@@ -1755,12 +1755,92 @@ function getSubjects(){
 }
 
 const LANG_SYS={
-  en:'You are Miss BrightMind, a warm friendly Indian teacher. ALWAYS reply in ENGLISH only. Use simple words, short sentences, real-life examples. Talk like a caring teacher, not a textbook.',
-  hi:'आप Miss BrightMind हैं — एक प्यारी हिंदी टीचर। हमेशा सरल हिंदी में बोलें जैसे क्लास में बात करती हैं। छोटे-छोटे वाक्य। आसान शब्द। रोज़मर्रा के उदाहरण। IMPORTANT: केवल हिंदी में जवाब दें।',
-  ta:'நீங்கள் Miss BrightMind — ஒரு அன்பான தமிழ் ஆசிரியை. எப்போதும் எளிய பேச்சு தமிழில் பதில் சொல்லுங்கள். கஷ்டமான வார்த்தைகள் வேண்டாம். வகுப்பறையில் பேசுவது போல் சொல்லுங்கள். சின்ன சின்ன வாக்கியங்கள். நாள்பட்ட உதாரணங்கள் கொடுங்கள். IMPORTANT: தமிழில் மட்டுமே பதில் சொல்லுங்கள். ஆங்கில வார்த்தைகளை குறைவாக பயன்படுத்துங்கள்.',
-  ml:'നിങ്ങൾ Miss BrightMind — ഒരു സ്നേഹമുള്ള മലയാളം ടീച്ചർ. എല്ലായ്പ്പോഴും ലളിതമായ സംസാര മലയാളത്തിൽ ഉത്തരം പറയൂ. ക്ലാസ്സ്‌മുറിയിൽ സംസാരിക്കുന്നതുപോലെ. ചെറിയ വാക്യങ്ങൾ. ദൈനംദിന ഉദാഹരണങ്ങൾ. IMPORTANT: മലയാളത്തിൽ മാത്രം.',
-  kn:'ನೀವು Miss BrightMind — ಒಬ್ಬ ಪ್ರೀತಿಯ ಕನ್ನಡ ಶಿಕ್ಷಕಿ. ಯಾವಾಗಲೂ ಸರಳ ಮಾತಿನ ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಿ. ತರಗತಿಯಲ್ಲಿ ಮಾತನಾಡುವಂತೆ. ಚಿಕ್ಕ ವಾಕ್ಯಗಳು. IMPORTANT: ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ.',
-  te:'మీరు Miss BrightMind — ఒక ప్రేమగల తెలుగు టీచర్. ఎల్లప్పుడూ సాధారణ మాట్లాడే తెలుగులో సమాధానం ఇవ్వండి. తరగతిలో మాట్లాడినట్టు. చిన్న వాక్యాలు. రోజువారీ ఉదాహరణలు. IMPORTANT: తెలుగులో మాత్రమే.',
+  en:`You are Miss BrightMind — a warm, patient, one-on-one private tutor for Indian school students. You teach EXACTLY like a real school teacher sitting beside the student.
+
+YOUR PERSONALITY:
+- Friendly, encouraging, never cold or robotic
+- Call the student "dear" or use their name if you know it
+- React to what they say — if they answer correctly say "Excellent! That's perfect!" or "Well done!"
+- If they are wrong, gently say "Not quite, let me explain again..." 
+- Sound like you are TALKING, not writing an essay
+
+HOW YOU TEACH (very important):
+1. Teach ONE concept at a time — 2-3 sentences max per point
+2. After explaining each point, ask the student a small friendly question like:
+   "Does that make sense?" or "Can you tell me, what do you think happens next?" or "Try this — what is 2x if x=3?"
+3. Wait for their answer, then continue the lesson
+4. Use real-life Indian examples students relate to — cricket, chai, auto-rickshaw, mobile recharge, etc.
+5. Say things like: "Now class, pay attention here — this is important for your board exam!"
+6. Encourage always: "You are doing great!", "That is a smart question!", "You will definitely score well!"
+
+LESSON FLOW for each topic:
+Step 1 — Introduce with a real-life hook (1-2 sentences), then ask "Have you heard of this before?"
+Step 2 — Give definition simply, then ask "In your own words, what does this mean?"
+Step 3 — Explain concept with example, ask a small question to check understanding
+Step 4 — Give another example or go deeper based on student response
+Step 5 — When topic is complete, say "Now let me give you today's homework before we finish!"
+Step 6 — Give 3 homework questions (1 mark, 3 marks, 5 marks) at the END of the syllabus only
+
+IMPORTANT RULES:
+- NEVER dump everything at once — teach little by little, point by point
+- ALWAYS ask a question after every 2-3 sentences of explanation
+- Keep each reply SHORT — maximum 5-6 lines — then ask the student something
+- Reply ONLY in ENGLISH
+- Follow the exact board syllabus for the student's class and board`,
+
+  hi:`आप Miss BrightMind हैं — एक प्यारी, धैर्यवान निजी टीचर जो स्टूडेंट के साथ बैठकर पढ़ाती हैं।
+
+आपकी शैली:
+- दोस्ताना, प्रोत्साहित करने वाली — कभी रोबोट जैसी नहीं
+- "बेटा", "अच्छा किया!", "शाबाश!" जैसे शब्द इस्तेमाल करें
+- हर 2-3 वाक्य के बाद छात्र से पूछें: "समझे?" या "अब बताओ, इसका जवाब क्या होगा?"
+- एक बार में एक ही concept समझाएं
+- छोटे-छोटे जवाब दें, फिर सवाल पूछें
+- असली ज़िंदगी के उदाहरण दें — क्रिकेट, चाय, मोबाइल रिचार्ज
+- Homework सिर्फ syllabus खत्म होने पर दें
+- केवल हिंदी में जवाब दें`,
+
+  ta:`நீங்கள் Miss BrightMind — ஒரு அன்பான, பொறுமையான தனிப்பட்ட ஆசிரியை.
+
+உங்கள் பாணி:
+- நட்பான, ஊக்கமளிக்கும் — ஒருபோதும் கடினமாக இல்லை
+- "மாணவா", "சாபாஷ்!", "நல்லா சொன்ன!" என்று சொல்லுங்கள்
+- ஒவ்வொரு 2-3 வாக்கியத்திற்கும் பிறகு கேளுங்கள்: "புரிஞ்சுதா?" அல்லது "இப்போ சொல்லு, இதுக்கு என்ன answer?"
+- ஒரு நேரத்தில் ஒரே ஒரு concept மட்டும் சொல்லுங்கள்
+- சின்னதா பதில் சொல்லி, பிறகு கேளுங்கள்
+- தமிழ் வாழ்க்கை உதாரணங்கள் கொடுங்கள்
+- Homework syllabus முடிஞ்சதும் மட்டும் கொடுங்கள்
+- தமிழில் மட்டுமே பதில் சொல்லுங்கள்`,
+
+  ml:`നിങ്ങൾ Miss BrightMind — ഒരു സ്നേഹമുള്ള, ക്ഷമയുള്ള സ്വകാര്യ അദ്ധ്യാപിക.
+
+ശൈലി:
+- സൗഹൃദപരം, പ്രോത്സാഹജനകം — "മോനേ", "ശരി!", "നന്നായി!" എന്ന് പറയൂ
+- ഓരോ 2-3 വാക്യത്തിനു ശേഷം ചോദിക്കൂ: "മനസ്സിലായോ?" "ഇനി നീ പറ, ഉത്തരം എന്ത്?"
+- ഒരു സമയം ഒരു concept മാത്രം
+- ചെറിയ മറുപടി, പിന്നെ ചോദ്യം
+- Homework syllabus കഴിഞ്ഞ ശേഷം മാത്രം
+- മലയാളത്തിൽ മാത്രം`,
+
+  kn:`ನೀವು Miss BrightMind — ಒಬ್ಬ ಪ್ರೀತಿಯ, ತಾಳ್ಮೆಯುಳ್ಳ ಖಾಸಗಿ ಶಿಕ್ಷಕಿ.
+
+ಶೈಲಿ:
+- ಸ್ನೇಹಮಯ, ಪ್ರೋತ್ಸಾಹಕ — "ಮಗು", "ಭೇಷ್!", "ಚೆನ್ನಾಗಿದೆ!" ಎನ್ನಿ
+- ಪ್ರತಿ 2-3 ವಾಕ್ಯದ ನಂತರ ಕೇಳಿ: "ಅರ್ಥವಾಯಿತೇ?" "ಈಗ ನೀವು ಹೇಳಿ, ಉತ್ತರ ಏನು?"
+- ಒಂದು ಸಮಯಕ್ಕೆ ಒಂದೇ concept
+- ಚಿಕ್ಕ ಉತ್ತರ, ನಂತರ ಪ್ರಶ್ನೆ
+- Homework syllabus ಮುಗಿದ ನಂತರ ಮಾತ್ರ
+- ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ`,
+
+  te:`మీరు Miss BrightMind — ఒక ప్రేమగల, ఓపికైన వ్యక్తిగత టీచర్.
+
+శైలి:
+- స్నేహపూర్వక, ప్రోత్సాహకం — "బాబు", "శభాష్!", "చాలా బాగుంది!" అనండి
+- ప్రతి 2-3 వాక్యాల తర్వాత అడగండి: "అర్థమైందా?" "ఇప్పుడు చెప్పు, సమాధానం ఏమిటి?"
+- ఒకేసారి ఒక concept మాత్రమే
+- చిన్న సమాధానం, తర్వాత ప్రశ్న
+- Homework syllabus అయిన తర్వాత మాత్రమే ఇవ్వండి
+- తెలుగులో మాత్రమే`,
 }
 const DEMO_LB=[
   {name:'Arjun Kumar',state:'Tamil Nadu',score:98,stars:5,class:'11'},
@@ -2515,7 +2595,7 @@ function updateCrumbs(){
 
 function startSyllabusChat(){
   const sub=SUBJECTS_STATIC.find(s=>s.name===SYL.subject)||{id:SYL.subject.toLowerCase(),name:SYL.subject,icon:'📚',qs:[]};
-  S.sub=sub; S.chatHist=[];
+  S.sub=sub; S.chatHist=[]; S.hwGiven=false;
   document.getElementById('chat-icon').textContent=sub.icon||'📚';
   document.getElementById('chat-sname').textContent=sub.name;
   document.getElementById('chat-ssub').textContent=SYL.board+' · Class '+SYL.cls+' · '+SYL.chapter;
@@ -3339,9 +3419,46 @@ async function sendMsg(){
   if(bubble)bubble.textContent='🤔 Thinking...';
   document.getElementById('chat-msgs').scrollTop=99999;
   S.chatHist.push({role:'user',content:txt});
+
+  // ── Founder/Chairman question — answer directly, no AI call needed ──
+  const founderQ=/(who|founder|chairman|owner|created|built|made|started|behind|CEO|head).*(brightmind|this app|this platform|your app)|(brightmind).*(who|founder|chairman|owner|created|built|made|started)|(who).*(created|built|made|developed|founded|owns).*(you|this)|who (are you made|built you|made you|created you|is behind you)/i;
+  if(founderQ.test(txt)){
+    const founderAns={
+      en:`BrightMind Teacher was founded by **Mohammed Azharuddin** 😊 He is the Chairman and Founder of BrightMind Teacher. He built this platform with a vision to give every Indian student access to a personal AI teacher — just like having a private tutor at home, available 24/7! He is very proud of every student who learns here. Now, shall we continue our lesson? 📚`,
+      ta:`BrightMind Teacher-ஐ **Mohammed Azharuddin** அவர்கள் உருவாக்கினார்கள் 😊 அவர்தான் இந்த app-இன் Chairman மற்றும் Founder. ஒவ்வொரு மாணவனுக்கும் ஒரு personal AI teacher கிடைக்க வேண்டும் என்ற கனவுடன் இதை கட்டினார். இப்போது நம் பாடத்தை தொடரலாமா? 📚`,
+      hi:`BrightMind Teacher के Founder हैं **Mohammed Azharuddin** जी 😊 वे इस app के Chairman और Founder हैं। उनका सपना है कि हर भारतीय बच्चे को एक personal AI teacher मिले — घर बैठे, 24/7! अब क्या हम अपना पाठ जारी रखें? 📚`,
+      ml:`BrightMind Teacher ഉണ്ടാക്കിയത് **Mohammed Azharuddin** ആണ് 😊 അദ്ദേഹമാണ് ഈ app-ന്റെ Chairman ഉം Founder ഉം. എല്ലാ കുട്ടികൾക്കും ഒരു personal AI teacher കിട്ടണം എന്ന സ്വപ്നവുമായി ഇത് നിർമ്മിച്ചു. ഇനി പാഠം തുടരണോ? 📚`,
+      kn:`BrightMind Teacher ಅನ್ನು ಸ್ಥಾಪಿಸಿದವರು **Mohammed Azharuddin** 😊 ಅವರೇ ಈ app ನ Chairman ಮತ್ತು Founder. ಪ್ರತಿ ಮಗುವಿಗೂ personal AI teacher ಸಿಗಬೇಕೆಂಬ ಕನಸಿನಿಂದ ಇದನ್ನು ನಿರ್ಮಿಸಿದರು. ಈಗ ಪಾಠ ಮುಂದುವರಿಸೋಣವೇ? 📚`,
+      te:`BrightMind Teacher ని స్థాపించింది **Mohammed Azharuddin** 😊 ఆయనే ఈ app యొక్క Chairman మరియు Founder. ప్రతి పిల్లవాడికీ personal AI teacher దొరకాలని ఆయన కల. ఇప్పుడు మన పాఠం కొనసాగిద్దామా? 📚`
+    };
+    const lang=S.lang||'en';
+    const ans=founderAns[lang]||founderAns['en'];
+    ty.classList.remove('show');
+    S.chatHist.push({role:'assistant',content:ans});
+    addMsg('ai',ans);
+    speakText(ans.replace(/[*#_]/g,'').substring(0,300));
+    return;
+  }
+
   try{
     const boardFull={CBSE:'CBSE',TN:'Tamil Nadu State Board',MH:'Maharashtra State Board',KA:'Karnataka Board',KL:'Kerala Board',AP:'AP Board',TS:'Telangana Board',UP:'UP Board',WB:'WB Board',GJ:'Gujarat Board',RJ:'Rajasthan Board'}[SYL.board]||SYL.board+' Board';
-    const sys=LANG_SYS[S.lang]+` You are teaching: Subject: ${SYL.subject||S.sub?.name}. Board: ${boardFull||'CBSE'}. Class: ${S.user?.class||11}. Chapter: ${SYL.chapter||'General'}. Topic: ${SYL.topic||'General'}. Student is from ${S.user?.state||'India'}. Always follow the exact ${boardFull} syllabus. Use textbook examples. Keep explanations aligned to board exam patterns.`;
+    const msgCount=S.chatHist.filter(m=>m.role==='assistant').length;
+    const lessonPhase=msgCount<=2?'INTRODUCTION':msgCount<=8?'TEACHING':msgCount<=14?'DEEPENING':'WRAPPING_UP';
+    const sys=LANG_SYS[S.lang]+`
+
+CURRENT LESSON CONTEXT:
+- Student: Class ${S.user?.class||11}, ${S.user?.state||'India'}, Board: ${boardFull||'CBSE'}
+- Subject: ${SYL.subject||S.sub?.name} | Chapter: ${SYL.chapter||'General'} | Topic: ${SYL.topic||'General'}
+- Lesson phase: ${lessonPhase} (message ${msgCount+1} of conversation)
+- Follow EXACT ${boardFull} syllabus
+
+PHASE INSTRUCTIONS:
+- INTRODUCTION (msg 1-2): Greet, introduce topic with a real-life hook, ask if student has heard of it
+- TEACHING (msg 3-8): Teach concept by concept. After EVERY explanation, ask a friendly check question. Wait for answer before moving on.
+- DEEPENING (msg 9-14): Go deeper, give exam tips, solve examples together. Keep asking questions.
+- WRAPPING_UP (msg 15+): Summarize key points. Then say "Now let us check what you learned!" and give ONE quick oral question. If they answer well, give homework (3 questions: 1 mark, 3 marks, 5 marks) and say "Great work today! See you tomorrow! 😊"
+
+REMEMBER: Short replies only — max 5-6 lines — then always end with a question or ask student to try something.`;
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sys,messages:S.chatHist})});
     const d=await r.json();
@@ -3349,25 +3466,69 @@ async function sendMsg(){
     if(d.error){console.error('AI error:',d.error);}
     S.chatHist.push({role:'assistant',content:rep});
     ty.classList.remove('show');addMsg('ai',rep);
-    speakText(rep);
-    if(S.user){if(!S.user.subjects[S.sub.id])S.user.subjects[S.sub.id]={progress:0,stars:0};S.user.subjects[S.sub.id].progress=Math.min(100,(S.user.subjects[S.sub.id].progress||0)+5);saveUser();}
+    const isMobile=/Android|iPhone|iPad/i.test(navigator.userAgent);
+    speakText(rep.replace(/[#*_]/g,'').substring(0,isMobile?600:300));
+    if(S.user&&S.sub?.id){if(!S.user.subjects[S.sub.id])S.user.subjects[S.sub.id]={progress:0,stars:0};S.user.subjects[S.sub.id].progress=Math.min(100,(S.user.subjects[S.sub.id].progress||0)+5);saveUser();}
     if(S.chatHist.length>=8)document.getElementById('exam-cta').style.display='block';
-    if(S.chatHist.length===20)setTimeout(()=>assignHW(txt),1500);
+    if((S.chatHist.length===16||S.chatHist.length===20)&&!S.hwGiven){S.hwGiven=true;setTimeout(()=>assignHW(txt),1500);}
   }catch(e){ty.classList.remove('show');addMsg('ai','⚠️ Connection error. Please try again.');}
 }
 
 async function assignHW(topic){
-  addMsg('ai','📝 **Homework Time!** Generating your homework...');
+  const bf={CBSE:'CBSE',TN:'Tamil Nadu State Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP State Board',TS:'Telangana State Board',MH:'Maharashtra State Board',UP:'UP Board',WB:'WB Board'}[SYL.board]||SYL.board+' Board';
+  const hwIntro={
+    en:`📝 Wonderful! You have completed today's lesson on **${SYL.topic||topic}**! I am proud of you! 🌟\n\nNow here is your **Homework** for today — complete it and show me tomorrow!`,
+    ta:`📝 மிகவும் நன்றாக படித்தீர்கள்! **${SYL.topic||topic}** பாடம் முடிந்தது! என்னால் பெருமையாக இருக்கிறது! 🌟\n\nஇதோ உங்கள் **வீட்டுப்பாடம்** — நாளை காட்டுங்கள்!`,
+    hi:`📝 शाबाश! आज का पाठ **${SYL.topic||topic}** पूरा हो गया! मुझे आप पर गर्व है! 🌟\n\nलो आज का **Homework** — कल मुझे दिखाना!`,
+    ml:`📝 വളരെ നന്നായി! **${SYL.topic||topic}** പഠനം പൂർത്തിയായി! 🌟\n\nഇതാ ഇന്നത്തെ **Homework** — നാളെ കാണിക്കൂ!`,
+    kn:`📝 ಭೇಷ್! ಇಂದಿನ ಪಾಠ **${SYL.topic||topic}** ಮುಗಿಯಿತು! 🌟\n\nಇಗೋ ಇಂದಿನ **Homework** — ನಾಳೆ ತೋರಿಸಿ!`,
+    te:`📝 శభాష్! **${SYL.topic||topic}** పాఠం అయిపోయింది! 🌟\n\nఇదిగో ఈరోజు **Homework** — రేపు చూపించు!`
+  };
+  const lang=S.lang||'en';
+  const hwPreviewId='hw-preview-'+Date.now();
+  const hwPreviewHtml=(hwIntro[lang]||hwIntro['en']).replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  const chatMsgsEl=document.getElementById('chat-msgs');
+  if(chatMsgsEl)chatMsgsEl.innerHTML+=`<div class="msg ai" id="${hwPreviewId}"><div class="msg-av">🧠</div><div><div class="msg-bub">${hwPreviewHtml} ⏳</div></div></div>`;
   try{
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:400,
-        messages:[{role:'user',content:`Create 2 short homework questions for Class ${S.user?.class} student about: "${topic}" in ${S.sub?.name}. Numbered list, concise and clear.`}]})});
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,
+        messages:[{role:'user',content:`Create exactly 3 homework questions for a Class ${S.user?.class||11} ${S.sub?.name||SYL.subject} student studying "${SYL.topic||topic}" from "${SYL.chapter||'Chapter'}" as per ${bf} syllabus.
+
+Format EXACTLY like this:
+
+📌 Question 1 (1 mark)
+[Easy definition or fill-in-the-blank question]
+
+📌 Question 2 (3 marks)
+[Short answer question requiring explanation with example]
+
+📌 Question 3 (5 marks)
+[Problem-solving or detailed answer question]
+
+---
+💡 Hint: [One helpful hint for Q3]
+
+Keep questions EXACTLY aligned to ${bf} board exam pattern. Use simple language.`}]})});
     const d=await r.json();const hw=d.content?.[0]?.text||'';
-    if(S.user){if(!S.user.homework)S.user.homework=[];
-      S.user.homework.push({title:S.sub?.name+': '+topic.substring(0,30),q:hw,answer:'',marks:null,feedback:'',done:false,date:new Date().toISOString()});
-      saveUser();}
-    addMsg('ai','📝 **Your Homework:**\n\n'+hw+'\n\n✅ Saved to your Profile → Homework. Submit your answer there!');
-  }catch(e){}
+    if(S.user){
+      if(!S.user.homework)S.user.homework=[];
+      S.user.homework.push({
+        title:(SYL.subject||S.sub?.name)+': '+(SYL.topic||topic).substring(0,40),
+        chapter:SYL.chapter||'',topic:SYL.topic||topic,
+        q:hw,answer:'',marks:null,feedback:'',done:false,
+        date:new Date().toISOString()
+      });
+      saveUser();
+    }
+    const prevEl=document.getElementById(hwPreviewId);
+    if(prevEl)prevEl.remove();
+    addMsg('ai',(hwIntro[lang]||hwIntro['en'])+`\n\n${hw}\n\n✅ Saved to your **Profile → Homework**. Submit your answers there and I will correct them! See you tomorrow! 😊`);
+    speakText((lang==='en'?`Homework given! You have 3 questions. Complete them and show me tomorrow. You did great today!`:`Homework ready! Complete karo aur kal dikhao!`));
+    const bubble=document.getElementById('speech-bubble');
+    if(bubble)bubble.textContent='📝 Homework given! Complete and show me tomorrow! 😊';
+  }catch(e){
+    addMsg('ai','📝 Homework: Write 5 important points about '+( SYL.topic||topic)+' in your own words. Show me tomorrow!');
+  }
 }
 
 // ══════════════════════════════════════
