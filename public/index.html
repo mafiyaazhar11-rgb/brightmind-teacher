@@ -2515,7 +2515,7 @@ function startSyllabusChat(){
         S.chatHist.push({role:'user',content:teachPrompt});
         S.chatHist.push({role:'assistant',content:reply});
         addMsg('ai',reply);
-        speakText(reply.replace(/[#*]/g,'').substring(0,400));
+        const isMobile=/Android|iPhone|iPad/i.test(navigator.userAgent);speakText(reply.replace(/[#*]/g,'').substring(0,isMobile?600:250));
         S.qToday=(S.qToday||0)+1;
         const sq=document.getElementById('stat-q');
         if(sq)sq.textContent=(parseInt(sq.textContent)||0)+1;
