@@ -1181,7 +1181,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
         <div style="font-size:9px;color:rgba(255,255,255,0.5);">Questions</div>
       </div>
       <!-- Language selector -->
-      <select id="bb-lang-sel" onchange="S.lang=this.value;document.getElementById('lang-sel').value=this.value;" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+      <select id="bb-lang-sel" onchange="S.lang=this.value;var cs=document.getElementById('lang-sel');if(cs)cs.value=this.value;window.speechSynthesis.cancel();const gm={en:'English!',ta:'தமிழில் பேசுகிறேன்!',hi:'हिंदी में!',ml:'മലയാളത്തിൽ!',kn:'ಕನ್ನಡದಲ್ಲಿ!',te:'తెలుగులో!'};setTimeout(()=>speakText(gm[this.value]||'Language changed!'),200);" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
         <option value="en">🌐 English</option>
         <option value="ta">தமிழ்</option>
         <option value="hi">हिंदी</option>
@@ -2068,36 +2068,19 @@ function switchTab(t,el){
 // LANGUAGE SELECTION ON SPLASH
 function setSplashLang(lang, el){
   S.lang=lang;
-  // Reset ALL buttons by ID
-  ['lang-en','lang-hi','lang-ta','lang-ml','lang-kn','lang-te'].forEach(function(id){
-    var b=document.getElementById(id);
-    if(!b)return;
-    b.style.background='rgba(255,255,255,0.06)';
-    b.style.color='rgba(255,255,255,0.85)';
-    b.style.borderColor='rgba(255,255,255,0.15)';
-    b.style.boxShadow='none';
-    b.style.transform='scale(1)';
+  ['lang-en','lang-hi','lang-ta','lang-ml','lang-kn','lang-te'].forEach(id=>{
+    const b=document.getElementById(id);if(!b)return;
+    b.style.background='rgba(255,255,255,0.06)';b.style.color='rgba(255,255,255,0.85)';
+    b.style.borderColor='rgba(255,255,255,0.15)';b.style.boxShadow='none';b.style.transform='scale(1)';
   });
-  // Also reset old .lang-badge class (fallback)
-  document.querySelectorAll('.lang-badge').forEach(function(b){
-    b.style.background='rgba(255,255,255,0.06)';
-    b.style.color='rgba(255,255,255,0.85)';
-    b.style.borderColor='rgba(255,255,255,0.15)';
-  });
-  // Highlight ONLY selected
-  if(el){
-    el.style.background='rgba(255,214,0,0.2)';
-    el.style.color='#fff';
-    el.style.borderColor='rgba(255,214,0,0.9)';
-    el.style.boxShadow='0 0 16px rgba(255,214,0,0.25)';
-    el.style.transform='scale(1.04)';
-  }
-  // Sync chat selector
-  var sel=document.getElementById('lang-sel');
-  if(sel)sel.value=lang;
+  if(el){el.style.background='rgba(255,214,0,0.2)';el.style.color='#fff';el.style.borderColor='rgba(255,214,0,0.9)';el.style.boxShadow='0 0 16px rgba(255,214,0,0.25)';el.style.transform='scale(1.04)';}
+  const sel=document.getElementById('lang-sel');if(sel)sel.value=lang;
+  const bbSel=document.getElementById('bb-lang-sel');if(bbSel)bbSel.value=lang;
+  window.speechSynthesis.cancel();
+  const g={en:'Hello! I am Miss BrightMind, your friendly AI teacher!',ta:'வணக்கம்! நான் உங்கள் Miss BrightMind!',hi:'नमस्ते! मैं आपकी Miss BrightMind हूँ!',ml:'നമസ്കാരം! ഞാൻ Miss BrightMind!',kn:'ನಮಸ್ಕಾರ! ನಾನು Miss BrightMind!',te:'నమస్కారం! నేను Miss BrightMind!'};
+  setTimeout(()=>speakText(g[lang]||g['en']),300);
 }
 
-// FORGOT PASSWORD
 function showForgotPassword(){
   document.getElementById('login-form').style.display='none';
   document.getElementById('forgot-form').style.display='flex';
@@ -3148,39 +3131,43 @@ function animateMouth(talking){
 function speakText(text){
   if(!voiceOn||!text)return;
   window.speechSynthesis.cancel();
-  const clean=text.replace(/\*\*(.*?)\*\*/g,'$1').replace(/[#\-\*]/g,'').replace(/\n/g,' ').trim();
-  if(!clean)return;
+  const clean=text.replace(/\*\*(.*?)\*\*/g,'$1').replace(/[#\*]/g,'').replace(/\n+/g,' ').trim();
+  if(!clean||clean.length<2)return;
   lastSpokenText=clean;
   const utt=new SpeechSynthesisUtterance(clean);
-  utt.rate=speechRate; utt.pitch=1.05; utt.volume=1;
-  // Pick best available voice
-  const langSel=document.getElementById('lang-sel');
-  if(langSel&&langSel.value) S.lang=langSel.value;
-  const curLang=S.lang||'en';
-  const langPrefixes={en:['en-IN','en-GB','en-US','en'],hi:['hi-IN','hi'],ta:['ta-IN','ta'],ml:['ml-IN','ml'],kn:['kn-IN','kn'],te:['te-IN','te']};
-  const langConf=langPrefixes[curLang]||langPrefixes['en'];
-  const langCode=langConf[0];
-  utt.lang=langCode;
-  const femaleKw=['Female','female','Samantha','Victoria','Karen','Moira','Veena','Zira','Heera','Kalpana'];
-  const trySpeak=()=>{
-    const voices=window.speechSynthesis.getVoices();
-    let voice=null;
-    for(const lc of langConf){if(!voice)voice=voices.find(v=>v.lang===lc&&femaleKw.some(f=>v.name.includes(f)));}
-    for(const lc of langConf){if(!voice)voice=voices.find(v=>v.lang===lc);}
-    for(const lc of langConf){if(!voice)voice=voices.find(v=>v.lang.startsWith(lc.split('-')[0])&&femaleKw.some(f=>v.name.includes(f)));}
-    for(const lc of langConf){if(!voice)voice=voices.find(v=>v.lang.startsWith(lc.split('-')[0]));}
-    if(!voice)voice=voices.find(v=>v.lang==='en-IN'&&femaleKw.some(f=>v.name.includes(f)));
-    if(!voice)voice=voices.find(v=>v.lang.startsWith('en')&&femaleKw.some(f=>v.name.includes(f)));
-    if(!voice)voice=voices.find(v=>v.lang.startsWith('en'));
-    if(!voice&&voices.length>0)voice=voices[0];
-    if(voice)utt.voice=voice;
+  utt.pitch=1.2;utt.volume=1.0;
+  const bbEl=document.getElementById('blackboard-overlay');
+  const bbSel=document.getElementById('bb-lang-sel');
+  const chatSel=document.getElementById('lang-sel');
+  let curLang=S.lang||'en';
+  if(bbEl&&(bbEl.classList.contains('open')||bbEl.style.display==='flex')){if(bbSel&&bbSel.value)curLang=bbSel.value;}
+  else if(chatSel&&chatSel.value)curLang=chatSel.value;
+  if(curLang==='en'&&S.user){const al={TN:'ta',KL:'ml',KA:'kn',AP:'te',TS:'te'}[S.user.board];if(al)curLang=al;}
+  const langMap={en:['en-IN','en-GB','en-US','en'],hi:['hi-IN','hi'],ta:['ta-IN','ta'],ml:['ml-IN','ml'],kn:['kn-IN','kn'],te:['te-IN','te']};
+  const lc=langMap[curLang]||langMap['en'];
+  utt.lang=lc[0];
+  utt.rate=['ta','ml','kn','te'].indexOf(curLang)>=0?0.80:curLang==='hi'?0.84:0.88;
+  const fk=['Heera','Veena','Kalpana','Lekha','Aditi','Google','Female','female','Samantha','Karen'];
+  function trySpeak(){
+    const vv=window.speechSynthesis.getVoices();
+    if(!vv||!vv.length){window.speechSynthesis.speak(utt);return;}
+    let v=null;
+    for(let i=0;i<lc.length&&!v;i++)v=vv.find(x=>x.lang===lc[i]&&fk.some(k=>x.name.includes(k)));
+    for(let i=0;i<lc.length&&!v;i++)v=vv.find(x=>x.lang===lc[i]);
+    for(let i=0;i<lc.length&&!v;i++){const p=lc[i].split('-')[0];v=vv.find(x=>x.lang.startsWith(p)&&fk.some(k=>x.name.includes(k)));}
+    for(let i=0;i<lc.length&&!v;i++){const p=lc[i].split('-')[0];v=vv.find(x=>x.lang.startsWith(p));}
+    if(!v)v=vv.find(x=>x.lang==='en-IN'&&fk.some(k=>x.name.includes(k)));
+    if(!v)v=vv.find(x=>x.lang.startsWith('en')&&fk.some(k=>x.name.includes(k)));
+    if(!v)v=vv.find(x=>x.lang.startsWith('en'));
+    if(!v&&vv.length)v=vv[0];
+    if(v)utt.voice=v;
     utt.onstart=()=>setAvatarSpeaking(true,clean);
     utt.onend=()=>setAvatarSpeaking(false);
     utt.onerror=()=>setAvatarSpeaking(false);
     window.speechSynthesis.speak(utt);
-  };
-  if(window.speechSynthesis.getVoices().length>0){trySpeak();}
-  else{window.speechSynthesis.onvoiceschanged=()=>{window.speechSynthesis.onvoiceschanged=null;trySpeak();};}
+  }
+  if(window.speechSynthesis.getVoices().length>0)trySpeak();
+  else{window.speechSynthesis.onvoiceschanged=()=>{window.speechSynthesis.onvoiceschanged=null;trySpeak();};setTimeout(()=>{if(!window.speechSynthesis.speaking&&!window.speechSynthesis.pending)trySpeak();},1500);}
 }
 
 function toggleVoice(){
@@ -3266,18 +3253,16 @@ function addMsg(role,text){
 }
 function sendQ(q){document.getElementById('chat-inp').value=q;sendMsg();}
 function changeLang(){
-  S.lang=document.getElementById('lang-sel').value;
-  const l={en:'English 🇬🇧',hi:'हिंदी 🇮🇳',ta:'தமிழ் 🇮🇳',ml:'മലയാളം 🇮🇳',kn:'ಕನ್ನಡ 🇮🇳',te:'తెలుగు 🇮🇳'};
-  const greet={
-    en:'Hello! Language changed to English. Ask me anything! 😊',
-    hi:'नमस्ते! भाषा हिंदी में बदल गई। कुछ भी पूछें! 😊',
-    ta:'வணக்கம்! மொழி தமிழுக்கு மாறியது. எதையும் கேளுங்கள்! 😊',
-    ml:'നമസ്കാരം! ഭാഷ മലയാളത്തിലേക്ക് മാറി. എന്തും ചോദിക്കൂ! 😊',
-    kn:'ನಮಸ್ಕಾರ! ಭಾಷೆ ಕನ್ನಡಕ್ಕೆ ಬದಲಾಯಿತು. ಏನಾದರೂ ಕೇಳಿ! 😊',
-    te:'నమస్కారం! భాష తెలుగుకి మారింది. ఏదైనా అడగండి! 😊'
-  };
-  addMsg('ai', greet[S.lang]||'Language changed! Ask me anything 😊');
+  const sel=document.getElementById('lang-sel');if(!sel)return;
+  S.lang=sel.value;
+  const bbSel=document.getElementById('bb-lang-sel');if(bbSel)bbSel.value=S.lang;
+  window.speechSynthesis.cancel();
+  const g={en:'Hello! Miss BrightMind here, your friendly AI teacher!',ta:'வணக்கம்! Miss BrightMind பேசுகிறேன்!',hi:'नमस्ते! Miss BrightMind बोल रही हूँ!',ml:'നമസ്കാരം! Miss BrightMind പറയുന്നു!',kn:'ನಮಸ್ಕಾರ! Miss BrightMind ಮಾತನಾಡ್ತಿದ್ದೇನೆ!',te:'నమస్కారం! Miss BrightMind మాట్లాడుతున్నాను!'};
+  const msg=g[S.lang]||g['en'];
+  addMsg('ai',msg);
+  setTimeout(()=>speakText(msg),200);
 }
+
 
 async function sendMsg(){
   const inp=document.getElementById('chat-inp'),txt=inp.value.trim();if(!txt)return;
