@@ -1504,48 +1504,73 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
 
 <!-- ══ PAYWALL ══ -->
 <div id="paywall-overlay">
-  <div class="paywall-card">
+  <div class="paywall-card" style="background:linear-gradient(145deg,#0a0f2e,#1a237e);border:1px solid rgba(255,214,0,0.2);">
     <div class="paywall-icon">🔒</div>
-    <div class="paywall-title">Your Free Trial Ended!</div>
-    <div class="paywall-sub">You have used your free day. Subscribe now to continue learning with your AI teacher — cheaper than one tuition class!</div>
-    <div style="background:linear-gradient(135deg,#ff6f00,#ff8f00);border-radius:12px;padding:10px 14px;text-align:center;margin-bottom:12px;">
+    <div class="paywall-title" style="color:#fff;">Your Free Trial Ended!</div>
+    <div class="paywall-sub" style="color:rgba(255,255,255,0.7);">Subscribe now to continue — cheaper than one tuition class!</div>
+
+    <!-- OFFER BANNER -->
+    <div style="background:linear-gradient(135deg,#ff6f00,#ff8f00,#ff6f00);background-size:200%;animation:goldShimmer 3s ease infinite;border-radius:12px;padding:10px 14px;text-align:center;margin-bottom:14px;">
       <div style="font-size:13px;font-weight:800;color:#fff;">🎉 LAUNCH OFFER — Valid till 31st August 2026!</div>
       <div style="font-size:11px;color:rgba(255,255,255,.9);margin-top:2px;">Founding member price — Limited time only!</div>
     </div>
-    <div class="paywall-plans">
-      <div class="paywall-plan" onclick="selPaywallPlan(this,'single')">
+
+    <!-- PLANS — only All Subjects, 3 durations -->
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+
+      <!-- Monthly -->
+      <div onclick="selPaywallPlan(this,'all','monthly')" id="pw-monthly"
+        style="border:2px solid rgba(255,255,255,0.15);border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.05);transition:all .2s;">
         <div>
-          <div class="pn">Single Subject</div>
-          <div class="pd">1 subject · Unlimited · AI tutor</div>
-          <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Was ₹249 · Save 52%!</div>
+          <div style="font-size:14px;font-weight:800;color:#fff;">All Subjects <span style="background:#ffd600;color:#0a0f2e;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:4px;">BEST</span></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">All subjects · Exams · Leaderboard · Rank Card</div>
         </div>
         <div style="text-align:right;">
-          <div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹249</div>
-          <div class="pp">₹120<small>/mo</small></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹399</div>
+          <div style="font-size:22px;font-weight:900;color:#ffd600;">₹199<span style="font-size:11px;font-weight:500;">/mo</span></div>
         </div>
       </div>
-      <div class="paywall-plan hot" onclick="selPaywallPlan(this,'all')">
+
+      <!-- Quarterly — 5% off -->
+      <div onclick="selPaywallPlan(this,'all','quarterly')" id="pw-quarterly"
+        style="border:2px solid rgba(255,214,0,0.5);border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:rgba(255,214,0,0.08);transition:all .2s;">
         <div>
-          <div class="pn">All Subjects <span class="hot-tag">BEST</span></div>
-          <div class="pd">All subjects · Exams · Leaderboard · Rank Card</div>
-          <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Was ₹399 · Save 50%!</div>
+          <div style="font-size:14px;font-weight:800;color:#fff;">Quarterly (3 months) <span style="background:#4caf50;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:4px;">5% OFF</span></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">₹189/mo × 3 · Save ₹30 total</div>
         </div>
         <div style="text-align:right;">
-          <div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹399</div>
-          <div class="pp">₹199<small>/mo</small></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹597</div>
+          <div style="font-size:22px;font-weight:900;color:#ffd600;">₹567<span style="font-size:11px;font-weight:500;">/3mo</span></div>
         </div>
       </div>
+
+      <!-- Annual — 10% off -->
+      <div onclick="selPaywallPlan(this,'all','annual')" id="pw-annual"
+        style="border:2px solid rgba(100,200,100,0.4);border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:rgba(100,200,100,0.07);transition:all .2s;">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:#fff;">Annual (12 months) <span style="background:#2196f3;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:4px;">10% OFF</span></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">₹179/mo × 12 · Save ₹240 total</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹2388</div>
+          <div style="font-size:22px;font-weight:900;color:#4caf50;">₹2148<span style="font-size:11px;font-weight:500;">/yr</span></div>
+        </div>
+      </div>
+
     </div>
-    <div class="paywall-features">
-      <div class="pf-row"><span>✅</span> Unlimited AI tutor questions</div>
-      <div class="pf-row"><span>✅</span> Chapter exams with AI grading</div>
-      <div class="pf-row"><span>✅</span> Personal rank card — share on WhatsApp</div>
-      <div class="pf-row"><span>✅</span> State + All India leaderboard</div>
-      <div class="pf-row"><span>✅</span> XP points, levels, badges</div>
-      <div class="pf-row"><span>✅</span> Parent progress report</div>
+
+    <!-- FEATURES -->
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;margin-bottom:14px;text-align:left;">
+      <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-bottom:4px;">✅ Unlimited AI tutor questions</div>
+      <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-bottom:4px;">✅ Chapter exams with AI grading</div>
+      <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-bottom:4px;">✅ Personal rank card — share on WhatsApp</div>
+      <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-bottom:4px;">✅ State + All India leaderboard</div>
+      <div style="color:rgba(255,255,255,0.8);font-size:12px;margin-bottom:4px;">✅ XP points, levels, badges</div>
+      <div style="color:rgba(255,255,255,0.8);font-size:12px;">✅ Parent progress report</div>
     </div>
-    <button class="btn-main" onclick="activatePaywall()">Subscribe with Razorpay →</button>
-    <div style="font-size:11px;color:var(--gray-text);margin-top:10px;">Cancel anytime · Secure payment</div>
+
+    <button class="btn-main" onclick="activatePaywall()" style="background:linear-gradient(135deg,#ffd600,#ff8f00);color:#0a0f2e;font-weight:800;box-shadow:0 4px 20px rgba(255,214,0,0.4);">Subscribe with Razorpay →</button>
+    <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:10px;">Cancel anytime · Secure payment</div>
   </div>
 </div>
 
@@ -1591,17 +1616,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
     <!-- STEP 1: SUBJECT PLAN -->
     <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:8px;letter-spacing:1px;">STEP 1 — SELECT PLAN</div>
     <div class="plan-opts" id="plan-opts">
-      <div class="plan-opt" onclick="selPlan(this,'single')">
-        <div>
-          <div class="pn">Single Subject</div>
-          <div class="pd">One subject · Unlimited · History</div>
-          <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Was ₹249 · Save 52%!</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:12px;color:var(--gray-text);text-decoration:line-through;">₹249</div>
-          <div class="pp">₹120<small>/mo</small></div>
-        </div>
-      </div>
+
       <div class="plan-opt sel" onclick="selPlan(this,'all')">
         <div>
           <div class="pn">All Subjects <span class="best-val">BEST VALUE</span></div>
@@ -1616,7 +1631,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gray-light);font-size:16p
     </div>
 
     <!-- STEP 2: DURATION -->
-    <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:8px;letter-spacing:1px;">STEP 2 — SELECT DURATION</div>
+    <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);margin-bottom:8px;letter-spacing:1px;">STEP 2 — SELECT DURATION</div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="duration-opts">
       <div class="plan-opt sel" onclick="selDuration(this,'monthly')" id="dur-monthly">
         <div>
@@ -1890,7 +1905,7 @@ function renderTrialBanner(u){
     const h=Math.floor(left/3600000),m=Math.floor((left%3600000)/60000);
     wrap.innerHTML=`<div class="trial-banner"><div class="tl"><div class="tt">🎉 Free Trial Active!</div><div class="ts">Full access — ends in ${h}h ${m}m</div></div><div class="trial-timer"><div class="tv">${h}h ${m}m</div><div class="tl2">REMAINING</div></div></div>`;
   }else{
-    wrap.innerHTML=`<div class="trial-banner" onclick="document.getElementById('paywall-overlay').classList.add('open')" style="cursor:pointer;"><div class="tl"><div class="tt">⏰ Free Trial Ended</div><div class="ts">Subscribe from ₹120/month to continue</div></div><div class="trial-timer" style="background:var(--gold);"><div class="tv" style="color:var(--blue-dark);font-size:13px;">Subscribe</div><div class="tl2" style="color:var(--blue-dark);">NOW</div></div></div>`;
+    wrap.innerHTML=`<div class="trial-banner" onclick="document.getElementById('paywall-overlay').classList.add('open')" style="cursor:pointer;"><div class="tl"><div class="tt">⏰ Free Trial Ended</div><div class="ts">Subscribe from ₹199/month to continue</div></div><div class="trial-timer" style="background:var(--gold);"><div class="tv" style="color:var(--blue-dark);font-size:13px;">Subscribe</div><div class="tl2" style="color:var(--blue-dark);">NOW</div></div></div>`;
   }
 }
 function checkPaywall(){
@@ -1898,12 +1913,22 @@ function checkPaywall(){
   if(checkTrial(S.user)==='expired'){document.getElementById('paywall-overlay').classList.add('open');return true;}
   return false;
 }
-function selPaywallPlan(el){document.querySelectorAll('.paywall-plan').forEach(p=>p.classList.remove('hot'));el.classList.add('hot');}
-function activatePaywall(){
-  const plan=document.querySelector('.paywall-plan.hot');
-  const amount=plan?.querySelector('.pp')?.textContent?.includes('199')?199:120;
-  openRazorpay(amount, amount===199?'all':'single');
+function selPaywallPlan(el,type,duration){
+  ['pw-monthly','pw-quarterly','pw-annual'].forEach(function(id){
+    var b=document.getElementById(id);
+    if(b){b.style.borderColor='rgba(255,255,255,0.15)';b.style.background='rgba(255,255,255,0.05)';}
+  });
+  if(el){el.style.borderColor='rgba(255,214,0,0.8)';el.style.background='rgba(255,214,0,0.12)';}
+  selectedPlanType=type||'all';
+  selectedDuration=duration||'monthly';
+  if(duration==='quarterly')selectedAmount=567;
+  else if(duration==='annual')selectedAmount=2148;
+  else selectedAmount=199;
 }
+function activatePaywall(){
+  openRazorpay(selectedAmount||199, 'all', selectedDuration||'monthly');
+}
+
 
 // ══════════════════════════════════════
 // SCORECARD & RANK CARD
@@ -1982,7 +2007,7 @@ function showRankCard(){
 function closeRankCard(){document.getElementById('rankcard-overlay').classList.remove('open');}
 function shareRankCard(){
   const u=S.user;if(!u)return;
-  const text=`🧠 BrightMind Teacher\n\n👤 ${u.name}\n📚 Class ${u.class} · ${u.board||'CBSE'}\n\n🏆 GPA: ${computeGPA(u)}/10\n📍 ${u.state} Rank: #${computeStateRank(u)}\n🇮🇳 All India Rank: #${rank(u)}\n🔥 Streak: ${u.streak||0} days\n⭐ Stars: ${u.stars||0}\n\nJoin BrightMind Teacher — AI Tutor from ₹120/month!`;
+  const text=`🧠 BrightMind Teacher\n\n👤 ${u.name}\n📚 Class ${u.class} · ${u.board||'CBSE'}\n\n🏆 GPA: ${computeGPA(u)}/10\n📍 ${u.state} Rank: #${computeStateRank(u)}\n🇮🇳 All India Rank: #${rank(u)}\n🔥 Streak: ${u.streak||0} days\n⭐ Stars: ${u.stars||0}\n\nJoin BrightMind Teacher — AI Tutor from ₹199/month!`;
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
 
@@ -1999,18 +2024,35 @@ function switchTab(t,el){
 // LANGUAGE SELECTION ON SPLASH
 function setSplashLang(lang, el){
   S.lang=lang;
-  const ls=document.getElementById('lang-sel');if(ls)ls.value=lang;
+  // Sync lang selector in chat
+  const ls=document.getElementById('lang-sel');
+  if(ls)ls.value=lang;
+
+  // Reset ALL lang buttons — both old .lang-badge and new id-based
   document.querySelectorAll('.lang-badge').forEach(b=>{
-    b.style.background='rgba(255,255,255,.12)';
-    b.style.color='#fff';
-    b.style.borderColor='rgba(255,255,255,.2)';
+    b.style.background='rgba(255,255,255,0.07)';
+    b.style.color='rgba(255,255,255,0.85)';
+    b.style.borderColor='rgba(255,255,255,0.2)';
+    b.style.boxShadow='none';
   });
-  el.style.background='var(--gold)';
-  el.style.color='var(--blue-dark)';
-  el.style.borderColor='var(--gold)';
-  // Update lang selector in chat too
-  const sel=document.getElementById('lang-sel');
-  if(sel)sel.value=lang;
+  ['lang-en','lang-hi','lang-ta','lang-ml','lang-kn','lang-te'].forEach(function(id){
+    const b=document.getElementById(id);
+    if(!b)return;
+    b.style.background='rgba(255,255,255,0.07)';
+    b.style.color='rgba(255,255,255,0.85)';
+    b.style.borderColor='rgba(255,255,255,0.2)';
+    b.style.boxShadow='none';
+    b.style.transform='scale(1)';
+  });
+
+  // Highlight ONLY the selected one
+  if(el){
+    el.style.background='rgba(255,214,0,0.2)';
+    el.style.color='#fff';
+    el.style.borderColor='rgba(255,214,0,0.9)';
+    el.style.boxShadow='0 0 16px rgba(255,214,0,0.3)';
+    el.style.transform='scale(1.05)';
+  }
 }
 
 // FORGOT PASSWORD
@@ -2138,7 +2180,7 @@ function loginUser(u){
             <div class="paywall-plans">
               <div class="paywall-plan" onclick="selPaywallPlan(this,'single')">
                 <div><div class="pn">Single Subject</div><div class="pd">Was ₹249 · Save 52%!</div></div>
-                <div style="text-align:right;"><div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹249</div><div class="pp">₹120<small>/mo</small></div></div>
+                
               </div>
               <div class="paywall-plan hot" onclick="selPaywallPlan(this,'all')">
                 <div><div class="pn">All Subjects <span class="hot-tag">BEST</span></div><div class="pd">Was ₹399 · Save 50%!</div></div>
@@ -2168,26 +2210,66 @@ function doLogout(){
 // HOME
 // ══════════════════════════════════════
 function renderSubjects(){
-  document.getElementById('subj-grid').innerHTML=getSubjects().map(s=>{
-    const d=S.user?.subjects?.[s.id]||{},p=d.progress||0,st=d.stars||0;
-    return `<div class="subj-card" style="padding:12px 10px;">
-      <div class="subj-icon">${s.icon}</div>
-      <div class="subj-name">${s.name}</div>
-      <div class="subj-prog"><div class="subj-prog-fill" style="width:${p}%"></div></div>
-      <div class="subj-stars">${'★'.repeat(st)}${'☆'.repeat(5-st)} ${p}%</div>
-      <div style="display:flex;gap:5px;margin-top:8px;">
-        <button onclick="event.stopPropagation();openSubject('${s.id}')" 
-          style="flex:1;background:var(--blue-mid);color:#fff;border:none;padding:6px 4px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;">
-          📚 Study
-        </button>
-        <button onclick="event.stopPropagation();openInstantExam('${s.id}','${s.name}','${s.icon}')" 
-          style="flex:1;background:linear-gradient(135deg,#e65100,#ff6f00);color:#fff;border:none;padding:6px 4px;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;">
-          📝 Exam
-        </button>
-      </div>
-    </div>`;
+  const subs=getSubjects();
+  const grid=document.getElementById('subj-grid');
+  if(!grid)return;
+
+  // Icon backgrounds per subject — matches Image 2 colored circles
+  const iconBg={
+    math:'linear-gradient(135deg,#3949ab,#5c6bc0)',
+    science:'linear-gradient(135deg,#6a1b9a,#9c27b0)',
+    english:'linear-gradient(135deg,#2e7d32,#43a047)',
+    socialsc:'linear-gradient(135deg,#1565c0,#1976d2)',
+    physics:'linear-gradient(135deg,#0277bd,#039be5)',
+    chem:'linear-gradient(135deg,#c62828,#e53935)',
+    bio:'linear-gradient(135deg,#2e7d32,#388e3c)',
+    cs:'linear-gradient(135deg,#00838f,#00acc1)',
+    tamil:'linear-gradient(135deg,#bf360c,#e64a19)',
+    hindi:'linear-gradient(135deg,#e65100,#f57c00)',
+    history:'linear-gradient(135deg,#4e342e,#795548)',
+    geography:'linear-gradient(135deg,#1b5e20,#388e3c)',
+    polsci:'linear-gradient(135deg,#283593,#3949ab)',
+    economics:'linear-gradient(135deg,#006064,#00838f)',
+    sociology:'linear-gradient(135deg,#4a148c,#7b1fa2)',
+    accountancy:'linear-gradient(135deg,#e65100,#ff6f00)',
+    bst:'linear-gradient(135deg,#1565c0,#1e88e5)',
+  };
+
+  // Pair subjects 2 per row
+  const rows=[];
+  for(let i=0;i<subs.length;i+=2) rows.push(subs.slice(i,i+2));
+
+  grid.innerHTML=rows.map(function(pair){
+    const cards=pair.map(function(s){
+      const d=S.user&&S.user.subjects&&S.user.subjects[s.id]||{};
+      const p=d.progress||0;
+      const st=d.stars||0;
+      const bg=iconBg[s.id]||'linear-gradient(135deg,#3949ab,#5c6bc0)';
+      const stars='★'.repeat(st)+'☆'.repeat(5-st);
+      return '<div style="flex:1;background:linear-gradient(145deg,#0d1547,#0a1035);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 12px;min-width:0;">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
+        +'<div style="width:52px;height:52px;border-radius:14px;background:'+bg+';display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,0.3);">'+s.icon+'</div>'
+        +'<div style="flex:1;min-width:0;">'
+        +'<div style="font-size:14px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+s.name+'</div>'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;">'
+        +'<div style="font-size:10px;color:#ffd600;">'+stars+'</div>'
+        +'<div style="font-size:11px;font-weight:800;color:#ffd600;">'+p+'%</div>'
+        +'</div>'
+        +'</div></div>'
+        +'<div style="height:4px;background:rgba(255,255,255,0.1);border-radius:4px;margin-bottom:10px;overflow:hidden;">'
+        +'<div style="height:100%;width:'+p+'%;background:linear-gradient(90deg,#ffd600,#ff8f00);border-radius:4px;transition:width .8s;"></div>'
+        +'</div>'
+        +'<div style="display:flex;gap:6px;">'
+        +'<button onclick="event.stopPropagation();openSubject(this.dataset.id)" data-id="'+s.id+'" style="flex:1;background:linear-gradient(135deg,#1a237e,#3949ab);color:#fff;border:none;padding:9px 4px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">📚 Study</button>'
+        +'<button onclick="event.stopPropagation();openInstantExam(this.dataset.id,this.dataset.name,this.dataset.icon)" data-id="'+s.id+'" data-name="'+s.name+'" data-icon="'+s.icon+'" style="flex:1;background:linear-gradient(135deg,#e65100,#ff6f00);color:#fff;border:none;padding:9px 4px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">📝 Exam</button>'
+        +'</div></div>';
+    });
+    if(pair.length===1) cards.push('<div style="flex:1;"></div>');
+    return '<div style="display:flex;gap:10px;">'+cards.join('')+'</div>';
   }).join('');
 }
+
+
 function renderLimitBar(){
   const used=S.qToday,left=Math.max(0,S.freeLimit-used);
   document.getElementById('lb-count').textContent=S.isPaid?'∞ Unlimited':left+' left';
@@ -5482,6 +5564,14 @@ window.addEventListener('popstate', function(e) {
 
 // Push state on load so back button works
 history.pushState(null,'',location.href);
+
+// Init: select English by default on splash
+(function(){
+  setTimeout(function(){
+    var enBtn=document.getElementById('lang-en');
+    if(enBtn) setSplashLang('en',enBtn);
+  },100);
+})();
 
 function save(){} // no-op — using API now
 </script>
