@@ -3802,7 +3802,6 @@ async function openRazorpay(amount, plan, subscription_type='monthly'){
     key:'rzp_live_T0ELMmLSIlgcLq',
     amount:amount*100,
     currency:'INR',
-    order_id:orderRes.order_id,
     name:'BrightMind Teacher',
     description:planNames[plan]||'BrightMind Teacher Subscription',
     prefill:{name:S.user.name, contact:''},
@@ -3816,6 +3815,8 @@ async function openRazorpay(amount, plan, subscription_type='monthly'){
       await verifyPayment(response, amount, plan, subscription_type);
     }
   };
+  // Only add order_id if we got one
+  if(orderRes.order_id) options.order_id=orderRes.order_id;
   const rzp=new window.Razorpay(options);
   rzp.on('payment.failed',function(response){
     alert('Payment failed! Reason: '+response.error.description+'\nPlease try again.');
