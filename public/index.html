@@ -560,6 +560,22 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 @keyframes tdot{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-6px);}}
 
 .bb-board{flex:1;overflow-y:auto;background:linear-gradient(180deg,#1a3a1a,#142e14);padding:16px;font-family:'Courier New',monospace;-webkit-overflow-scrolling:touch;border-left:8px solid #3d2008;border-right:8px solid #3d2008;border-bottom:12px solid #3d2008;}
+.ob-slide{display:none;position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.ob-slide.active{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ob-inner{width:100%;max-width:460px;padding:20px 20px 10px;text-align:center;}
+.ob-num{font-size:10px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,0.35);margin-bottom:12px;}
+.ob-slide-icon{font-size:60px;line-height:1;margin-bottom:12px;}
+.ob-slide-title{font-size:22px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:8px;}
+.ob-gold{color:#ffd600;}
+.ob-slide-sub{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;max-width:380px;margin:0 auto;}
+.ob-cards{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.ob-card{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:10px 12px;min-width:90px;text-align:center;}
+.ob-card-icon{font-size:22px;margin-bottom:4px;}
+.ob-card-lbl{font-size:12px;font-weight:700;color:#fff;}
+.ob-card-sub{font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px;}
+.ob-lang-pill{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:6px 13px;font-size:12px;font-weight:700;color:#fff;}
+.ob-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);cursor:pointer;transition:all .3s;}
+.ob-dot.active{background:#ffd600;width:22px;border-radius:4px;}
 </style>
 </head>
 <body>
@@ -1187,7 +1203,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
   </div>
 
   <!-- BLACKBOARD CANVAS — chalk green -->
-  <div class="bb-board" id="bb-canvas">
+  <div class="bb-board" id="bb-board">
     <!-- Welcome shown by showBBWelcome() -->
   </div>
 
@@ -2523,53 +2539,38 @@ let bbCurrentMode='solve', bbAllSteps=[], bbCurrentStep=0, bbWriting=false;
 function openBlackboard(){
   document.getElementById('blackboard-overlay').classList.add('open');
   const subName=S.sub?.name||'Miss BrightMind';
-  document.getElementById('bb-title').textContent=`✏️ ${S.sub?.icon||'📐'} ${subName} — Blackboard`;
+  document.getElementById('bb-title').textContent='✏️ '+(S.sub?.icon||'📐')+' '+subName+' — Blackboard';
   showBBWelcome();
 }
 
+function closeBlackboard(){
+  const ov=document.getElementById('blackboard-overlay');
+  if(ov){ov.classList.remove('open');ov.style.display='none';}
+  window.speechSynthesis.cancel();
+}
+
 function showBBWelcome(){
+  const canvas=document.getElementById('bb-board')||document.getElementById('bb-canvas');
+  if(!canvas)return;
   const u=S.user;
-  const canvas=document.getElementById('bb-canvas');
-  const subs=getSubjects();
-  const rows=subs.map(s=>{
-    const d=u&&u.subjects&&u.subjects[s.id]||{};
-    const p=d.progress||0;
-    const st=d.stars||0;
-    const stars='★'.repeat(st)+'☆'.repeat(5-st);
-    return '<div data-id="'+s.id+'" data-name="'+s.name+'" onclick="openSubjectOnBB(this.dataset.id,this.dataset.name)" style="display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);transition:background .15s;">'
-      +'<span style="font-size:22px;">'+s.icon+'</span>'
-      +'<div style="flex:1;">'
-      +'<div style="font-size:14px;font-weight:700;color:#fff;">'+s.name+'</div>'
-      +'<div style="display:flex;align-items:center;gap:8px;margin-top:3px;">'
-      +'<div style="flex:1;height:3px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">'
-      +'<div style="height:100%;width:'+p+'%;background:linear-gradient(90deg,#ffd600,#ff8f00);border-radius:3px;"></div>'
-      +'</div>'
-      +'<span style="font-size:10px;color:#ffd600;font-weight:600;">'+stars+' '+p+'%</span>'
-      +'</div></div>'
-      +'<div style="display:flex;gap:6px;">'
-      +'<button data-id="'+s.id+'" data-name="'+s.name+'" onclick="event.stopPropagation();openSubjectOnBB(this.dataset.id,this.dataset.name)" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">📚 Study</button>'
-      +'<button data-id="'+s.id+'" data-name="'+s.name+'" data-icon="'+s.icon+'" onclick="event.stopPropagation();openInstantExam(this.dataset.id,this.dataset.name,this.dataset.icon)" style="background:rgba(255,107,0,0.3);border:1px solid rgba(255,107,0,0.4);color:#ff8f00;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">📝 Exam</button>'
-      +'</div></div>';
-  }).join('');
-  canvas.innerHTML='<div style="padding:16px 14px;">'
-    +'<div style="text-align:center;margin-bottom:16px;">'
-    +'<div style="font-size:20px;font-weight:900;color:#fff;font-family:serif;">Welcome, '+(u&&u.name?u.name:'Student')+'! 👋</div>'
-    +'<div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:4px;">'+(u&&u.board||'CBSE')+' &bull; Class '+(u&&u.class||11)+' &bull; '+(u&&u.state||'India')+'</div>'
-    +'</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">'
-    +'<div onclick="var i=document.getElementById(\"bb-inp\");if(i)i.focus();" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:10px;text-align:center;cursor:pointer;"><div style="font-size:18px;">✏️</div><div style="font-size:10px;color:#fff;font-weight:700;margin-top:4px;">Blackboard</div><div style="font-size:9px;color:rgba(255,255,255,0.5);">Step by step</div></div>'
-    +'<div onclick="showPage(\"papers\")" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:10px;text-align:center;cursor:pointer;"><div style="font-size:18px;">📄</div><div style="font-size:10px;color:#fff;font-weight:700;margin-top:4px;">Papers</div><div style="font-size:9px;color:rgba(255,255,255,0.5);">Download now</div></div>'
-    +'<div onclick="closeBlackboard();showPage(\"score\")" style="background:rgba(180,100,220,0.12);border:1px solid rgba(180,100,220,0.3);border-radius:10px;padding:10px;text-align:center;cursor:pointer;"><div style="font-size:18px;">🏆</div><div style="font-size:10px;color:#ce93d8;font-weight:700;margin-top:4px;">My Score</div><div style="font-size:9px;color:rgba(206,147,216,0.6);">Badges & XP</div></div>'
-    +'</div>'
-    +'<div style="font-size:14px;font-weight:800;color:#ffd600;text-align:center;margin-bottom:12px;letter-spacing:1px;">✦ Choose Your Subject ✦</div>'
-    +rows
+  // Empty board — ready for student to ask
+  canvas.innerHTML='<div style="padding:20px;text-align:center;">'
+    +'<div style="font-size:48px;margin-bottom:12px;">🖊️</div>'
+    +'<div style="font-size:20px;font-weight:800;color:#fff;font-family:serif;margin-bottom:6px;">Welcome, '+(u&&u.name||'Student')+'! 👋</div>'
+    +'<div style="font-size:13px;color:rgba(255,255,255,0.55);margin-bottom:20px;">'+(u&&u.board||'CBSE')+' · Class '+(u&&u.class||11)+' · '+(u&&u.state||'India')+'</div>'
+    +'<div style="background:rgba(255,255,255,0.05);border:1px dashed rgba(255,255,255,0.2);border-radius:12px;padding:20px;max-width:320px;margin:0 auto;">'
+    +'<div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.8;">'
+    +'💬 Ask any question below<br>'
+    +'📷 Upload a photo of your textbook<br>'
+    +'🔢 Get step-by-step solutions<br>'
+    +'📐 See formulas and examples'
+    +'</div></div>'
     +'</div>';
 }
 
 function openSubjectOnBB(id, name){
-  // Close blackboard and open subject study
   closeBlackboard();
-  openSubject(id);
+  setTimeout(()=>openSubject(id), 100);
 }
 
 
@@ -3860,39 +3861,40 @@ function loadRazorpay(){
 async function openRazorpay(amount, plan, subscription_type='monthly'){
   if(!S.user){alert('Please login first!');return;}
   const loaded=await loadRazorpay();
-  if(!loaded){alert('Payment system could not load. Please check internet and try again.');return;}
-
-  // Create order first — prevents QR auto-refund issue
-  const orderRes=await apiPost('/api/payment/create-order',{
-    amount, plan,
-    student_id:S.user.id,
-    student_name:S.user.name,
-    subscription_type
-  });
-  if(!orderRes.ok){alert('Could not initiate payment. Please try again in a moment.');return;}
+  if(!loaded){alert('Razorpay could not load. Check internet and try again.');return;}
 
   const planNames={all:'All Subjects — BrightMind Teacher',single:'Single Subject — BrightMind Teacher'};
   const options={
     key:'rzp_live_T0ELMmLSIlgcLq',
     amount:amount*100,
     currency:'INR',
-    order_id:orderRes.order_id,
     name:'BrightMind Teacher',
-    description:planNames[plan]||'BrightMind Teacher Subscription',
-    prefill:{name:S.user.name, contact:''},
-    notes:{
-      student_id:String(S.user.id),
-      student_name:S.user.name,
-      plan, class:S.user.class, state:S.user.state
-    },
+    description:planNames[plan]||'BrightMind Teacher Premium',
+    prefill:{name:S.user.name,contact:''},
+    notes:{student_id:String(S.user.id),student_name:S.user.name,plan,class:String(S.user.class||''),state:S.user.state||''},
     theme:{color:'#1a237e'},
+    modal:{ondismiss:function(){console.log('Payment closed');}},
     handler:async function(response){
-      await verifyPayment(response, amount, plan, subscription_type);
+      await verifyPayment(response,amount,plan,subscription_type);
     }
   };
+
+  // Try to get order_id — but never block payment if it fails
+  try{
+    const orderRes=await Promise.race([
+      apiPost('/api/payment/create-order',{amount,plan,student_id:S.user.id,student_name:S.user.name,subscription_type}),
+      new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),5000))
+    ]);
+    if(orderRes&&orderRes.ok&&orderRes.order_id){
+      options.order_id=orderRes.order_id;
+    }
+  }catch(e){
+    console.warn('Order creation skipped, proceeding without order_id:', e.message);
+  }
+
   const rzp=new window.Razorpay(options);
   rzp.on('payment.failed',function(response){
-    alert('Payment failed! Reason: '+response.error.description+'\nPlease try again.');
+    alert('Payment failed: '+response.error.description+'\nPlease try again.');
   });
   rzp.open();
 }
@@ -3965,52 +3967,33 @@ function showOnboarding(){
 }
 
 function obGoToSlide(idx){
+  if(OB.timer)clearInterval(OB.timer);
+  window.speechSynthesis.cancel();
+  OB.slide=idx;
   document.querySelectorAll('.ob-slide').forEach((s,i)=>s.classList.toggle('active',i===idx));
   document.querySelectorAll('.ob-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
-  document.getElementById('ob-slide-num').textContent=(idx+1)+' / '+OB.totalSlides;
-  const prevBtn=document.getElementById('ob-prev');
-  if(prevBtn)prevBtn.style.opacity=idx===0?'0':'1';
-  const nextBtn=document.getElementById('ob-next');
-  if(nextBtn){
-    nextBtn.disabled=true;
-    nextBtn.style.background='rgba(255,255,255,.2)';
-    nextBtn.style.color='rgba(255,255,255,.5)';
-    nextBtn.style.cursor='not-allowed';
-    nextBtn.textContent=idx===OB.totalSlides-1?'Start! 🚀':'Next →';
-  }
-  if(OB.timer)clearInterval(OB.timer);
-  OB.secs=15;
-  const timerBar=document.getElementById('ob-timer-bar');
-  const timerText=document.getElementById('ob-timer-text');
-  const waitSecs=document.getElementById('ob-wait-secs');
-  const waitMsg=document.getElementById('ob-wait-msg');
-  if(timerBar){timerBar.style.transition='none';timerBar.style.width='100%';}
-  if(timerText)timerText.textContent='⏱ 15s';
-  if(waitSecs)waitSecs.textContent='15';
-  setTimeout(()=>{if(timerBar){timerBar.style.transition='width 15s linear';timerBar.style.width='0%';}},100);
-  OB.timer=setInterval(()=>{
-    OB.secs--;
-    if(timerText)timerText.textContent='⏱ '+OB.secs+'s';
-    if(waitSecs)waitSecs.textContent=OB.secs;
-    if(OB.secs<=0){
+  const num=document.getElementById('ob-slide-num');
+  if(num)num.textContent=(idx+1)+' / '+OB.totalSlides;
+  const prog=document.getElementById('ob-prog');
+  if(prog)prog.style.width=((idx+1)/OB.totalSlides*100)+'%';
+  const sb=document.getElementById('ob-start-btn');
+  if(sb)sb.style.display='none';
+  let secs=5;
+  const tt=document.getElementById('ob-timer-text');
+  if(tt)tt.textContent='5s';
+  OB.timer=setInterval(function(){
+    secs--;
+    if(tt)tt.textContent=secs+'s';
+    if(secs<=0){
       clearInterval(OB.timer);
-      if(nextBtn){nextBtn.disabled=false;nextBtn.style.background='var(--gold)';nextBtn.style.color='var(--blue-dark)';nextBtn.style.cursor='pointer';}
-      if(waitMsg)waitMsg.innerHTML='<span style="color:#ffd600;font-weight:700;">✅ Tap Next!</span>';
+      if(idx>=OB.totalSlides-1){
+        if(sb)sb.style.display='block';
+        setTimeout(function(){closeOnboarding();},2500);
+      }else{
+        obGoToSlide(idx+1);
+      }
     }
   },1000);
-  speakOBSlide(idx);
-}
-
-function speakOBSlide(idx){
-  window.speechSynthesis.cancel();
-  const text=OB_VOICE[idx];
-  if(!text)return;
-  const utt=new SpeechSynthesisUtterance(text);
-  utt.rate=0.92;utt.pitch=1.1;utt.volume=1;
-  const voices=window.speechSynthesis.getVoices();
-  const fem=voices.find(v=>v.lang.startsWith('en')&&(v.name.includes('Female')||v.name.includes('Samantha')||v.name.includes('Google UK English Female')));
-  if(fem)utt.voice=fem;
-  window.speechSynthesis.speak(utt);
 }
 
 function obTapSkip(){if(OB&&OB.timer)clearInterval(OB.timer);window.speechSynthesis.cancel();if(OB&&OB.slide<OB.totalSlides-1){OB.slide++;obGoToSlide(OB.slide);}else{closeOnboarding();}}
@@ -4063,20 +4046,46 @@ async function openInstantExam(subjectId, subjectName, icon){
     const board = {CBSE:'CBSE',TN:'Tamil Nadu Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board'}[S.user?.board]||'CBSE';
     const r = await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,
-        messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class||11} ${subjectName} student.
-Board: ${board}. Mix easy, medium and hard questions from different chapters.
-Return ONLY a JSON array:
-[{"q":"question text","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"why this is correct","marks":1}]`}]})});
+        messages:[{role:'user',content:`You are an exam question generator for Indian school students.
+Generate EXACTLY 10 real multiple choice questions for Class ${S.user?.class||11} ${subjectName} (${board} board).
+Each question must have REAL content - actual facts, formulas, definitions from the syllabus.
+IMPORTANT: Every option must be a real meaningful answer, NOT "Option 1" or "opt1".
+
+Return ONLY valid JSON array, no markdown, no explanation outside JSON:
+[{"q":"What is Newton's first law of motion?","options":["A) An object at rest stays at rest unless acted upon by a force","B) Force equals mass times acceleration","C) Every action has an equal and opposite reaction","D) Energy cannot be created or destroyed"],"correct":"A","explanation":"Newton's first law states that an object remains at rest or in uniform motion unless acted upon by an external force.","marks":1}]
+
+Generate 10 such questions now for ${subjectName}:`}]})});
     const d = await r.json();
     let raw = d.content?.[0]?.text||'[]';
     raw = raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
     IE.questions = JSON.parse(raw);
   }catch(e){
-    IE.questions = Array(10).fill(null).map((_,i)=>({
-      q:`${subjectName} Question ${i+1}: Which of the following is correct?`,
-      options:['A) Option 1','B) Option 2','C) Option 3','D) Option 4'],
-      correct:'A', explanation:'This is the correct answer.', marks:1
-    }));
+    // Fallback with subject-specific real questions
+    const fbQs={
+      'Mathematics':[
+        {q:'What is the value of π (pi) approximately?',options:['A) 3.14159','B) 2.71828','C) 1.41421','D) 1.73205'],correct:'A',explanation:'π ≈ 3.14159, ratio of circumference to diameter of a circle.'},
+        {q:'What is the quadratic formula?',options:['A) x = (-b ± √(b²-4ac)) / 2a','B) x = -b/2a','C) x = b² - 4ac','D) x = (a+b)²'],correct:'A',explanation:'The quadratic formula solves ax²+bx+c=0.'},
+        {q:'What is the area of a circle with radius r?',options:['A) πr²','B) 2πr','C) πd','D) r²'],correct:'A',explanation:'Area of circle = πr².'},
+        {q:'What is the Pythagorean theorem?',options:['A) a² + b² = c²','B) a + b = c','C) a² - b² = c','D) (a+b)² = c²'],correct:'A',explanation:'In a right triangle, the square of the hypotenuse equals the sum of squares of the other two sides.'},
+        {q:'What is the sum of angles in a triangle?',options:['A) 180°','B) 360°','C) 90°','D) 270°'],correct:'A',explanation:'The sum of interior angles of any triangle is always 180°.'},
+      ],
+      'Science':[
+        {q:'What is the chemical formula for water?',options:['A) H₂O','B) CO₂','C) NaCl','D) H₂SO₄'],correct:'A',explanation:'Water consists of 2 hydrogen atoms and 1 oxygen atom.'},
+        {q:'What is Newton\'s Second Law of Motion?',options:['A) F = ma','B) F = mv','C) F = m/a','D) F = ma²'],correct:'A',explanation:'Force equals mass times acceleration.'},
+        {q:'What is the speed of light?',options:['A) 3 × 10⁸ m/s','B) 3 × 10⁶ m/s','C) 3 × 10¹⁰ m/s','D) 3 × 10⁴ m/s'],correct:'A',explanation:'Speed of light in vacuum = 3 × 10⁸ m/s.'},
+        {q:'Which gas do plants absorb during photosynthesis?',options:['A) Carbon dioxide (CO₂)','B) Oxygen (O₂)','C) Nitrogen (N₂)','D) Hydrogen (H₂)'],correct:'A',explanation:'Plants absorb CO₂ and release O₂ during photosynthesis.'},
+        {q:'What is the unit of electric current?',options:['A) Ampere (A)','B) Volt (V)','C) Watt (W)','D) Ohm (Ω)'],correct:'A',explanation:'Electric current is measured in Amperes.'},
+      ],
+    };
+    const defaultQs=[
+      {q:`What is the most important concept in ${subjectName}?`,options:['A) Understanding core principles','B) Memorising without understanding','C) Skipping difficult topics','D) Avoiding practice'],correct:'A',explanation:'Deep understanding of core principles is fundamental to mastering any subject.'},
+      {q:`Which approach helps most in ${subjectName} exams?`,options:['A) Regular practice and revision','B) Last minute studying only','C) Ignoring previous papers','D) Avoiding difficult topics'],correct:'A',explanation:'Consistent practice and revision leads to the best exam performance.'},
+    ];
+    const subjectQs = fbQs[subjectName]||defaultQs;
+    IE.questions = Array(10).fill(null).map((_,i)=>{
+      const q = subjectQs[i%subjectQs.length];
+      return {...q, marks:1};
+    });
   }
 
   IE.currentQ = 0;
@@ -4140,6 +4149,7 @@ function ieRenderQuestion(){
     </div>`;
 }
 
+function ieSelectAnswer(letter){iePickOpt(letter);}
 function iePickOpt(letter){
   if(IE.answers[IE.currentQ]) return;
   IE.answers[IE.currentQ] = letter;
@@ -4180,6 +4190,7 @@ async function ieSubmit(){
   }
 }
 
+function showIEResult(score,corr,tot,t){showCorrectedPaper(score,corr,tot,t);}
 function showCorrectedPaper(score, corr, tot, timeTaken){
   const u = S.user;
   const passed = score>=85;
@@ -5560,226 +5571,138 @@ setTimeout(function(){
 function save(){} // no-op — using API now
 </script>
 
-<!-- ══ ONBOARDING OVERLAY ══ -->
-<div id="onboarding-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:#0d1b4b;flex-direction:column;">
+<!-- ══ ONBOARDING OVERLAY — PREMIUM SLIDES ══ -->
+<div id="onboarding-overlay" style="display:none;position:fixed;inset:0;z-index:500;flex-direction:column;background:#0a0f2e;overflow:hidden;">
 
-  <!-- PROGRESS DOTS -->
-  <div style="display:flex;justify-content:center;gap:8px;padding:16px 20px 8px;flex-shrink:0;">
-    <div class="ob-dot active" id="ob-dot-0"></div>
-    <div class="ob-dot" id="ob-dot-1"></div>
-    <div class="ob-dot" id="ob-dot-2"></div>
-    <div class="ob-dot" id="ob-dot-3"></div>
-    <div class="ob-dot" id="ob-dot-4"></div>
-    <div class="ob-dot" id="ob-dot-5"></div>
+  <div style="height:3px;background:rgba(255,255,255,0.1);flex-shrink:0;">
+    <div id="ob-prog" style="height:100%;background:linear-gradient(90deg,#ffd600,#ff8f00);transition:width .4s;width:16.6%;"></div>
   </div>
 
-  <!-- TIMER BAR -->
-  <div style="padding:0 20px 8px;flex-shrink:0;">
-    <div style="height:4px;background:rgba(255,255,255,.15);border-radius:4px;overflow:hidden;">
-      <div id="ob-timer-bar" style="height:100%;background:var(--gold);border-radius:4px;width:100%;transition:width 1s linear;"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;margin-top:4px;">
-      <div style="font-size:11px;color:rgba(255,255,255,.5);" id="ob-slide-num">1 / 6</div>
-      <div style="font-size:12px;font-weight:700;color:var(--gold);" id="ob-timer-text">⏱ 15s</div>
-    </div>
-  </div>
+  <div style="flex:1;position:relative;overflow:hidden;cursor:pointer;" onclick="obTapSkip()">
 
-  <!-- SLIDES CONTAINER -->
-  <div style="flex:1;overflow:hidden;position:relative;" id="ob-slides-wrap">
-
-    <!-- SLIDE 1 — Welcome -->
-    <div class="ob-slide active" id="ob-slide-0"
-      style="background:linear-gradient(160deg,#0d1b4b 0%,#1565c0 100%);">
-      <div class="ob-content">
-        <div class="ob-icon-big">🧠</div>
-        <div class="ob-title">Welcome to BrightMind Teacher!</div>
-        <div class="ob-subtitle">South India's First AI Tutor in Tamil, English & 4 more languages</div>
-        <div class="ob-screenshot" style="background:linear-gradient(135deg,#1a237e,#283593);">
-          <div style="text-align:center;padding:20px;">
-            <div style="font-size:36px;margin-bottom:8px;">👩‍🏫</div>
-            <div style="font-size:14px;font-weight:700;color:#fff;">Miss BrightMind</div>
-            <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:4px;">Your Personal AI Teacher</div>
-            <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
-              <span style="background:rgba(255,214,0,.2);color:#ffd600;font-size:10px;padding:4px 10px;border-radius:12px;font-weight:700;">CBSE</span>
-              <span style="background:rgba(255,214,0,.2);color:#ffd600;font-size:10px;padding:4px 10px;border-radius:12px;font-weight:700;">TN Board</span>
-              <span style="background:rgba(255,214,0,.2);color:#ffd600;font-size:10px;padding:4px 10px;border-radius:12px;font-weight:700;">KERALA</span>
-              <span style="background:rgba(255,214,0,.2);color:#ffd600;font-size:10px;padding:4px 10px;border-radius:12px;font-weight:700;">KARNATAKA</span>
-            </div>
-            <div style="margin-top:14px;font-size:13px;color:#a5d6a7;font-weight:600;">₹199/month — Less than one tuition class!</div>
-          </div>
+    <div class="ob-slide active" id="ob-slide-0" style="background:radial-gradient(ellipse at 50% 0%,#1a3a8f,#0a0f2e 70%);">
+      <div class="ob-inner">
+        <div class="ob-num">01 / 06</div>
+        <div class="ob-slide-icon">📚</div>
+        <div class="ob-slide-title">Welcome to <span class="ob-gold">BrightMind Teacher</span></div>
+        <div class="ob-slide-sub">South India's first AI tutor built for YOUR board and YOUR syllabus — not just a basic chatbot!</div>
+        <div class="ob-cards">
+          <div class="ob-card"><div class="ob-card-icon">🧠</div><div class="ob-card-lbl">AI Teacher</div><div class="ob-card-sub">Always available</div></div>
+          <div class="ob-card"><div class="ob-card-icon">📋</div><div class="ob-card-lbl">Your Syllabus</div><div class="ob-card-sub">CBSE · TN · Kerala</div></div>
+          <div class="ob-card"><div class="ob-card-icon">⚡</div><div class="ob-card-lbl">Instant Help</div><div class="ob-card-sub">24/7 · No waiting</div></div>
         </div>
-        <div class="ob-fact">🚀 NOT just ChatGPT — Built specifically for YOUR board and syllabus!</div>
       </div>
     </div>
 
-    <!-- SLIDE 2 — Miss BrightMind Talks -->
-    <div class="ob-slide" id="ob-slide-1"
-      style="background:linear-gradient(160deg,#1b5e20 0%,#2e7d32 100%);">
-      <div class="ob-content">
-        <div class="ob-icon-big">🎤</div>
-        <div class="ob-title">Miss BrightMind Speaks to You!</div>
-        <div class="ob-subtitle">Ask questions by voice in Tamil or English — she answers and speaks back!</div>
-        <div class="ob-screenshot">
-          <div style="padding:16px;">
-            <div style="background:rgba(255,255,255,.08);border-radius:12px;padding:12px;margin-bottom:10px;">
-              <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:4px;">YOU ASKED 🎤</div>
-              <div style="font-size:13px;color:#fff;">"Newton's second law-ஐ விளக்கவும்"</div>
-            </div>
-            <div style="background:rgba(255,255,255,.08);border-radius:12px;padding:12px;">
-              <div style="font-size:11px;color:#a5d6a7;margin-bottom:4px;">MISS BRIGHTMIND 🔊</div>
-              <div style="font-size:12px;color:#fff;line-height:1.6;">F = ma — விசை = திணிவு × முடுக்கம். அதாவது ஒரு பொருளை தள்ளும்போது அதன் எடை அதிகமாக இருந்தால் அது மெதுவாக நகரும்...</div>
-            </div>
-            <div style="display:flex;gap:8px;margin-top:10px;justify-content:center;">
-              <div style="background:#c62828;border-radius:20px;padding:8px 16px;font-size:12px;color:#fff;font-weight:700;">🎤 Tamil</div>
-              <div style="background:#1565c0;border-radius:20px;padding:8px 16px;font-size:12px;color:#fff;font-weight:700;">🔊 Voice Reply</div>
-            </div>
-          </div>
+    <div class="ob-slide" id="ob-slide-1" style="background:radial-gradient(ellipse at 50% 0%,#1a5e1a,#0a0f2e 70%);">
+      <div class="ob-inner">
+        <div class="ob-num">02 / 06</div>
+        <div class="ob-slide-icon">🎤</div>
+        <div class="ob-slide-title">Miss BrightMind <span class="ob-gold">Speaks Your Language!</span></div>
+        <div class="ob-slide-sub">Ask in Tamil, English, Hindi, Malayalam, Kannada or Telugu — she replies AND speaks back in your language!</div>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;">
+          <div class="ob-lang-pill" style="background:rgba(26,95,255,0.2);border-color:rgba(26,95,255,0.5);">🌐 English</div>
+          <div class="ob-lang-pill" style="background:rgba(198,40,40,0.2);border-color:rgba(198,40,40,0.5);">த தமிழ்</div>
+          <div class="ob-lang-pill" style="background:rgba(230,81,0,0.2);border-color:rgba(230,81,0,0.5);">हि हिंदी</div>
+          <div class="ob-lang-pill" style="background:rgba(46,125,50,0.2);border-color:rgba(46,125,50,0.5);">മ മലയാളം</div>
+          <div class="ob-lang-pill" style="background:rgba(230,81,0,0.2);border-color:rgba(230,81,0,0.5);">ಕ ಕನ್ನಡ</div>
+          <div class="ob-lang-pill" style="background:rgba(74,20,140,0.2);border-color:rgba(74,20,140,0.5);">తె తెలుగు</div>
         </div>
-        <div class="ob-fact">🌍 Speaks Tamil, Malayalam, Kannada, Telugu, Hindi & English!</div>
       </div>
     </div>
 
-    <!-- SLIDE 3 — Blackboard -->
-    <div class="ob-slide" id="ob-slide-2"
-      style="background:linear-gradient(160deg,#0a1a0a 0%,#1a4a1a 100%);">
-      <div class="ob-content">
-        <div class="ob-icon-big">🖊️</div>
-        <div class="ob-title">Live Blackboard — Step by Step!</div>
-        <div class="ob-subtitle">Miss BrightMind writes the solution on a real digital blackboard — just like your school teacher!</div>
-        <div class="ob-screenshot" style="background:#0d2b0d;border:2px solid #2a4a2a;">
-          <div style="padding:14px;font-family:'Courier New',monospace;">
-            <div style="font-size:11px;color:#ffd600;margin-bottom:8px;letter-spacing:1px;">── STEP 1/4: UNDERSTAND ──</div>
-            <div style="font-size:13px;color:#e8ffe8;line-height:1.8;">Solve: x² - 5x + 6 = 0<br>We need to find values of x</div>
-            <div style="font-size:11px;color:#ffd600;margin-top:10px;margin-bottom:6px;">── STEP 2/4: FACTORISE ──</div>
-            <div style="font-size:13px;color:#e8ffe8;line-height:1.8;">(x - 2)(x - 3) = 0</div>
-            <div style="background:rgba(255,214,0,.1);border-radius:8px;padding:8px;margin-top:8px;">
-              <div style="font-size:14px;color:#ffd600;font-weight:700;">✅ x = 2 or x = 3</div>
-            </div>
-            <div style="display:flex;gap:8px;margin-top:10px;">
-              <div style="background:linear-gradient(135deg,#ffd600,#ff8f00);color:#0d1b4b;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:800;">✅ I Understand → Next</div>
-              <div style="background:rgba(255,255,255,.1);color:#a0ffa0;border-radius:8px;padding:6px 12px;font-size:11px;">🔄 Repeat</div>
-            </div>
-          </div>
+    <div class="ob-slide" id="ob-slide-2" style="background:radial-gradient(ellipse at 50% 0%,#1a1a5e,#0a0f2e 70%);">
+      <div class="ob-inner">
+        <div class="ob-num">03 / 06</div>
+        <div class="ob-slide-icon">🖊️</div>
+        <div class="ob-slide-title">Live <span class="ob-gold">Blackboard</span> — Step by Step!</div>
+        <div class="ob-slide-sub">Miss BrightMind writes solutions just like your school teacher! Photo your textbook to solve instantly!</div>
+        <div style="background:rgba(26,58,26,0.7);border:2px solid rgba(100,180,100,0.3);border-left:6px solid #3d2008;border-right:6px solid #3d2008;border-radius:10px;padding:14px 16px;margin-top:12px;font-family:'Courier New',monospace;text-align:left;">
+          <div style="font-size:11px;color:#ffd600;font-weight:700;margin-bottom:5px;">── STEP 1 ──</div>
+          <div style="font-size:13px;color:#a5d6a7;">Solve: x&#178; - 5x + 6 = 0</div>
+          <div style="font-size:11px;color:#ffd600;font-weight:700;margin:7px 0 4px;">── STEP 2 ──</div>
+          <div style="font-size:13px;color:#a5d6a7;">Factor: (x-2)(x-3) = 0</div>
+          <div style="font-size:12px;color:#4caf50;font-weight:700;margin-top:8px;">✅ x = 2 or x = 3</div>
         </div>
-        <div class="ob-fact">📷 Photo your textbook sum — Miss BrightMind solves it on the blackboard!</div>
       </div>
     </div>
 
-    <!-- SLIDE 4 — Exam + Red Pen -->
-    <div class="ob-slide" id="ob-slide-3"
-      style="background:linear-gradient(160deg,#b71c1c 0%,#c62828 100%);">
-      <div class="ob-content">
-        <div class="ob-icon-big">📝</div>
-        <div class="ob-title">AI Corrects With Red Pen!</div>
-        <div class="ob-subtitle">Take chapter exam anytime — AI grades instantly and returns corrected answer sheet!</div>
-        <div class="ob-screenshot" style="background:#fff;">
-          <div style="padding:14px;font-family:'Times New Roman',serif;">
-            <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:10px;">
-              <div style="font-size:11px;font-weight:bold;">BRIGHTMIND TEACHER</div>
-              <div style="font-size:10px;color:#555;">Tamil Nadu Board · Class 11 · Mathematics</div>
-            </div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-              <div style="font-size:11px;">Student: <b>Priya</b></div>
-              <div style="width:45px;height:45px;border-radius:50%;border:2px solid #4caf50;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-15deg);">
-                <div style="font-size:12px;font-weight:bold;color:#4caf50;">90%</div>
-                <div style="font-size:8px;color:#4caf50;font-weight:bold;">PASS</div>
-              </div>
-            </div>
-            <div style="font-size:11px;margin-bottom:6px;">
-              <span style="color:#4caf50;font-weight:bold;">✓ Correct: 9</span> &nbsp;
-              <span style="color:#f44336;font-weight:bold;">✗ Wrong: 1</span>
-            </div>
-            <div style="font-family:'Comic Sans MS',cursive;font-size:11px;color:#c62828;line-height:1.6;">
-              Excellent work Priya! You have mastered this chapter! 🌟<br>
-              — Miss BrightMind
-            </div>
+    <div class="ob-slide" id="ob-slide-3" style="background:radial-gradient(ellipse at 50% 0%,#5e1a1a,#0a0f2e 70%);">
+      <div class="ob-inner">
+        <div class="ob-num">04 / 06</div>
+        <div class="ob-slide-icon">📝</div>
+        <div class="ob-slide-title">AI Corrects with <span class="ob-gold">Red Pen!</span></div>
+        <div class="ob-slide-sub">Take chapter exams anytime — AI grades instantly with teacher remarks and explanation for every wrong answer!</div>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
+          <div class="ob-card" style="background:rgba(0,200,100,0.12);border-color:rgba(0,200,100,0.3);">
+            <div style="font-size:26px;font-weight:900;color:#4caf50;">90%</div>
+            <div style="font-size:11px;color:#4caf50;font-weight:700;">PASS ✓</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.5);">Score</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:12px;font-family:serif;font-size:12px;color:rgba(255,200,200,0.9);text-align:left;flex:1;max-width:180px;">
+            <div style="color:#ff6b6b;font-weight:700;margin-bottom:6px;">✏️ Miss BrightMind:</div>
+            "Excellent! Keep going! 🌟"
           </div>
         </div>
-        <div class="ob-fact">📤 Share your result card on WhatsApp with friends!</div>
       </div>
     </div>
 
-    <!-- SLIDE 5 — Question Papers -->
-    <div class="ob-slide" id="ob-slide-4"
-      style="background:linear-gradient(160deg,#4a148c 0%,#7b1fa2 100%);">
-      <div class="ob-content">
-        <div class="ob-icon-big">📄</div>
-        <div class="ob-title">Download Real Question Papers!</div>
-        <div class="ob-subtitle">Unit Test, Quarterly, Half Yearly, Annual, Board Exam papers — all boards, all subjects!</div>
-        <div class="ob-screenshot">
-          <div style="padding:14px;display:flex;flex-direction:column;gap:8px;">
-            <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;border-left:3px solid #e53935;">
-              <div style="font-size:12px;font-weight:700;color:#fff;">📐 1st Quarterly — Mathematics</div>
-              <div style="font-size:10px;color:rgba(255,255,255,.6);">TN Board · Class 11 · 90 marks · 2.5 hrs</div>
-            </div>
-            <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;border-left:3px solid #ffd600;">
-              <div style="font-size:12px;font-weight:700;color:#fff;">⚛️ Board Exam — Physics</div>
-              <div style="font-size:10px;color:rgba(255,255,255,.6);">CBSE · Class 12 · 70 marks · 3 hrs</div>
-            </div>
-            <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;border-left:3px solid #4caf50;">
-              <div style="font-size:12px;font-weight:700;color:#fff;">🧪 Half Yearly — Chemistry</div>
-              <div style="font-size:10px;color:rgba(255,255,255,.6);">TN Board · Class 12 · 90 marks · 3 hrs</div>
-            </div>
-            <div style="background:var(--gold);border-radius:10px;padding:10px 12px;text-align:center;">
-              <div style="font-size:12px;font-weight:800;color:#0d1b4b;">📄 Download & Print as PDF</div>
-            </div>
-          </div>
+    <div class="ob-slide" id="ob-slide-4" style="background:radial-gradient(ellipse at 50% 0%,#4a1a8f,#0a0f2e 70%);">
+      <div class="ob-inner">
+        <div class="ob-num">05 / 06</div>
+        <div class="ob-slide-icon">📄</div>
+        <div class="ob-slide-title">Real <span class="ob-gold">Question Papers!</span></div>
+        <div class="ob-slide-sub">Unit Test · Quarterly · Half Yearly · Annual · Board Exam for ALL subjects and ALL boards!</div>
+        <div class="ob-cards" style="margin-top:14px;">
+          <div class="ob-card"><div class="ob-card-icon">📋</div><div class="ob-card-lbl">Unit Test</div><div class="ob-card-sub">Chapter wise</div></div>
+          <div class="ob-card"><div class="ob-card-icon">📋</div><div class="ob-card-lbl">Quarterly</div><div class="ob-card-sub">3 months</div></div>
+          <div class="ob-card"><div class="ob-card-icon">📋</div><div class="ob-card-lbl">Half Yearly</div><div class="ob-card-sub">6 months</div></div>
+          <div class="ob-card"><div class="ob-card-icon">📋</div><div class="ob-card-lbl">Board Exam</div><div class="ob-card-sub">Full paper</div></div>
         </div>
-        <div class="ob-fact">🎯 AI generates fresh unique questions every time — unlimited practice!</div>
       </div>
     </div>
 
-    <!-- SLIDE 6 — Ready! -->
-    <div class="ob-slide" id="ob-slide-5"
-      style="background:linear-gradient(160deg,#e65100 0%,#ff6f00 100%);">
-      <div class="ob-content">
-        <div class="ob-icon-big">🏆</div>
-        <div class="ob-title">You Are Ready to Learn!</div>
-        <div class="ob-subtitle">BrightMind is NOT ChatGPT — it is your personal AI teacher who knows YOUR board and YOUR syllabus!</div>
-        <div class="ob-screenshot">
-          <div style="padding:16px;">
-            <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:12px;text-align:center;">What makes BrightMind different:</div>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-              <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.1);border-radius:10px;padding:10px;">
-                <span style="font-size:18px;">🖊️</span>
-                <div style="font-size:12px;color:#fff;font-weight:600;">Blackboard — step by step solutions</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.1);border-radius:10px;padding:10px;">
-                <span style="font-size:18px;">📝</span>
-                <div style="font-size:12px;color:#fff;font-weight:600;">Exams with red pen AI correction</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.1);border-radius:10px;padding:10px;">
-                <span style="font-size:18px;">📄</span>
-                <div style="font-size:12px;color:#fff;font-weight:600;">Download your board question papers</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.1);border-radius:10px;padding:10px;">
-                <span style="font-size:18px;">🏆</span>
-                <div style="font-size:12px;color:#fff;font-weight:600;">Leaderboard — compete with Tamil Nadu!</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.1);border-radius:10px;padding:10px;">
-                <span style="font-size:18px;">🌍</span>
-                <div style="font-size:12px;color:#fff;font-weight:600;">Tamil · Malayalam · Kannada · Telugu</div>
-              </div>
-            </div>
-          </div>
+    <div class="ob-slide" id="ob-slide-5" style="background:radial-gradient(ellipse at 50% 0%,#3a1a00,#0a0f2e 70%);">
+      <div class="ob-inner">
+        <div class="ob-num">06 / 06</div>
+        <div class="ob-slide-icon">🏆</div>
+        <div class="ob-slide-title">Get <span class="ob-gold">Unlimited Access</span> for Less!</div>
+        <div class="ob-slide-sub">NOT ChatGPT — Your personal AI teacher who knows YOUR exact syllabus!</div>
+        <div style="display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:10px;">
+          <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:5px 10px;font-size:10px;color:rgba(255,255,255,0.55);">Vedantu ₹3,000+</div>
+          <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:5px 10px;font-size:10px;color:rgba(255,255,255,0.55);">PhysicsWallah ₹1,250</div>
+          <div style="background:rgba(0,200,100,0.15);border:1px solid rgba(0,200,100,0.4);border-radius:8px;padding:5px 10px;font-size:10px;color:#4caf50;font-weight:700;">BrightMind ₹199 ✓</div>
         </div>
-        <div class="ob-fact" style="background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.4);">
-          🎉 Only ₹199/month — Less than ONE tuition class. Let's start learning!
+        <div style="background:rgba(255,214,0,0.1);border:1px solid rgba(255,214,0,0.3);border-radius:12px;padding:11px 18px;margin-top:12px;">
+          <div style="font-size:10px;color:rgba(255,214,0,0.7);font-weight:700;letter-spacing:1px;margin-bottom:3px;">LAUNCH OFFER — TILL 31 AUG</div>
+          <div style="font-size:14px;font-weight:800;color:#ffd600;">All Subjects · Unlimited · ₹199/month</div>
         </div>
+        <div style="margin-top:10px;text-align:left;display:inline-block;">
+          <div style="font-size:12px;color:rgba(255,255,255,0.75);padding:2px 0;">✅ Blackboard step by step</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.75);padding:2px 0;">✅ Red pen correction + papers</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.75);padding:2px 0;">✅ 6 Indian languages + voice</div>
+        </div>
+        <button id="ob-start-btn" onclick="closeOnboarding()" style="display:none;width:100%;background:linear-gradient(135deg,#00c853,#00e676);color:#003300;border:none;padding:14px;border-radius:12px;font-size:15px;font-weight:800;margin-top:12px;cursor:pointer;">Start Learning 🚀</button>
       </div>
     </div>
 
   </div>
 
-  <!-- BOTTOM NAV -->
-  <div style="padding:12px 20px 24px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.3);">
-    <button id="ob-prev" onclick="obPrev()" style="background:rgba(255,255,255,.15);border:none;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;opacity:0;">← Back</button>
-    <div style="font-size:12px;color:rgba(255,255,255,.5);" id="ob-wait-msg">⏱ Please watch — <span id="ob-wait-secs">15</span>s</div>
-    <button id="ob-next" onclick="obNext()" disabled
-      style="background:rgba(255,255,255,.2);border:none;color:rgba(255,255,255,.5);padding:10px 24px;border-radius:20px;font-size:13px;font-weight:700;cursor:not-allowed;"
-      id="ob-next-btn">Next →</button>
+  <div style="background:rgba(0,0,0,0.5);padding:12px 18px 20px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:11px;color:rgba(255,255,255,0.35);" id="ob-slide-num">1 / 6</div>
+      <div style="display:flex;gap:6px;" id="ob-dots">
+        <div class="ob-dot active" onclick="obGoToSlide(0)"></div>
+        <div class="ob-dot" onclick="obGoToSlide(1)"></div>
+        <div class="ob-dot" onclick="obGoToSlide(2)"></div>
+        <div class="ob-dot" onclick="obGoToSlide(3)"></div>
+        <div class="ob-dot" onclick="obGoToSlide(4)"></div>
+        <div class="ob-dot" onclick="obGoToSlide(5)"></div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);" id="ob-timer-text">5s</div>
+    </div>
   </div>
 
 </div>
-</body>
-</html>
+
+</body></html>
