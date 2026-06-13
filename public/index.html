@@ -1189,6 +1189,9 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
         <option value="kn">ಕನ್ನಡ</option>
         <option value="te">తెలుగు</option>
       </select>
+      <!-- Voice toggle -->
+      <button id="bb-voice-btn" onclick="toggleBBVoice(this)"
+        style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;width:36px;height:36px;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Toggle voice">🔊</button>
       <button class="bb-close" onclick="closeBlackboard()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;width:36px;height:36px;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
     </div>
   </div>
@@ -1203,7 +1206,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
   </div>
 
   <!-- BLACKBOARD CANVAS — chalk green -->
-  <div class="bb-board" id="bb-board">
+  <div class="bb-board" id="bb-canvas">
     <!-- Welcome shown by showBBWelcome() -->
   </div>
 
@@ -1500,40 +1503,76 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 
 <!-- ══ PAYWALL ══ -->
 <div id="paywall-overlay">
-  <div class="paywall-card">
-    <div class="paywall-icon">🔒</div>
-    <div class="paywall-title">Your Free Trial Ended!</div>
-    <div class="paywall-sub">You have used your free day. Subscribe now to continue learning with your AI teacher — cheaper than one tuition class!</div>
-    <div style="background:linear-gradient(135deg,#ff6f00,#ff8f00);border-radius:12px;padding:10px 14px;text-align:center;margin-bottom:12px;">
-      <div style="font-size:13px;font-weight:800;color:#fff;">🎉 LAUNCH OFFER — Valid till 31st August 2026!</div>
-      <div style="font-size:11px;color:rgba(255,255,255,.9);margin-top:2px;">Founding member price — Limited time only!</div>
-    </div>
-    <div class="paywall-plans">
+  <div class="paywall-card" style="background:linear-gradient(145deg,#0a0f2e,#1a237e);border:1px solid rgba(255,214,0,0.2);max-height:92vh;overflow-y:auto;">
 
-      <div class="paywall-plan hot" onclick="selPaywallPlan(this,'all')">
-        <div>
-          <div class="pn">All Subjects <span class="hot-tag">BEST</span></div>
-          <div class="pd">All subjects · Exams · Leaderboard · Rank Card</div>
-          <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Was ₹399 · Save 50%!</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹399</div>
-          <div class="pp">₹199<small>/mo</small></div>
-        </div>
+    <div style="text-align:center;margin-bottom:10px;">
+      <div style="font-size:36px;">🔒</div>
+      <div class="paywall-title" style="color:#fff;font-size:20px;">Your Free Demo Ended!</div>
+      <div class="paywall-sub" style="color:rgba(255,255,255,0.65);font-size:13px;">Subscribe to continue learning with Miss BrightMind — unlimited access anytime!</div>
+    </div>
+
+    <!-- OFFER BANNER -->
+    <div style="background:linear-gradient(135deg,#ff6f00,#ff8f00,#ff6f00);background-size:200%;animation:goldShimmer 3s ease infinite;border-radius:12px;padding:10px 14px;text-align:center;margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:800;color:#fff;">🎉 LAUNCH OFFER — Till 31st August 2026!</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.9);margin-top:2px;">Founding member price — Limited time only!</div>
+    </div>
+
+    <!-- PLAN 1: MONTHLY -->
+    <div id="pw-monthly" onclick="selPaywallPlan(this,'all','monthly')"
+      style="border:2px solid rgba(255,214,0,0.8);background:rgba(255,214,0,0.12);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:all .2s;">
+      <div>
+        <div style="font-size:14px;font-weight:800;color:#fff;">All Subjects <span style="background:#ffd600;color:#0a0f2e;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:4px;">BEST</span></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">Unlimited · Exams · Leaderboard · Rank Card</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:10px;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹399</div>
+        <div style="font-size:22px;font-weight:900;color:#ffd600;">₹199<span style="font-size:10px;font-weight:500;">/mo</span></div>
       </div>
     </div>
-    <div class="paywall-features">
-      <div class="pf-row"><span>✅</span> Unlimited AI tutor questions</div>
-      <div class="pf-row"><span>✅</span> Chapter exams with AI grading</div>
-      <div class="pf-row"><span>✅</span> Personal rank card — share on WhatsApp</div>
-      <div class="pf-row"><span>✅</span> State + All India leaderboard</div>
-      <div class="pf-row"><span>✅</span> XP points, levels, badges</div>
-      <div class="pf-row"><span>✅</span> Parent progress report</div>
+
+    <!-- PLAN 2: QUARTERLY -->
+    <div id="pw-quarterly" onclick="selPaywallPlan(this,'all','quarterly')"
+      style="border:2px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:all .2s;">
+      <div>
+        <div style="font-size:14px;font-weight:800;color:#fff;">Quarterly <span style="background:#4caf50;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:4px;">5% OFF</span></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">3 months · Save ₹30 · ₹189/mo</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:10px;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹597</div>
+        <div style="font-size:22px;font-weight:900;color:#ffd600;">₹567<span style="font-size:10px;font-weight:500;">/3mo</span></div>
+      </div>
     </div>
-    <button class="btn-main" onclick="activatePaywall()">Subscribe with Razorpay →</button>
-    <div style="font-size:11px;color:var(--gray-text);margin-top:10px;">Cancel anytime · Secure payment</div>
+
+    <!-- PLAN 3: ANNUAL -->
+    <div id="pw-annual" onclick="selPaywallPlan(this,'all','annual')"
+      style="border:2px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);border-radius:14px;padding:12px 14px;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:all .2s;">
+      <div>
+        <div style="font-size:14px;font-weight:800;color:#fff;">Annual <span style="background:#2196f3;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:4px;">10% OFF</span></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">12 months · Save ₹240 · ₹179/mo</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:10px;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹2388</div>
+        <div style="font-size:22px;font-weight:900;color:#4caf50;">₹2148<span style="font-size:10px;font-weight:500;">/yr</span></div>
+      </div>
+    </div>
+
+    <!-- FEATURES -->
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px 14px;margin-bottom:12px;">
+      <div style="font-size:12px;color:rgba(255,255,255,0.8);padding:2px 0;">✅ Unlimited AI tutor questions</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.8);padding:2px 0;">✅ Chapter exams with AI grading</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.8);padding:2px 0;">✅ Personal rank card — share on WhatsApp</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.8);padding:2px 0;">✅ State + All India leaderboard</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.8);padding:2px 0;">✅ 6 Indian languages + voice</div>
+    </div>
+
+    <button class="btn-main" onclick="activatePaywall()"
+      style="background:linear-gradient(135deg,#ffd600,#ff8f00);color:#0a0f2e;font-weight:800;box-shadow:0 4px 20px rgba(255,214,0,0.4);">
+      Subscribe with Razorpay →
+    </button>
+    <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:8px;text-align:center;">Cancel anytime · Secure payment</div>
   </div>
 </div>
+
 
 <!-- ══ RANK CARD OVERLAY ══ -->
 <div id="rankcard-overlay">
@@ -2549,6 +2588,18 @@ function closeBlackboard(){
   window.speechSynthesis.cancel();
 }
 
+// Voice on/off toggle for Blackboard
+let bbVoiceOn=true;
+function toggleBBVoice(btn){
+  bbVoiceOn=!bbVoiceOn;
+  if(btn){
+    btn.textContent=bbVoiceOn?'🔊':'🔇';
+    btn.style.background=bbVoiceOn?'rgba(255,255,255,0.1)':'rgba(255,80,80,0.2)';
+    btn.style.borderColor=bbVoiceOn?'rgba(255,255,255,0.2)':'rgba(255,80,80,0.4)';
+  }
+  if(!bbVoiceOn) window.speechSynthesis.cancel();
+}
+
 function showBBWelcome(){
   const canvas=document.getElementById('bb-board')||document.getElementById('bb-canvas');
   if(!canvas)return;
@@ -2769,7 +2820,7 @@ function showNextBBStep(){
     if(counter)counter.textContent=`Step ${bbCurrentStep+1} of ${bbAllSteps.length}`;
 
     // Speak the step
-    if(step.speak)speakText(step.speak);
+    if(step.speak)if(bbVoiceOn)speakText(step.speak);
 
     canvas.scrollTop=canvas.scrollHeight;
   });
