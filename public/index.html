@@ -2150,27 +2150,32 @@ function loginUser(u){
         // Force logout — show paywall
         window.speechSynthesis.cancel();
         S.user=null;
-        document.getElementById('paywall-overlay').classList.add('open');
-        document.getElementById('paywall-overlay').innerHTML=`
-          <div class="paywall-card">
-            <div style="font-size:60px;margin-bottom:10px;">⏰</div>
-            <div class="paywall-title">Free Session Ended!</div>
-            <div class="paywall-sub">Your 1-hour free session has ended.<br><br>Subscribe now to continue learning with Miss BrightMind — unlimited access, anytime!</div>
-            <div style="background:linear-gradient(135deg,#ff6f00,#ff8f00);border-radius:12px;padding:10px 14px;text-align:center;margin-bottom:14px;">
-              <div style="font-size:13px;font-weight:800;color:#fff;">🎉 LAUNCH OFFER — Till 31st August 2026!</div>
+        const pwEl=document.getElementById('paywall-overlay');
+        pwEl.classList.add('open');
+        pwEl.innerHTML=`
+          <div class="paywall-card" style="background:linear-gradient(145deg,#0a0f2e,#1a237e);border:1px solid rgba(255,214,0,0.2);max-height:92vh;overflow-y:auto;">
+            <div style="text-align:center;margin-bottom:10px;">
+              <div style="font-size:36px;">⏰</div>
+              <div class="paywall-title" style="color:#fff;font-size:20px;">Free Demo Ended!</div>
+              <div class="paywall-sub" style="color:rgba(255,255,255,0.65);font-size:13px;">Subscribe to continue learning with Miss BrightMind — unlimited access anytime!</div>
             </div>
-            <div class="paywall-plans">
-              <div class="paywall-plan" onclick="selPaywallPlan(this,'single')">
-                <div><div class="pn">Single Subject</div><div class="pd">Was ₹249 · Save 52%!</div></div>
-                <div style="text-align:right;"><div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹249</div><div class="pp">₹199<small>/mo</small></div></div>
-              </div>
-              <div class="paywall-plan hot" onclick="selPaywallPlan(this,'all')">
-                <div><div class="pn">All Subjects <span class="hot-tag">BEST</span></div><div class="pd">Was ₹399 · Save 50%!</div></div>
-                <div style="text-align:right;"><div style="font-size:11px;color:var(--gray-text);text-decoration:line-through;">₹399</div><div class="pp">₹199<small>/mo</small></div></div>
-              </div>
+            <div style="background:linear-gradient(135deg,#ff6f00,#ff8f00,#ff6f00);background-size:200%;border-radius:12px;padding:10px 14px;text-align:center;margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:800;color:#fff;">🎉 LAUNCH OFFER — Till 31st August 2026!</div>
             </div>
-            <button class="btn-main" onclick="activatePaywall()">Subscribe with Razorpay →</button>
-            <div style="font-size:11px;color:var(--gray-text);margin-top:10px;">Login again after subscribing</div>
+            <div id="pw-monthly" onclick="selPaywallPlan(this,'all','monthly')" style="border:2px solid rgba(255,214,0,0.8);background:rgba(255,214,0,0.12);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+              <div><div style="font-size:14px;font-weight:800;color:#fff;">All Subjects <span style="background:#ffd600;color:#0a0f2e;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:4px;">BEST</span></div><div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">Unlimited · Exams · Leaderboard</div></div>
+              <div style="text-align:right;flex-shrink:0;margin-left:10px;"><div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹399</div><div style="font-size:22px;font-weight:900;color:#ffd600;">₹199<span style="font-size:10px;">/mo</span></div></div>
+            </div>
+            <div id="pw-quarterly" onclick="selPaywallPlan(this,'all','quarterly')" style="border:2px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+              <div><div style="font-size:14px;font-weight:800;color:#fff;">Quarterly <span style="background:#4caf50;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:4px;">5% OFF</span></div><div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">3 months · Save ₹30 · ₹189/mo</div></div>
+              <div style="text-align:right;flex-shrink:0;margin-left:10px;"><div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹597</div><div style="font-size:22px;font-weight:900;color:#ffd600;">₹567<span style="font-size:10px;">/3mo</span></div></div>
+            </div>
+            <div id="pw-annual" onclick="selPaywallPlan(this,'all','annual')" style="border:2px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);border-radius:14px;padding:12px 14px;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+              <div><div style="font-size:14px;font-weight:800;color:#fff;">Annual <span style="background:#2196f3;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:4px;">10% OFF</span></div><div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">12 months · Save ₹240 · ₹179/mo</div></div>
+              <div style="text-align:right;flex-shrink:0;margin-left:10px;"><div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹2388</div><div style="font-size:22px;font-weight:900;color:#4caf50;">₹2148<span style="font-size:10px;">/yr</span></div></div>
+            </div>
+            <button class="btn-main" onclick="activatePaywall()" style="background:linear-gradient(135deg,#ffd600,#ff8f00);color:#0a0f2e;font-weight:800;">Subscribe with Razorpay →</button>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:8px;text-align:center;">Cancel anytime · Secure payment</div>
           </div>`;
         go('app'); // keep on app screen to show paywall
       }
@@ -3109,12 +3114,12 @@ function speakText(text){
   utt.lang=lc[0];
   // Language-specific voice tuning for natural sound
   const voiceSettings={
-    ta:{rate:0.75,pitch:0.95},  // Tamil: slower, lower pitch (natural cadence)
-    ml:{rate:0.74,pitch:0.92},  // Malayalam: even slower, deeper
-    kn:{rate:0.76,pitch:0.94},  // Kannada
-    te:{rate:0.76,pitch:0.94},  // Telugu
-    hi:{rate:0.82,pitch:1.0},   // Hindi: medium pace, neutral pitch
-    en:{rate:0.88,pitch:1.1},   // English: warm teacher pace
+    ta:{rate:0.88,pitch:1.2},   // Tamil: same as yesterday - confirmed natural
+    ml:{rate:0.88,pitch:1.2},   // Malayalam: same - confirmed good
+    kn:{rate:0.88,pitch:1.15},  // Kannada
+    te:{rate:0.88,pitch:1.15},  // Telugu
+    hi:{rate:0.88,pitch:1.1},   // Hindi
+    en:{rate:0.88,pitch:1.2},   // English: warm teacher
   };
   const vs=voiceSettings[curLang]||voiceSettings['en'];
   utt.rate=vs.rate; utt.pitch=vs.pitch;
