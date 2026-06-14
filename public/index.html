@@ -309,7 +309,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 /* ══ MODAL ══ */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(13,27,75,.7);z-index:200;align-items:flex-end;justify-content:center;}
 .modal-overlay.show{display:flex;}
-.modal-sheet{background:#fff;border-radius:22px 22px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;animation:slideUp .3s ease;}
+.modal-sheet{background:#fff;border-radius:22px 22px 0 0;padding:20px 18px 32px;width:100%;max-width:480px;animation:slideUp .3s ease;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .modal-handle{width:38px;height:4px;background:var(--gray-mid);border-radius:4px;margin:0 auto 18px;}
 .modal-title{font-size:19px;font-weight:800;color:var(--blue-dark);margin-bottom:5px;}
 .modal-sub{font-size:13px;color:var(--gray-text);margin-bottom:18px;}
@@ -1756,7 +1756,8 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
           <div class="pd">Pay every month · Cancel anytime</div>
         </div>
         <div style="text-align:right;">
-          <div class="pp" id="price-monthly">₹199<small>/mo</small></div>
+          <div style="font-size:11px;color:var(--gray-text);" id="price-monthly-label">1 month</div>
+          <div class="pp" id="price-monthly" style="font-size:14px;">₹199</div>
         </div>
       </div>
       <div class="plan-opt" onclick="selDuration(this,'quarterly')" id="dur-quarterly">
@@ -4735,7 +4736,18 @@ const BASE_PRICES={all:199, premium:399};
 
 function showModal(id){
   document.getElementById(id).classList.add('show');
-  if(id==='sub-modal') updatePriceDisplay();
+  if(id==='sub-modal'){
+    // Reset to Basic monthly on open
+    selectedPlanType='all'; selectedDuration='monthly';
+    // Highlight Basic plan card as selected
+    document.querySelectorAll('#plan-opts .plan-opt').forEach(p=>p.classList.remove('sel'));
+    const basicCard=document.querySelector('#plan-opts .plan-opt');
+    if(basicCard)basicCard.classList.add('sel');
+    document.querySelectorAll('#duration-opts .plan-opt').forEach(p=>p.classList.remove('sel'));
+    const monthlyCard=document.getElementById('dur-monthly');
+    if(monthlyCard)monthlyCard.classList.add('sel');
+    updatePriceDisplay();
+  }
 }
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 
@@ -4757,64 +4769,32 @@ function updatePriceDisplay(){
   const base=BASE_PRICES[selectedPlanType]||199;
   const isPremium=selectedPlanType==='premium';
   const planName=isPremium?'Premium Plan (60Q/day · 5 photos/day)':'Basic Plan (30Q/day · 2 photos/day)';
-  const planShort=isPremium?'Premium Plan':'Basic Plan';
-
-  // Calculate prices — bigger discounts for longer plans, Premium gets better deals
+  const planShort=isPremium?'⭐ Premium Plan':'Basic Plan';
   const monthly=base;
-  let quarterly, yearly;
-  if(isPremium){
-    quarterly=Math.round(base*3*0.90);   // Premium Quarterly: 10% off = ₹1,077
-    yearly=Math.round(base*12*0.60);     // Premium Annual: 40% off = ₹2,868 (₹239/mo — HUGE SAVING)
-  } else {
-    quarterly=Math.round(base*3*0.90);   // Basic Quarterly: 10% off = ₹537
-    yearly=Math.round(base*12*0.75);     // Basic Annual: 25% off = ₹1,791 (₹149/mo)
-  }
+  const quarterly=Math.round(base*3*0.90);  // 10% off both plans
+  const yearly=isPremium?Math.round(base*12*0.80):Math.round(base*12*0.75); // Premium 20% off, Basic 25% off
+  const discY=isPremium?'SAVE 20%':'SAVE 25%';
   const savingsQ=Math.round(base*3-quarterly);
   const savingsY=Math.round(base*12-yearly);
-  const perMonthQ=Math.round(quarterly/3);
-  const perMonthY=Math.round(yearly/12);
-
-  // Update plan selected label
   const planLabel=document.getElementById('plan-selected-label');
   if(planLabel)planLabel.textContent='Selected: '+planName;
-
-  // Update duration prices
   const pm=document.getElementById('price-monthly');
-  const pq=document.getElementById('price-quarterly');
-  const py=document.getElementById('price-yearly');
-  const sq=document.getElementById('save-quarterly');
-  const sy=document.getElementById('save-yearly');
-  const pmQ=document.getElementById('per-month-quarterly');
-  const pmY=document.getElementById('per-month-yearly');
-  if(pm)pm.innerHTML=`₹${monthly.toLocaleString('en-IN')}<small>/mo</small>`;
-  if(pq)pq.innerHTML=`₹${quarterly.toLocaleString('en-IN')}`;
-  if(py)py.innerHTML=`₹${yearly.toLocaleString('en-IN')}`;
-  if(sq)sq.textContent=`Save ₹${savingsQ}!`;
-  if(sy)sy.textContent=`Save ₹${savingsY}!`;
-  // Update discount % badges
-  const bq=document.getElementById('badge-quarterly');
-  const by=document.getElementById('badge-yearly');
-  if(bq)bq.textContent=isPremium?'SAVE 10%':'SAVE 10%';
-  if(by)by.textContent=isPremium?'SAVE 40%':'SAVE 25%';
-  if(pmQ)pmQ.textContent=`₹${perMonthQ}/mo`;
-  if(pmY)pmY.textContent=`₹${perMonthY}/mo`;
-
-  // Update total + breakdown label
+  if(pm)pm.innerHTML='₹'+monthly.toLocaleString('en-IN');
+  const pq=document.getElementById('price-quarterly');if(pq)pq.innerHTML='₹'+quarterly.toLocaleString('en-IN');
+  const sq=document.getElementById('save-quarterly');if(sq)sq.textContent='Save ₹'+savingsQ+'!';
+  const pmQ=document.getElementById('per-month-quarterly');if(pmQ)pmQ.textContent='₹'+Math.round(quarterly/3)+'/mo';
+  const bq=document.getElementById('badge-quarterly');if(bq)bq.textContent='SAVE 10%';
+  const py=document.getElementById('price-yearly');if(py)py.innerHTML='₹'+yearly.toLocaleString('en-IN');
+  const sy=document.getElementById('save-yearly');if(sy)sy.textContent='Save ₹'+savingsY+'!';
+  const pmY=document.getElementById('per-month-yearly');if(pmY)pmY.textContent='₹'+Math.round(yearly/12)+'/mo';
+  const by=document.getElementById('badge-yearly');if(by)by.textContent=discY;
   const total=selectedDuration==='monthly'?monthly:selectedDuration==='quarterly'?quarterly:yearly;
-  const durLabel=selectedDuration==='monthly'?'Monthly':selectedDuration==='quarterly'?'Quarterly (3 months)':'Annual (12 months)';
-  const totalEl=document.getElementById('modal-total');
-  const breakdownEl=document.getElementById('total-breakdown');
-  if(totalEl)totalEl.textContent='₹'+total.toLocaleString('en-IN');
-  if(breakdownEl)breakdownEl.textContent=planShort+' · '+durLabel;
-
-  // Update pay button color for premium
+  const durLabel=selectedDuration==='monthly'?'Monthly · 1 month':selectedDuration==='quarterly'?'Quarterly · 3 months':'Annual · 12 months';
+  const totalEl=document.getElementById('modal-total');if(totalEl)totalEl.textContent='₹'+total.toLocaleString('en-IN');
+  const breakdownEl=document.getElementById('total-breakdown');if(breakdownEl)breakdownEl.textContent=planShort+' · '+durLabel;
   const payBtn=document.querySelector('#sub-modal .btn-main');
-  if(payBtn){
-    payBtn.style.background=isPremium?'linear-gradient(135deg,#7b1fa2,#4a148c)':'';
-    payBtn.textContent=isPremium?'⭐ Pay with Razorpay →':'Pay with Razorpay →';
-  }
+  if(payBtn){payBtn.style.background=isPremium?'linear-gradient(135deg,#7b1fa2,#4a148c)':'';payBtn.textContent=isPremium?'⭐ Pay with Razorpay →':'Pay with Razorpay →';}
 }
-
 function subscribePlan(){
   const base=BASE_PRICES[selectedPlanType]||199;
   let amount=base;
