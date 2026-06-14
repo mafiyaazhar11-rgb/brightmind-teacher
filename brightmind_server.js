@@ -617,10 +617,24 @@ app.post('/api/ai', async (req, res) => {
       body: JSON.stringify(req.body)
     });
     const data = await response.json();
-    if (data.error) console.error('Anthropic error:', data.error);
+    if (data.error) {
+      console.error('Anthropic error:', data.error.type, data.error.message);
+      // Never forward raw billing/credit errors to students
+      const errType = (data.error.type || '').toLowerCase();
+      const errMsg = (data.error.message || '').toLowerCase();
+      if (errType.includes('credit') || errType.includes('billing') || 
+          errType.includes('quota') || errMsg.includes('credit') || errMsg.includes('billing')) {
+        // Alert owner via console but show friendly message to student
+        console.error('🚨 BILLING ALERT: Anthropic credits low or exhausted! Top up at console.anthropic.com');
+        return res.json({ content: [{ type: 'text', text: 'Miss BrightMind is taking a short break! Please try again in a few minutes. 😊' }] });
+      }
+      // Other errors — still friendly
+      return res.json({ content: [{ type: 'text', text: 'I could not answer that right now. Please ask your question again! 😊' }] });
+    }
     res.json(data);
   } catch (e) {
-    res.status(500).json({ error: { message: 'AI service error: ' + e.message } });
+    console.error('AI proxy error:', e.message);
+    res.status(500).json({ content: [{ type: 'text', text: 'Miss BrightMind is taking a short break! Please try again. 😊' }] });
   }
 });
 
