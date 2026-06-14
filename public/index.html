@@ -2325,6 +2325,8 @@ function doLogout(){
       subjects:Object.keys(S.user.subjects||{})
     }).catch(()=>{});
   }
+  // Clear session upload counter on logout — files were only in browser memory anyway
+  try{Object.keys(sessionStorage).filter(k=>k.startsWith('bmt_uploads_')).forEach(k=>sessionStorage.removeItem(k));}catch(e){}
   S.user=null;go('splash');
 }
 
@@ -3129,6 +3131,20 @@ function bbFinished(){
 async function handleBBPhotoUpload(event){
   const file=event.target.files[0];
   if(!file)return;
+  // ── RESTRICTION: Max 4MB per file ──
+  if(file.size>4*1024*1024){
+    alert('⚠️ File too large! Maximum 4MB.\nYour file: '+(file.size/1024/1024).toFixed(1)+'MB');
+    event.target.value='';return;
+  }
+  // ── RESTRICTION: Max 15 uploads per 12 hours ──
+  const _uid2=S.user?.id||'x';
+  const _key2='bmt_uploads_'+_uid2,_tsKey2='bmt_uploads_ts_'+_uid2,_now2=Date.now();
+  const _ts2=parseInt(localStorage.getItem(_tsKey2)||'0');
+  if(_now2-_ts2>12*60*60*1000){localStorage.setItem(_tsKey2,_now2);localStorage.setItem(_key2,'0');}
+  const _uc=parseInt(localStorage.getItem(_key2)||'0');
+  const _hr2=Math.ceil((12*60*60*1000-(_now2-_ts2))/(60*60*1000));
+  if(_uc>=15){alert('⚠️ Daily upload limit: 15 photos per 12 hours. Resets in '+_hr2+' hr(s).');event.target.value='';return;}
+  localStorage.setItem(_key2,_uc+1);
   // Free demo: 1 photo only
   if(!S.isPaid&&(S.photoUsed||0)>=1){
     event.target.value='';
@@ -3202,10 +3218,32 @@ Return ONLY JSON array.`;
 function handlePhotoUpload(event){
   const file=event.target.files[0];
   if(!file)return;
+  // ── RESTRICTION: Max 4MB per file ──
+  const MAX_MB=4;
+  if(file.size>MAX_MB*1024*1024){
+    alert('⚠️ File too large!\n\nMaximum size is '+MAX_MB+'MB.\nYour file is '+( file.size/1024/1024).toFixed(1)+'MB.\n\nPlease compress the image and try again.');
+    event.target.value='';return;
+  }
+  // ── RESTRICTION: Max 15 uploads per 12 hours per user ID ──
+  const _uid=S.user?.id||'x';
+  const _key='bmt_uploads_'+_uid;
+  const _tsKey='bmt_uploads_ts_'+_uid;
+  const _now=Date.now();
+  const _ts=parseInt(localStorage.getItem(_tsKey)||'0');
+  // Reset counter if 12 hours have passed
+  if(_now-_ts>12*60*60*1000){localStorage.setItem(_tsKey,_now);localStorage.setItem(_key,'0');}
+  const uploadCount=parseInt(localStorage.getItem(_key)||'0');
+  const _hoursLeft=Math.ceil((12*60*60*1000-(_now-_ts))/(60*60*1000));
+  if(uploadCount>=15){
+    alert('⚠️ Daily upload limit reached!\n\nYou can upload 15 photos per 12 hours.\nYour limit resets in '+_hoursLeft+' hour(s).');
+    event.target.value='';return;
+  }
   const reader=new FileReader();
   reader.onload=(e)=>{
     bbPhotoBase64=e.target.result.split(',')[1];
     const mediaType=file.type||'image/jpeg';
+    // Track upload count in sessionStorage — clears on logout, never goes to server
+    localStorage.setItem('bmt_uploads_'+(S.user?.id||'x'), uploadCount+1);
     document.getElementById('photo-preview-img').src=e.target.result;
     document.getElementById('photo-preview-img').dataset.mediaType=mediaType;
     document.getElementById('photo-overlay').classList.add('open');
@@ -3604,8 +3642,18 @@ async function startExam(){
         messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name}. Topics: ${topics||'general chapter concepts'}. Make questions TOUGH — test deep understanding. Return ONLY a JSON array, no other text:
 [{"q":"question","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"brief explanation"}]`}]})});
     const d=await r.json();let raw=d.content?.[0]?.text||'[]';
-    raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
+    // Strip markdown code fences and any leading/trailing text
+    raw=raw.replace(/```json|```/gi,'').trim();
+    // Extract JSON array if wrapped in extra text
+    const arrMatch=raw.match(/\[\s*\{[\s\S]*\}\s*\]/);
+    if(arrMatch)raw=arrMatch[0];
     S.examQs=JSON.parse(raw);
+    // Validate — ensure correct field matches option letter
+    S.examQs=S.examQs.map(q=>({
+      ...q,
+      correct:(q.correct||'A').toString().toUpperCase().charAt(0),
+      options:Array.isArray(q.options)?q.options:['A) Option A','B) Option B','C) Option C','D) Option D']
+    }));
   }catch(e){S.examQs=fallbackQs();}
   startTimer();renderExamQ();
 }
@@ -3630,14 +3678,31 @@ function renderExamQ(){
       <div class="exam-qnum">QUESTION ${S.examIdx+1} OF ${tot}</div>
       <div class="exam-qtext">${q.q}</div>
       <div class="exam-opts">${q.options.map((opt,i)=>{
+        const letter=opt[0];
         let cls='exam-opt';
-        if(saved){if(opt[0]===saved)cls+=' sel';if(opt[0]===q.correct)cls+=' correct';else if(opt[0]===saved)cls+=' wrong';}
-        return `<button class="${cls}" onclick="pickOpt('${opt[0]}')">${opt}</button>`;
+        const disabled=saved?'disabled':'';
+        if(saved){
+          if(letter===q.correct){
+            cls+=' correct'; // always highlight correct in green
+          } else if(letter===saved){
+            cls+=' wrong';   // student's wrong choice in red
+          }
+        }
+        return `<button class="${cls}" ${disabled} onclick="pickOpt('${letter}')">${opt}${saved&&letter===q.correct?' ✓':saved&&letter===saved&&letter!==q.correct?' ✗':''}</button>`;
       }).join('')}</div>
-      ${saved?`<div class="exam-explain">${saved===q.correct?'✅':'💡'} <strong>Explanation:</strong> ${q.explanation}</div>`:''}
+      ${saved?`<div class="exam-explain" style="margin-top:12px;padding:12px;background:${saved===q.correct?'#e8f5e9':'#fff8e1'};border-radius:10px;border-left:4px solid ${saved===q.correct?'#2e7d32':'#f57c00'};font-size:13px;">
+        ${saved===q.correct?'✅ <strong>Correct!</strong>':'💡 <strong>Correct Answer: '+q.correct+')</strong>'}<br><span style="color:#555;">${q.explanation}</span>
+      </div>`:''}
     </div>`;
 }
-function pickOpt(letter){if(S.examAns[S.examIdx])return;S.examAns[S.examIdx]=letter;renderExamQ();}
+function pickOpt(letter){
+  if(S.examAns[S.examIdx])return; // already answered
+  S.examAns[S.examIdx]=letter;
+  renderExamQ();
+  // Show Next button clearly after answering
+  const nextBtn=document.getElementById('exam-next-btn');
+  if(nextBtn){nextBtn.style.background='var(--orange)';nextBtn.style.transform='scale(1.02)';}
+}
 function nextQ(){if(S.examIdx<S.examQs.length-1){S.examIdx++;renderExamQ();}else submitExam();}
 function submitExam(){
   if(S.examTimer)clearInterval(S.examTimer);
@@ -5989,7 +6054,7 @@ function saveUser(){
     exam_hist:S.user.examHist||[], badges:S.user.badges||[],
     xp:S.user.xp||0, streak:S.user.streak||0, stars:S.user.stars||0,
     total_questions:S.user.totalQ||0, questions_today:S.user.qToday||0,
-    last_study_day:S.user.lastStudyDay||null, is_paid:S.user.isPaid||false,
+    last_study_day:S.user.lastStudyDay||null, is_paid:S.user.isPaid||false, // NOTE: photos/base64 never saved to DB
     plan:S.user.plan||'free', parent_pin:S.user.parentPin||'1234'
   }).catch(()=>{});
 }
