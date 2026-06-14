@@ -3173,7 +3173,7 @@ Return ONLY JSON array.`
     const prompt=modePrompts[bbCurrentMode]+'\n\nQuestion/Topic: '+q;
 
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,system:sys,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,system:sys,
         messages:[{role:'user',content:prompt}]})});
     const d=await r.json();
     let raw=d.content?.[0]?.text||'[]';
