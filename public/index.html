@@ -769,10 +769,28 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
   </div>
 
   <!-- LIMIT BAR -->
-  <div style="background:rgba(3,8,32,0.7);padding:8px 16px;display:flex;align-items:center;gap:10px;margin:0 -16px;border-bottom:1px solid rgba(255,255,255,0.06);" id="limit-bar">
-    <div style="font-size:11px;color:rgba(255,255,255,0.5);flex:1;" id="limit-label">🎁 Free Demo</div>
-    <div class="lb-dots" id="lb-dots"></div>
-    <div style="font-size:11px;font-weight:700;" id="lb-count">5 left</div>
+  <div style="background:rgba(3,8,32,0.85);padding:10px 16px;margin:0 -16px;border-bottom:1px solid rgba(255,255,255,0.06);" id="limit-bar">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div style="font-size:11px;color:rgba(255,255,255,0.6);" id="limit-label">🎁 Free Demo</div>
+      <div style="font-size:11px;font-weight:700;color:#fff;" id="lb-count">3 left</div>
+    </div>
+    <!-- Questions progress bar -->
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+      <div style="font-size:10px;color:rgba(255,255,255,0.5);width:16px;">💬</div>
+      <div style="flex:1;height:5px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">
+        <div id="q-progress-bar" style="height:100%;width:0%;background:var(--green);border-radius:3px;transition:width .4s;"></div>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:#fff;min-width:36px;text-align:right;" id="q-progress-text">0/3</div>
+    </div>
+    <!-- Photos progress bar -->
+    <div style="display:flex;align-items:center;gap:6px;" id="photo-bar-row">
+      <div style="font-size:10px;color:rgba(255,255,255,0.5);width:16px;">📷</div>
+      <div style="flex:1;height:5px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">
+        <div id="p-progress-bar" style="height:100%;width:0%;background:#ff9800;border-radius:3px;transition:width .4s;"></div>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:#fff;min-width:36px;text-align:right;" id="p-progress-text">0/0</div>
+    </div>
+    <div class="lb-dots" id="lb-dots" style="display:none;"></div>
   </div>
 
   <!-- MAIN CONTENT -->
@@ -1409,6 +1427,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
       <button onclick="showAdminTab('revenue',this)" id="tab-revenue" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💰 Revenue</button>
       <button onclick="showAdminTab('sessions',this)" id="tab-sessions" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">⏱ Sessions</button>
       <button onclick="showAdminTab('audit',this)" id="tab-audit" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📋 Audit Log</button>
+      <button onclick="showAdminTab('usage',this)" id="tab-usage" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📊 Usage Audit</button>
       <button onclick="showAdminTab('support',this)" id="tab-support" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💬 Support</button>
     </div>
     <div id="adm-tab-students">
@@ -1423,6 +1442,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
       <div class="sec-title">⏱ Student Sessions</div>
       <div id="adm-sessions-list"></div>
     </div>
+    <div id="adm-tab-usage" style="display:none;"><div id="adm-usage-list"><div style="text-align:center;padding:20px;color:var(--gray-text);">Loading usage data...</div></div></div>
     <div id="adm-tab-audit" style="display:none;">
       <div class="sec-title">📋 Audit Log</div>
       <div id="adm-audit-list"></div>
@@ -1613,7 +1633,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 
     <!-- FEATURES -->
     <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:10px 14px;margin-bottom:12px;">
-      <div style="font-size:12px;color:rgba(255,255,255,0.8);padding:2px 0;">✅ Unlimited AI tutor questions</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.8);padding:2px 0;">✅ 30 questions/day (Basic) · 60/day (Premium)</div>
       <div style="font-size:12px;color:rgba(255,255,255,0.8);padding:2px 0;">✅ Chapter exams with AI grading</div>
       <div style="font-size:12px;color:rgba(255,255,255,0.8);padding:2px 0;">✅ Personal rank card — share on WhatsApp</div>
       <div style="font-size:12px;color:rgba(255,255,255,0.8);padding:2px 0;">✅ State + All India leaderboard</div>
@@ -1671,15 +1691,28 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     <!-- STEP 1: SUBJECT PLAN -->
     <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:8px;letter-spacing:1px;">STEP 1 — SELECT PLAN</div>
     <div class="plan-opts" id="plan-opts">
+      <!-- BASIC PLAN -->
       <div class="plan-opt sel" onclick="selPlan(this,'all')">
         <div>
-          <div class="pn">All Subjects <span class="best-val">BEST VALUE</span></div>
-          <div class="pd">All subjects · Homework · Exams · Leaderboard</div>
+          <div class="pn">Basic Plan</div>
+          <div class="pd">30 Q/day · 2 photos/day · All subjects · Exams</div>
           <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Was ₹399 · Save 50%!</div>
         </div>
         <div style="text-align:right;">
           <div style="font-size:12px;color:var(--gray-text);text-decoration:line-through;">₹399</div>
           <div class="pp">₹199<small>/mo</small></div>
+        </div>
+      </div>
+      <!-- PREMIUM PLAN -->
+      <div class="plan-opt" onclick="selPlan(this,'premium')">
+        <div>
+          <div class="pn">Premium Plan <span class="best-val" style="background:linear-gradient(135deg,#7b1fa2,#4a148c);">⭐ PREMIUM</span></div>
+          <div class="pd">60 Q/day · 5 photos/day · All subjects · Priority</div>
+          <div style="font-size:10px;color:#7b1fa2;font-weight:700;margin-top:2px;">Best for serious students!</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;color:var(--gray-text);text-decoration:line-through;">₹799</div>
+          <div class="pp" style="color:#7b1fa2;">₹399<small>/mo</small></div>
         </div>
       </div>
     </div>
@@ -2331,7 +2364,17 @@ function mapStudent(s){
   };
 }
 function loginUser(u){
-  S.user=u;S.isPaid=u.isPaid||false;S.qToday=u.qToday||0;S.freeLimit=5;S.photoUsed=parseInt(localStorage.getItem('bmt_photo_'+u.id)||'0');S.photoLimit=1;S.papersDownloaded=parseInt(localStorage.getItem('bmt_papers_'+u.id)||'0');S.papersLimit=1;
+  S.user=u;S.isPaid=u.isPaid||false;S.qToday=u.qToday||0;
+  // Set limits from plan
+  if(!u.isPaid){ S.freeLimit=3; S.photoLimit=0; }
+  else if(u.plan==='premium'){ S.freeLimit=60; S.photoLimit=5; }
+  else { S.freeLimit=u.daily_q_limit||30; S.photoLimit=u.daily_photo_limit||2; }
+  S.photoUsed=parseInt(localStorage.getItem('bmt_photo_date_'+u.id)===new Date().toDateString()?localStorage.getItem('bmt_photo_'+u.id)||'0':'0');
+  if(localStorage.getItem('bmt_photo_date_'+u.id)!==new Date().toDateString()){
+    localStorage.setItem('bmt_photo_'+u.id,'0');
+    localStorage.setItem('bmt_photo_date_'+u.id,new Date().toDateString());
+  }
+  S.papersDownloaded=parseInt(localStorage.getItem('bmt_papers_'+u.id)||'0');S.papersLimit=1;
   document.getElementById('nav-av').textContent=u.name[0].toUpperCase();
   document.getElementById('nav-uname').textContent=u.name;
   document.getElementById('hero-name').textContent='Hello, '+u.name+'! 👋';
@@ -2485,11 +2528,33 @@ function renderSubjects(){
 }
 
 function renderLimitBar(){
-  const used=S.qToday,left=Math.max(0,S.freeLimit-used);
-  document.getElementById('lb-count').textContent=S.isPaid?'∞ Unlimited':left+' left';
-  const d=document.getElementById('lb-dots');
-  if(S.isPaid){d.innerHTML='<span style="font-size:12px;color:var(--green);font-weight:700;">✓ Premium</span>';return;}
-  d.innerHTML=Array.from({length:S.freeLimit},(_,i)=>`<div class="lb-dot${i<used?' used':''}"></div>`).join('');
+  const used=S.qToday, lim=S.freeLimit||3, left=Math.max(0,lim-used);
+  const photoUsed=S.photoUsed||0, photoLim=S.photoLimit||0, photoLeft=Math.max(0,photoLim-photoUsed);
+  const planLabel=!S.isPaid?'🎁 Free Demo':S.user?.plan==='premium'?'⭐ Premium':'✅ Basic';
+
+  // Header label + count
+  const labelEl=document.getElementById('limit-label');
+  const countEl=document.getElementById('lb-count');
+  if(labelEl)labelEl.textContent=planLabel;
+  if(countEl)countEl.textContent=left+' Q left today';
+
+  // Questions progress bar
+  const qPct=lim>0?Math.min(100,Math.round((used/lim)*100)):0;
+  const qBarColor=qPct>=90?'#f44336':qPct>=70?'#ff9800':'#4caf50';
+  const qBar=document.getElementById('q-progress-bar');
+  const qTxt=document.getElementById('q-progress-text');
+  if(qBar){qBar.style.width=qPct+'%';qBar.style.background=qBarColor;}
+  if(qTxt)qTxt.textContent=used+'/'+lim;
+
+  // Photos progress bar
+  const pRow=document.getElementById('photo-bar-row');
+  const pPct=photoLim>0?Math.min(100,Math.round((photoUsed/photoLim)*100)):0;
+  const pBarColor=pPct>=90?'#f44336':pPct>=70?'#ff9800':'#ff9800';
+  const pBar=document.getElementById('p-progress-bar');
+  const pTxt=document.getElementById('p-progress-text');
+  if(pBar){pBar.style.width=pPct+'%';pBar.style.background=pBarColor;}
+  if(pTxt)pTxt.textContent=photoUsed+'/'+(photoLim||'0');
+  if(pRow)pRow.style.display=photoLim>0?'flex':'none'; // hide photo bar for free users
 }
 
 // ══════════════════════════════════════
@@ -3256,10 +3321,10 @@ async function handleBBPhotoUpload(event){
   if(_uc>=15){alert('⚠️ Daily upload limit: 15 photos per 12 hours. Resets in '+_hr2+' hr(s).');event.target.value='';return;}
   localStorage.setItem(_key2,_uc+1);
   // Free demo: 1 photo only
-  if(!S.isPaid&&(S.photoUsed||0)>=1){
+  if((S.photoUsed||0)>=(S.photoLimit||0)){
     event.target.value='';
-    showModal('sub-modal');
-    setTimeout(()=>alert('Free demo allows 1 photo question only.\nSubscribe for unlimited photo questions!'),300);
+    if(!S.isPaid){showModal('sub-modal');setTimeout(()=>alert('Free demo does not include photos. Subscribe to unlock!'),300);}
+    else{alert('📷 Daily photo limit ('+( S.photoLimit||2)+'): reached! Upgrade to Premium for 5/day.');};
     return;
   }
   const reader=new FileReader();
@@ -3614,7 +3679,15 @@ function changeLang(){
 async function sendMsg(){
   const inp=document.getElementById('chat-inp'),txt=inp.value.trim();if(!txt)return;
   if(checkPaywall())return;
-  if(!S.isPaid&&checkTrial(S.user)==='active'&&S.qToday>=S.freeLimit){showModal('sub-modal');return;}
+  // Check daily limit — applies to ALL users (paid and free)
+  if(S.qToday>=(S.freeLimit||3)){
+    if(!S.isPaid){showModal('sub-modal');return;}
+    else{
+      addMsg('ai','😊 You have reached your daily limit of '+(S.freeLimit||30)+' questions! Your limit resets at midnight. See you tomorrow! 📚');
+      speakText('You have reached your daily question limit. See you tomorrow!');
+      return;
+    }
+  }
   inp.value='';addMsg('user',txt);
   S.qToday++;if(S.user){S.user.qToday=S.qToday;S.user.totalQ=(S.user.totalQ||0)+1;S.user.xp=(S.user.xp||0)+10;updateStreak(S.user);checkBadges(S.user);saveUser();}
   renderLimitBar();document.getElementById('stat-q').textContent=S.user?.totalQ||0;
@@ -4104,8 +4177,10 @@ function renderProfile(){
   document.getElementById('pb-ex').textContent=(u.examHist||[]).length;
   const best=Math.max(0,...(u.examHist||[]).map(e=>e.score));
   document.getElementById('pb-best').textContent=best?best+'/100':'—';
-  document.getElementById('plan-title').textContent=u.isPaid?'✅ Premium Plan':'Free Plan';
-  document.getElementById('plan-sub').textContent=u.isPaid?'Unlimited · All features':'5 questions/day · Limited';
+  const planName=u.plan==='premium'?'⭐ Premium Plan':u.isPaid?'✅ Basic Plan':'🆓 Free Plan';
+  const planDesc=u.plan==='premium'?'60 Q/day · 5 photos/day · All features':u.isPaid?'30 Q/day · 2 photos/day · All features':'3 questions only · Limited';
+  document.getElementById('plan-title').textContent=planName;
+  document.getElementById('plan-sub').textContent=planDesc;
 
   // Parent PIN card
   const pinSection=document.getElementById('parent-pin-card');
@@ -4279,7 +4354,7 @@ function renderParentView(u){
 // ADMIN
 // ══════════════════════════════════════
 function showAdminTab(tab, btn){
-  ['students','revenue','sessions','audit','support'].forEach(t=>{
+  ['students','revenue','sessions','audit','support','usage'].forEach(t=>{
     const el=document.getElementById('adm-tab-'+t);
     if(el)el.style.display=t===tab?'block':'none';
     const b=document.getElementById('tab-'+t);
@@ -4384,6 +4459,42 @@ async function loadAdminSessions(){
   }).join('');
 }
 
+async function loadAdminUsage(){
+  const el=document.getElementById('adm-usage-list');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:20px;color:var(--gray-text);">⏳ Loading usage data...</div>';
+  try{
+    const d=await apiGet('/api/admin/usage-audit',{'x-admin-key':'azhar2026'});
+    if(!d||!d.ok){el.innerHTML='<div style="color:red;padding:10px;">Failed to load</div>';return;}
+    const rows=d.students||[];
+    el.innerHTML=`
+      <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:10px;">
+        Top users by today's usage — ${rows.length} students
+      </div>
+      ${rows.map(u=>{
+        const pct=u.q_usage_pct||0;
+        const barColor=pct>=90?'#c62828':pct>=70?'#e65100':'#2e7d32';
+        const planLabel=u.plan==='premium'?'⭐ Premium':u.is_paid?'✅ Basic':'🆓 Free';
+        return `<div style="background:#fff;border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--blue-dark);">${u.name}</div>
+              <div style="font-size:10px;color:var(--gray-text);">${planLabel} · Total API calls: ${u.total_api_calls||0}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:13px;font-weight:800;color:${barColor};">${u.questions_today||0}/${u.daily_q_limit||30} Q</div>
+              <div style="font-size:10px;color:var(--gray-text);">${u.questions_today_photo||0}/${u.daily_photo_limit||0} 📷</div>
+            </div>
+          </div>
+          <div style="height:6px;background:var(--gray-light);border-radius:3px;overflow:hidden;">
+            <div style="height:100%;width:${Math.min(100,pct)}%;background:${barColor};border-radius:3px;transition:width .3s;"></div>
+          </div>
+          <div style="font-size:9px;color:var(--gray-text);margin-top:3px;">${pct}% of daily limit used</div>
+        </div>`;
+      }).join('')}`;
+  }catch(e){el.innerHTML='<div style="color:red;padding:10px;">Error: '+e.message+'</div>';}
+}
+
 async function loadAdminAudit(){
   const el=document.getElementById('adm-audit-list');
   if(!el)return;
@@ -4450,7 +4561,7 @@ async function renderAdmin(){
 let selectedPlanType='all', selectedDuration='monthly';
 
 // Base prices
-const BASE_PRICES={all:199};
+const BASE_PRICES={all:199, premium:399};
 
 function showModal(id){
   document.getElementById(id).classList.add('show');
