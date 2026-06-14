@@ -495,6 +495,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 @keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(244,67,54,.4);}50%{box-shadow:0 0 0 10px rgba(244,67,54,0);}}
 @keyframes mouthTalk{0%,100%{d:path('M 35 58 Q 45 62 55 58');}50%{d:path('M 35 58 Q 45 68 55 58');}}
 @keyframes eyeBlink{0%,90%,100%{transform:scaleY(1);}95%{transform:scaleY(0.1);}}
+@keyframes goldShine{0%{background-position:200% center;}100%{background-position:-200% center;}}
 /* ══ ONBOARDING ══ */
 .ob-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);transition:all .3s;}
 .ob-dot.active{background:var(--gold);width:24px;border-radius:4px;}
@@ -640,6 +641,19 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
         <span onclick="showForgotPassword()" style="font-size:12px;color:var(--blue-bright);cursor:pointer;font-weight:600;">Forgot Password?</span>
       </div>
       <div class="auth-hint">New student? Click <b>Register</b> to create your account!</div>
+      <!-- Powered by Jainab CEO -->
+      <div style="margin-top:18px;">
+        <div style="text-align:center;padding:8px 0 4px;">
+          <div style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(255,214,0,0.06),rgba(255,180,0,0.12),rgba(255,214,0,0.06));border:1px solid rgba(255,214,0,0.3);border-radius:24px;padding:7px 20px;backdrop-filter:blur(10px);box-shadow:0 0 16px rgba(255,214,0,0.12),inset 0 1px 0 rgba(255,255,255,0.08);">
+            <span style="font-size:14px;">👑</span>
+            <div>
+              <div style="font-size:12px;font-weight:800;background:linear-gradient(90deg,#b8860b,#ffd700,#ffec8b,#ffd700,#b8860b);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:goldShine 3s linear infinite;letter-spacing:0.5px;">Jainab</div>
+              <div style="font-size:9px;color:rgba(255,214,0,0.7);font-weight:600;letter-spacing:0.8px;margin-top:1px;">CEO · BrightMind Teacher</div>
+            </div>
+            <span style="font-size:14px;">✨</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- FORGOT PASSWORD FORM -->
@@ -1062,6 +1076,20 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
         <div id="guide-history" style="margin-top:14px;"></div>
       </div>
 
+      <!-- Jainab CEO badge — home page footer -->
+      <div style="padding:16px 16px 8px;">
+        <div style="text-align:center;padding:8px 0 4px;">
+          <div style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(255,214,0,0.06),rgba(255,180,0,0.12),rgba(255,214,0,0.06));border:1px solid rgba(255,214,0,0.3);border-radius:24px;padding:7px 20px;backdrop-filter:blur(10px);box-shadow:0 0 16px rgba(255,214,0,0.12),inset 0 1px 0 rgba(255,255,255,0.08);">
+            <span style="font-size:14px;">👑</span>
+            <div>
+              <div style="font-size:12px;font-weight:800;background:linear-gradient(90deg,#b8860b,#ffd700,#ffec8b,#ffd700,#b8860b);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:goldShine 3s linear infinite;letter-spacing:0.5px;">Jainab</div>
+              <div style="font-size:9px;color:rgba(255,214,0,0.7);font-weight:600;letter-spacing:0.8px;margin-top:1px;">CEO · BrightMind Teacher</div>
+            </div>
+            <span style="font-size:14px;">✨</span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- PROFILE -->
@@ -1204,6 +1232,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     <div class="tdots"><span></span><span></span><span></span></div>
   </div>
   <button class="exam-cta" id="exam-cta" onclick="startExam()">📝 Take Chapter Exam Now!</button>
+  <button id="syl-lesson-start-btn" onclick="window._startFullLesson&&window._startFullLesson()" style="display:none;width:100%;background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;border:none;padding:12px;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:0.5px;animation:pulse 2s infinite;">📖 Start Full Lesson → Tap Here!</button>
   <div style="display:flex;gap:6px;padding:6px 14px 0;background:#fff;flex-shrink:0;">
     <button onclick="openBlackboard()" style="flex:1;background:linear-gradient(135deg,#1a1a2e,#2d2d5e);color:#fff;border:none;border-radius:10px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">🖊️ Blackboard</button>
     <button onclick="document.getElementById('photo-input').click()" style="flex:1;background:linear-gradient(135deg,var(--orange),#ff8f00);color:#fff;border:none;border-radius:10px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">📷 Photo Question</button>
@@ -1254,7 +1283,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
         <div style="font-size:9px;color:rgba(255,255,255,0.5);">Questions</div>
       </div>
       <!-- Language selector -->
-      <select id="bb-lang-sel" onchange="S.lang=this.value;var cs=document.getElementById('lang-sel');if(cs)cs.value=this.value;window.speechSynthesis.cancel();const gm={en:'English!',ta:'தமிழில் பேசுகிறேன்!',hi:'हिंदी में!',ml:'മലയാളത്തിൽ!',kn:'ಕನ್ನಡದಲ್ಲಿ!',te:'తెలుగులో!'};setTimeout(()=>speakText(gm[this.value]||'Language changed!'),200);" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+      <select id="bb-lang-sel" onchange="S.lang=this.value;var cs=document.getElementById('lang-sel');if(cs)cs.value=this.value;try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}const gm={en:'English!',ta:'தமிழில் பேசுகிறேன்!',hi:'हिंदी में!',ml:'മലയാളത്തിൽ!',kn:'ಕನ್ನಡದಲ್ಲಿ!',te:'తెలుగులో!'};setTimeout(()=>speakText(gm[this.value]||'Language changed!'),200);" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
         <option value="en">🌐 English</option>
         <option value="ta">தமிழ்</option>
         <option value="hi">हिंदी</option>
@@ -1778,6 +1807,13 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 // DATA
 // ══════════════════════════════════════
 // ── API CONFIG ──────────────────────────────────
+// Global safety net — suppress speech synthesis errors silently
+window.addEventListener('error',function(e){
+  if(e.message&&(e.message.includes('cancel')||e.message.includes('speechSynthesis')||e.message.includes("Cannot read properties of undefined"))){
+    e.preventDefault();return false;
+  }
+},true);
+
 const API_URL = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
   ? 'https://brightmind-teacher.onrender.com'   // change to your Render URL
   : window.location.origin;
@@ -2292,7 +2328,7 @@ function setSplashLang(lang, el){
   if(el){el.style.background='rgba(255,214,0,0.2)';el.style.color='#fff';el.style.borderColor='rgba(255,214,0,0.9)';el.style.boxShadow='0 0 16px rgba(255,214,0,0.25)';el.style.transform='scale(1.04)';}
   const sel=document.getElementById('lang-sel');if(sel)sel.value=lang;
   const bbSel=document.getElementById('bb-lang-sel');if(bbSel)bbSel.value=lang;
-  window.speechSynthesis.cancel();
+  try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}
   const g={en:'Hello! I am Miss BrightMind, your friendly AI teacher!',ta:'வணக்கம்! நான் உங்கள் Miss BrightMind!',hi:'नमस्ते! मैं आपकी Miss BrightMind हूँ!',ml:'നമസ്കാരം! ഞാൻ Miss BrightMind!',kn:'ನಮಸ್ಕಾರ! ನಾನು Miss BrightMind!',te:'నమస్కారం! నేను Miss BrightMind!'};
   setTimeout(()=>speakText(g[lang]||g['en']),300);
 }
@@ -2373,7 +2409,18 @@ function mapStudent(s){
   };
 }
 function loginUser(u){
-  S.user=u;S.isPaid=u.isPaid||false;S.qToday=u.qToday||0;
+  S.user=u;S.isPaid=u.isPaid||false;
+  // Load 18hr rolling count from localStorage
+  const _qk='bmt_q_'+u.id;
+  const _fuk='bmt_first_use_'+u.id;
+  const _nowL=Date.now();
+  const _fuL=parseInt(localStorage.getItem(_fuk)||'0');
+  if(_fuL>0 && _nowL-_fuL > 18*60*60*1000){
+    localStorage.setItem(_qk,'0'); localStorage.setItem(_fuk,'0');
+    S.qToday=0;
+  } else {
+    S.qToday=parseFloat(localStorage.getItem(_qk)||'0');
+  }
   // Set limits from plan
   if(!u.isPaid){ S.freeLimit=3; S.photoLimit=0; }
   else if(u.plan==='premium'){ S.freeLimit=60; S.photoLimit=5; }
@@ -2432,7 +2479,7 @@ function loginUser(u){
       if(checkTrial(S.user)==='expired'){
         clearInterval(S.sessionTimer);
         // Force logout — show paywall
-        window.speechSynthesis.cancel();
+        try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}
         S.user=null;
         const pwEl=document.getElementById('paywall-overlay');
         pwEl.classList.add('open');
@@ -2545,7 +2592,14 @@ function renderLimitBar(){
   const labelEl=document.getElementById('limit-label');
   const countEl=document.getElementById('lb-count');
   if(labelEl)labelEl.textContent=planLabel;
-  if(countEl)countEl.textContent=left+' Q left today';
+  // Calculate reset time
+  const _fu=parseInt(localStorage.getItem('bmt_first_use_'+(S.user?.id||'x'))||'0');
+  let resetStr='';
+  if(_fu>0){
+    const resetAt=new Date(_fu+18*60*60*1000);
+    resetStr=' · Resets '+resetAt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  }
+  if(countEl)countEl.textContent=left+' Q left'+resetStr;
 
   // Questions progress bar
   const qPct=lim>0?Math.min(100,Math.round((used/lim)*100)):0;
@@ -2860,8 +2914,18 @@ function startSyllabusChat(){
   const bubble=document.getElementById('speech-bubble');
   if(bubble) bubble.textContent=`${tg}! Let me teach you ${SYL.topic} step by step! 📖`;
 
-  // After greeting, fetch and deliver FULL lesson
-  setTimeout(async function(){
+  // Show Start Lesson button instead of auto-loading
+  setTimeout(()=>{
+    const startBtn=document.getElementById('syl-lesson-start-btn');
+    if(startBtn){startBtn.style.display='block';}
+    addMsg('ai',`Ready to start! Tap the **Start Lesson** button below and I will teach you ${SYL.topic||'this topic'} completely — step by step! 🚀`);
+    speakText('Ready! Tap Start Lesson and I will begin teaching you right away!');
+  },800);
+
+  // LESSON FETCH — only runs when student taps Start Lesson
+  window._startFullLesson=async function(){
+    document.getElementById('syl-lesson-start-btn').style.display='none';
+    setTimeout(async function(){
     // Add loading message with unique ID so we can remove it safely
     const loadId='lesson-loading-'+Date.now();
     addMsg('ai','<span id="'+loadId+'" style="color:var(--gray-text);font-style:italic;">📝 Miss BrightMind is preparing your lesson... please wait!</span>');
@@ -2904,7 +2968,7 @@ Keep sentences short. Talk directly to student using "you", "we", "let us". Foll
       const sys=(LANG_SYS[lang]||LANG_SYS['en'])+` You are Miss BrightMind, expert ${bf} teacher for Class ${cls} ${subj}. Topic: "${topic}". Chapter: "${chapter}". Teach warmly, sentence by sentence. Give homework at end.`;
       
       const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,system:sys,
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,system:sys,
           messages:[{role:'user',content:teachPrompt}]})});
       const d=await r.json();
       const reply=(d.content&&d.content[0]&&d.content[0].text)||'';
@@ -2935,6 +2999,7 @@ Keep sentences short. Talk directly to student using "you", "we", "let us". Foll
       addMsg('ai','😊 Miss BrightMind is getting ready! Please type your first question below and I will start teaching you right away!');
     }
   },1500);
+  }; // end _startFullLesson
 }
 
 
@@ -2971,7 +3036,7 @@ function openBlackboard(){
 function closeBlackboard(){
   const ov=document.getElementById('blackboard-overlay');
   if(ov){ov.classList.remove('open');ov.style.display='none';}
-  window.speechSynthesis.cancel();
+  try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}
 }
 
 // Voice on/off toggle for Blackboard
@@ -2983,7 +3048,7 @@ function toggleBBVoice(btn){
     btn.style.background=bbVoiceOn?'rgba(255,255,255,0.1)':'rgba(255,80,80,0.2)';
     btn.style.borderColor=bbVoiceOn?'rgba(255,255,255,0.2)':'rgba(255,80,80,0.4)';
   }
-  if(!bbVoiceOn) window.speechSynthesis.cancel();
+  if(!bbVoiceOn) try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}
 }
 
 function showBBWelcome(){
@@ -3264,7 +3329,7 @@ function bbNextStep(){
 }
 
 function bbReplayStep(stepIdx){
-  window.speechSynthesis.cancel();
+  try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}
   const step=bbAllSteps[stepIdx];
   if(step&&step.speak)speakText(step.speak);
   // Re-type the content
@@ -3283,7 +3348,7 @@ function bbReplayStep(stepIdx){
 }
 
 function bbRestartFromBeginning(){
-  window.speechSynthesis.cancel();
+  try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}
   const container=document.getElementById('bb-steps-container');
   if(container)container.innerHTML='';
   bbCurrentStep=0;
@@ -3295,7 +3360,7 @@ function bbRestartFromBeginning(){
 }
 
 function bbFinished(){
-  window.speechSynthesis.cancel();
+  try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}
   const canvas=document.getElementById('bb-canvas');
   const finDiv=document.createElement('div');
   finDiv.style.cssText='text-align:center;padding:20px;border-top:1px solid #2a4a2a;margin-top:16px;';
@@ -3458,7 +3523,7 @@ async function sendPhotoQuestion(){
     const sys=`You are Miss BrightMind, an expert Indian teacher for Class ${S.user?.class||11} ${S.sub?.name||''} student. Board: ${S.user?.board||'CBSE'}. A student has sent you a photo of their question or problem. Identify the question in the image and solve/explain it step by step. Be encouraging and clear. If it is a maths problem, show all working steps.`;
 
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,system:sys,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:isPhotoMsg?1000:600,system:sys,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:mediaType,data:bbPhotoBase64}},
           {type:'text',text:'Please solve or explain this question from my photo. Show step by step working.'}
@@ -3538,7 +3603,7 @@ function animateMouth(talking){
 
 function speakText(text){
   if(!voiceOn||!text)return;
-  window.speechSynthesis.cancel();
+  try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}
   const clean=text.replace(/\*\*(.*?)\*\*/g,'$1').replace(/[#\*\-•]/g,'').replace(/\n+/g,' ')
     .replace(/[0-9]+\./g,'').  // Remove "1." "2." list numbers that confuse TTS
     replace(/[\(\)\[\]]/g,' '). // Remove brackets
@@ -3570,7 +3635,7 @@ function speakText(text){
   utt.rate=vs.rate; utt.pitch=vs.pitch;
   const fk=['Heera','Veena','Kalpana','Lekha','Aditi','Google','Female','female','Samantha','Karen'];
   function trySpeak(){
-    const vv=window.speechSynthesis.getVoices();
+    const vv=(window.speechSynthesis&&window.speechSynthesis.getVoices?window.speechSynthesis.getVoices():[]);
     if(!vv||!vv.length){window.speechSynthesis.speak(utt);return;}
     let v=null;
     for(let i=0;i<lc.length&&!v;i++)v=vv.find(x=>x.lang===lc[i]&&fk.some(k=>x.name.includes(k)));
@@ -3587,7 +3652,7 @@ function speakText(text){
     utt.onerror=()=>setAvatarSpeaking(false);
     window.speechSynthesis.speak(utt);
   }
-  if(window.speechSynthesis.getVoices().length>0)trySpeak();
+  if((window.speechSynthesis&&window.speechSynthesis.getVoices?window.speechSynthesis.getVoices():[]).length>0)trySpeak();
   else{window.speechSynthesis.onvoiceschanged=()=>{window.speechSynthesis.onvoiceschanged=null;trySpeak();};setTimeout(()=>{if(!window.speechSynthesis.speaking&&!window.speechSynthesis.pending)trySpeak();},1500);}
 }
 
@@ -3596,7 +3661,7 @@ function toggleVoice(){
   const btn=document.getElementById('voice-toggle');
   if(!btn)return;
   if(voiceOn){btn.textContent='🔊 Voice On';btn.classList.add('active');} 
-  else{btn.textContent='🔇 Voice Off';btn.classList.remove('active');window.speechSynthesis.cancel();setAvatarSpeaking(false);}
+  else{btn.textContent='🔇 Voice Off';btn.classList.remove('active');try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}setAvatarSpeaking(false);}
 }
 
 function cycleSpeed(){
@@ -3629,7 +3694,7 @@ function startMic(){
     if(btn){btn.classList.add('listening');btn.textContent='🔴';}
     const bubble=document.getElementById('speech-bubble');
     if(bubble)bubble.textContent='🎤 Listening... speak now!';
-    window.speechSynthesis.cancel();
+    try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}
   };
   recognition.onresult=(e)=>{
     const transcript=Array.from(e.results).map(r=>r[0].transcript).join('');
@@ -3660,8 +3725,8 @@ function stopMic(){
 
 // Load voices async
 if(window.speechSynthesis){
-  window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
-  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged=()=>(window.speechSynthesis&&window.speechSynthesis.getVoices?window.speechSynthesis.getVoices():[]);
+  (window.speechSynthesis&&window.speechSynthesis.getVoices?window.speechSynthesis.getVoices():[]);
 }
 
 function addMsg(role,text){
@@ -3677,7 +3742,7 @@ function changeLang(){
   const sel=document.getElementById('lang-sel');if(!sel)return;
   S.lang=sel.value;
   const bbSel=document.getElementById('bb-lang-sel');if(bbSel)bbSel.value=S.lang;
-  window.speechSynthesis.cancel();
+  try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}
   const g={en:'Hello! Miss BrightMind here, your friendly AI teacher!',ta:'வணக்கம்! Miss BrightMind பேசுகிறேன்!',hi:'नमस्ते! Miss BrightMind बोल रही हूँ!',ml:'നമസ്കാരം! Miss BrightMind പറയുന്നു!',kn:'ನಮಸ್ಕಾರ! Miss BrightMind ಮಾತನಾಡ್ತಿದ್ದೇನೆ!',te:'నమస్కారం! Miss BrightMind మాట్లాడుతున్నాను!'};
   const msg=g[S.lang]||g['en'];
   addMsg('ai',msg);
@@ -3704,6 +3769,12 @@ async function sendMsg(){
   const bubble=document.getElementById('speech-bubble');
   if(bubble)bubble.textContent='🤔 Thinking...';
   document.getElementById('chat-msgs').scrollTop=99999;
+  // 30 min idle reset — clear history to reduce token cost
+  const _lastMsg=parseInt(localStorage.getItem('bmt_last_msg_'+_uid)||'0');
+  if(_lastMsg>0 && _now18-_lastMsg > 30*60*1000 && S.chatHist.length>4){
+    S.chatHist=S.chatHist.slice(-4); // keep last 2 exchanges only
+  }
+  localStorage.setItem('bmt_last_msg_'+_uid, _now18);
   S.chatHist.push({role:'user',content:txt});
 
   // ── Founder/Chairman question — answer directly, no AI call needed ──
@@ -3906,10 +3977,60 @@ async function askFromGuide(){
     alert('Please upload a photo of your guide page first! Tap the upload area above.');return;
   }
 
-  // Update usage
-  S.qToday++;
-  if(S.user){S.user.qToday=S.qToday;S.user.totalQ=(S.user.totalQ||0)+1;S.user.xp=(S.user.xp||0)+10;saveUser();}
-  renderLimitBar();
+  // ── SMART COUNTING — 18hr rolling reset ──
+  const _uid=S.user?.id||'x';
+  const _firstUseKey='bmt_first_use_'+_uid;
+  const _qKey='bmt_q_'+_uid;
+  const _now18=Date.now();
+  const _firstUse=parseInt(localStorage.getItem(_firstUseKey)||'0');
+  // Reset if 18 hours passed since first question
+  if(_firstUse>0 && _now18-_firstUse > 18*60*60*1000){
+    localStorage.setItem(_qKey,'0');
+    localStorage.setItem(_firstUseKey,'0');
+    S.qToday=0;
+  }
+  // Set first use timestamp on first question of cycle
+  if(!_firstUse || parseInt(localStorage.getItem(_qKey)||'0')===0){
+    localStorage.setItem(_firstUseKey,_now18);
+  }
+
+  // ── SMART COST: detect message type ──
+  const msgLower=txt.toLowerCase().trim();
+  const wordCount=txt.trim().split(/\s+/).length;
+  const hasQuestion=txt.includes('?')||wordCount>8;
+  const isGreeting=/^(hi|hello|ok|okay|thanks|thank you|yes|no|good|great|sure|got it|understood|noted|fine|done|👍|😊|nice|wow|cool|yep|nope|hm|hmm)[\s!.]*$/i.test(msgLower);
+  const isFollowUp=/^(explain more|give example|tell more|continue|go on|next|elaborate|expand|what else|more detail|i dont understand|not clear|again|repeat|simplify|in simple|what do you mean)/i.test(msgLower);
+  const isPhotoMsg=!!bbPhotoBase64;
+
+  let qCost=0;
+  if(isGreeting) qCost=0;
+  else if(isFollowUp) qCost=0.5;
+  else if(isPhotoMsg) qCost=3;
+  else if(hasQuestion) qCost=1;
+  else qCost=0.5;
+
+  // Check limit before counting
+  const currentQ=parseFloat(localStorage.getItem(_qKey)||'0');
+  const limit=S.freeLimit||30;
+  if(currentQ+qCost>limit && qCost>0){
+    if(!S.isPaid){showModal('sub-modal');return;}
+    else{
+      const resetTime=new Date(parseInt(localStorage.getItem(_firstUseKey)||_now18)+18*60*60*1000);
+      const resetStr=resetTime.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+      addMsg('ai',`😊 You have used all ${limit} questions for this cycle! Your limit resets at ${resetStr}. See you then! 📚`);
+      speakText('Your daily limit is reached. See you after '+resetStr+'!');
+      return;
+    }
+  }
+
+  // Add cost
+  if(qCost>0){
+    const newQ=Math.min(limit, currentQ+qCost);
+    localStorage.setItem(_qKey, newQ);
+    S.qToday=Math.round(newQ);
+    if(S.user){S.user.qToday=S.qToday;S.user.totalQ=(S.user.totalQ||0)+1;S.user.xp=(S.user.xp||0)+(qCost>0?10:2);saveUser();}
+    renderLimitBar();
+  }
 
   const ansArea=document.getElementById('guide-answer-area');
   const ansText=document.getElementById('guide-answer-text');
@@ -3957,7 +4078,7 @@ Be structured, clear, and always encouraging — react like a real teacher proud
 
   try{
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,system:sys,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sys,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:guidePhotoType,data:guidePhotoBase64}},
           {type:'text',text:userMsg}
@@ -4927,7 +5048,7 @@ function showOnboarding(){
 
 function obGoToSlide(idx){
   if(OB.timer)clearInterval(OB.timer);
-  window.speechSynthesis.cancel();
+  try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}
   OB.slide=idx;
   document.querySelectorAll('.ob-slide').forEach((s,i)=>s.classList.toggle('active',i===idx));
   document.querySelectorAll('.ob-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
@@ -4955,22 +5076,22 @@ function obGoToSlide(idx){
   },1000);
 }
 
-function obTapSkip(){if(OB&&OB.timer)clearInterval(OB.timer);window.speechSynthesis.cancel();if(OB&&OB.slide<OB.totalSlides-1){OB.slide++;obGoToSlide(OB.slide);}else{closeOnboarding();}}
+function obTapSkip(){if(OB&&OB.timer)clearInterval(OB.timer);try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}if(OB&&OB.slide<OB.totalSlides-1){OB.slide++;obGoToSlide(OB.slide);}else{closeOnboarding();}}
 function obNext(){
-  window.speechSynthesis.cancel();
+  try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}
   if(OB.slide>=OB.totalSlides-1){closeOnboarding();return;}
   OB.slide++;obGoToSlide(OB.slide);
 }
 
 function obPrev(){
   if(OB.slide<=0)return;
-  window.speechSynthesis.cancel();
+  try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}
   OB.slide--;obGoToSlide(OB.slide);
 }
 
 function closeOnboarding(){
   if(OB.timer)clearInterval(OB.timer);
-  window.speechSynthesis.cancel();
+  try{if(window.speechSynthesis)try{if(window.speechSynthesis&&window.speechSynthesis.cancel)window.speechSynthesis.cancel();}catch(_){}}catch(e){}
   document.getElementById('onboarding-overlay').style.display='none';
   if(S.user)localStorage.setItem('bmt_ob_seen_'+S.user.id,'1');
 }
@@ -5004,7 +5125,7 @@ async function openInstantExam(subjectId, subjectName, icon){
   try{
     const board = {CBSE:'CBSE',TN:'Tamil Nadu Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board'}[S.user?.board]||'CBSE';
     const r = await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,
         messages:[{role:'user',content:`You are an exam question generator for Indian school students.
 Generate EXACTLY 10 real multiple choice questions for Class ${S.user?.class||11} ${subjectName} (${board} board).
 Each question must have REAL content - actual facts, formulas, definitions from the syllabus.
