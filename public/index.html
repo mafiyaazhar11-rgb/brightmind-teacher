@@ -1484,46 +1484,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
         <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:8px;">CURRENT BANK SIZE</div>
         <div id="qbank-stats-content" style="font-size:13px;color:var(--gray-text);">Loading...</div>
       </div>
-      <!-- Generate form -->
-      <div style="background:#fff;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:14px;">
-        <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:10px;">GENERATE NEW QUESTIONS</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-          <select id="qb-board" style="padding:8px;border:1px solid var(--gray-mid);border-radius:8px;font-size:12px;">
-            <option value="TN">Tamil Nadu</option>
-            <option value="CBSE">CBSE</option>
-            <option value="KL">Kerala</option>
-            <option value="KA">Karnataka</option>
-            <option value="AP">Andhra Pradesh</option>
-            <option value="TS">Telangana</option>
-            <option value="MH">Maharashtra</option>
-            <option value="UP">Uttar Pradesh</option>
-            <option value="WB">West Bengal</option>
-            <option value="GJ">Gujarat</option>
-            <option value="RJ">Rajasthan</option>
-          </select>
-          <select id="qb-class" style="padding:8px;border:1px solid var(--gray-mid);border-radius:8px;font-size:12px;">
-            <option value="9">Class 9</option>
-            <option value="10">Class 10</option>
-            <option value="11">Class 11</option>
-            <option value="12">Class 12</option>
-          </select>
-        </div>
-        <input id="qb-subject" placeholder="Subject (e.g. Mathematics, Science, Tamil)" style="width:100%;padding:8px;border:1px solid var(--gray-mid);border-radius:8px;font-size:12px;box-sizing:border-box;margin-bottom:8px;"/>
-        <input id="qb-chapter" placeholder="Chapter (optional)" style="width:100%;padding:8px;border:1px solid var(--gray-mid);border-radius:8px;font-size:12px;box-sizing:border-box;margin-bottom:8px;"/>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-          <label style="font-size:12px;color:var(--gray-text);">Questions to generate:</label>
-          <select id="qb-count" style="padding:6px;border:1px solid var(--gray-mid);border-radius:8px;font-size:12px;">
-            <option value="20">20</option>
-            <option value="30" selected>30</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
-        </div>
-        <button onclick="generateQBank()" style="width:100%;background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
-          ⚡ Generate &amp; Save to Bank
-        </button>
-        <div id="qb-result" style="margin-top:10px;font-size:12px;text-align:center;"></div>
-      </div>
+      <div id="qb-result" style="margin:10px 0;font-size:12px;text-align:center;"></div>
       <!-- AUTO BULK — one click does everything -->
       <div style="background:linear-gradient(135deg,#004d40,#00695c);border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.1);margin-bottom:10px;">
         <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:6px;">🚀 AUTO BULK GENERATE — One Click!</div>
@@ -4920,11 +4881,13 @@ async function loadAdminSessions(){
 async function loadQBankStats(){
   const el=document.getElementById('qbank-stats-content');
   if(!el)return;
+  el.textContent='Loading...';
   try{
-    const d=await apiGet('/api/admin/qbank/stats',{'x-admin-key':'azhar2026'});
-    if(!d||!d.ok){el.textContent='No questions yet. Generate some below!';return;}
-    if(!d.total){el.innerHTML='<span style="color:var(--orange);">⚠️ Bank is empty — generate questions to enable DB-served exams!</span>';return;}
-    el.innerHTML=`<div style="font-size:20px;font-weight:900;color:var(--blue-dark);margin-bottom:8px;">Total: ${d.total} questions</div>`+
+    const r=await fetch(API_URL+'/api/admin/qbank/stats',{headers:{'x-admin-key':'azhar2026'}});
+    const d=await r.json();
+    if(!d||!d.ok){el.textContent='Error loading stats. Try refresh.';return;}
+    if(!d.total||d.total===0){el.innerHTML='<span style="color:var(--orange);">⚠️ Bank is empty — click a board below to generate!</span>';return;}
+    el.innerHTML=`<div style="font-size:22px;font-weight:900;color:var(--blue-dark);margin-bottom:10px;">✅ Total: ${d.total} questions in bank</div>`+
       d.breakdown.map(b=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--gray-light);font-size:12px;">
         <span>${b.board} · Class ${b.class} · ${b.subject}</span>
         <span style="font-weight:700;color:var(--blue-mid);">${b.count} Q</span>
