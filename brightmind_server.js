@@ -131,6 +131,9 @@ function sanitize(s) {
     subscription_type: s.subscription_type || 'monthly',
     sub_expiry: s.subscription_end || null,
     expiry: s.subscription_end || null,
+    daily_q_limit: s.plan === 'premium' ? 60 : s.plan === 'all' ? 30 : s.daily_q_limit || 3,
+    daily_photo_limit: s.plan === 'premium' ? 5 : s.plan === 'all' ? 2 : 0,
+    questions_today_photo: s.questions_today_photo || 0,
     xp: s.xp || 0, streak: s.streak || 0, stars: s.stars || 0,
     total_questions: s.total_questions || 0,
     questions_today: s.questions_today || 0,
@@ -472,12 +475,16 @@ app.post('/api/payment/verify', async (req, res) => {
        VALUES ($1,$2,$3,$4,$5,'success')`,
       [student_id, student_name, amount, plan, razorpay_id]
     );
+    // Set limits based on plan
+    const qLimit = plan === 'premium' ? 60 : 30; // premium=60, basic(all)=30
+    const photoLimit = plan === 'premium' ? 5 : 2;
     await pool.query(
       `UPDATE bmt_students SET is_paid=true, plan=$1,
        subscription_type=$2, subscription_start=NOW(),
-       subscription_end=$3, next_due_date=$4, reminder_sent=false
-       WHERE id=$5`,
-      [plan, subscription_type || 'monthly', subEnd, nextDue, student_id]
+       subscription_end=$3, next_due_date=$4, reminder_sent=false,
+       daily_q_limit=$5, daily_photo_limit=$6
+       WHERE id=$7`,
+      [plan, subscription_type || 'monthly', subEnd, nextDue, qLimit, photoLimit, student_id]
     );
     await pool.query(
       `INSERT INTO bmt_audit_log (student_id, student_name, action, details)
@@ -504,13 +511,16 @@ app.post('/api/admin/activate-student', async (req, res) => {
     const expiry = new Date();
     const m = parseInt(months) || 1;
     expiry.setMonth(expiry.getMonth() + m);
+    const demoQLimit = parseInt(req.body.q_limit) || 10;
+    const demoPhotoLimit = parseInt(req.body.photo_limit) || 1;
 
     let query, params;
     if (student_id) {
-      query = `UPDATE bmt_students SET is_paid=true, plan='all', subscription_type=$1,
-               subscription_start=NOW(), subscription_end=$2, next_due_date=$2, reminder_sent=false
-               WHERE id=$3 RETURNING id, name, is_paid, subscription_end`;
-      params = [subscription_type || 'monthly', expiry, student_id];
+      query = `UPDATE bmt_students SET is_paid=true, plan='demo', subscription_type=$1,
+               subscription_start=NOW(), subscription_end=$2, next_due_date=$2, reminder_sent=false,
+               daily_q_limit=$3, daily_photo_limit=$4
+               WHERE id=$5 RETURNING id, name, is_paid, subscription_end`;
+      params = [subscription_type || 'monthly', expiry, demoQLimit, demoPhotoLimit, student_id];
     } else {
       query = `UPDATE bmt_students SET is_paid=true, plan='all', subscription_type=$1,
                subscription_start=NOW(), subscription_end=$2, next_due_date=$2, reminder_sent=false
@@ -734,6 +744,51 @@ app.post('/api/session-end', async (req, res) => {
 });
 
 // ADMIN — Audit Log
+// HIGH USAGE AUDIT — admin sees who is using most
+app.get('/api/admin/usage-audit', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
+    const result = await pool.query(`
+      SELECT id, name, plan, is_paid,
+             questions_today, daily_q_limit,
+             questions_today_photo, daily_photo_limit,
+             total_questions, total_api_calls,
+             ROUND((questions_today::numeric / NULLIF(daily_q_limit,0)) * 100) as q_usage_pct,
+             last_login_date, reg_on
+      FROM bmt_students
+      ORDER BY questions_today DESC, total_api_calls DESC
+      LIMIT 50
+    `);
+    res.json({ ok: true, students: result.rows });
+  } catch(e) {
+    res.json({ ok: false, msg: e.message });
+  }
+});
+
+// LOG AI USAGE per call
+app.post('/api/log-usage', async (req, res) => {
+  try {
+    const { student_id, type } = req.body; // type: 'question' or 'photo'
+    if (!student_id) return res.json({ ok: false });
+    if (type === 'photo') {
+      await pool.query(
+        `UPDATE bmt_students SET 
+         questions_today_photo = CASE WHEN last_photo_date = CURRENT_DATE THEN questions_today_photo+1 ELSE 1 END,
+         last_photo_date = CURRENT_DATE,
+         total_api_calls = total_api_calls + 1
+         WHERE id=$1`, [student_id]
+      );
+    } else {
+      await pool.query(
+        `UPDATE bmt_students SET total_api_calls = total_api_calls + 1 WHERE id=$1`,
+        [student_id]
+      );
+    }
+    res.json({ ok: true });
+  } catch(e) { res.json({ ok: false }); }
+});
+
 app.get('/api/admin/audit', async (req, res) => {
   try {
     const key = req.headers['x-admin-key'];
