@@ -688,7 +688,7 @@ Return ONLY valid JSON array:
     const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01'},
-      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:4000, messages:[{role:'user',content:prompt}] })
+      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:4000, messages:[{role:'user',content:prompt}] })
     });
     const aiData = await aiRes.json();
     if (aiData.error) return res.json({ ok:false, msg:aiData.error.message });
@@ -826,28 +826,20 @@ app.post('/api/admin/qbank/auto-bulk', async (req, res) => {
             'SELECT COUNT(*) FROM bmt_question_bank WHERE board=$1 AND class=$2 AND LOWER(subject)=LOWER($3)',
             [board, cls, subject]
           );
-          if (parseInt(existing.rows[0].count) >= 20) {
+          if (parseInt(existing.rows[0].count) >= 50) {
             console.log(`⏭️ Skip ${board} Cl${cls} ${subject} — already has ${existing.rows[0].count} questions`);
             continue;
           }
 
-          const prompt = `[{"q":"What is photosynthesis?","a":"Process of making food","b":"Process of breathing","c":"Process of digestion","d":"Process of reproduction","correct":"A","explanation":"Plants make food using sunlight","difficulty":"easy","chapter":"Life Processes"},{"q":"example2","a":"opt1","b":"opt2","c":"opt3","d":"opt4","correct":"B","explanation":"reason","difficulty":"medium","chapter":"chapter"}]
+          const prompt = `[{"q":"What is photosynthesis?","a":"Making food using sunlight","b":"Breathing process","c":"Blood circulation","d":"Digestion of food","correct":"A","explanation":"Photosynthesis is food making process in plants","difficulty":"easy","chapter":"Life Processes"},{"q":"Newton first law states?","a":"F=ma","b":"Every action has reaction","c":"Object stays at rest unless acted upon","d":"Energy is conserved","correct":"C","explanation":"First law is law of inertia","difficulty":"medium","chapter":"Laws of Motion"}]
 
-Above is the EXACT JSON format. Now generate 30 MCQ questions for ${boardFull} Class ${cls} ${subject}.
-STRICT RULES:
-- Output ONLY the JSON array starting with [ and ending with ]
-- NO explanation text before or after
-- NO markdown, NO backticks, NO \`\`\`json
-- Each object must have: q, a, b, c, d, correct, explanation, difficulty, chapter
-- correct must be exactly: A or B or C or D
-- Mix correct answers: use A, B, C, D in rotation
-
-Start with [ now:`;
+Generate EXACTLY 50 MCQ questions for ${boardFull} Class ${cls} ${subject} in the SAME JSON format above.
+Output ONLY the JSON array. Start immediately with [ and end with ]. No other text.`;
 
           const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: { 'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01' },
-            body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:4000, messages:[{role:'user',content:prompt}] })
+            body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:4000, messages:[{role:'user',content:prompt}] })
           });
 
           const aiData = await aiRes.json();
