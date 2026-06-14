@@ -639,7 +639,7 @@ app.get('/api/subscription/:id', async (req, res) => {
 // GET random questions for student exam from bank
 app.get('/api/qbank/exam', async (req, res) => {
   try {
-    const { board, class: cls, subject, count = 10 } = req.query;
+    const { board, class: cls, subject, count = 15 } = req.query;
     if (!board || !cls || !subject) return res.json({ ok: false, msg: 'Missing params' });
     const result = await pool.query(
       `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks
@@ -678,7 +678,7 @@ app.post('/api/admin/qbank/generate', async (req, res) => {
   try {
     const key = req.headers['x-admin-key'];
     if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
-    const { board, class: cls, subject, chapter, topic, count = 30 } = req.body;
+    const { board, class: cls, subject, chapter, topic, count = 50 } = req.body;
     if (!board || !cls || !subject) return res.status(400).json({ ok: false, msg: 'Missing params' });
     const boardFull = {CBSE:'CBSE',TN:'Tamil Nadu State Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board'}[board]||board;
     const prompt = `Generate EXACTLY ${count} MCQ questions for ${boardFull} Class ${cls} ${subject}${chapter?' Chapter: '+chapter:''}${topic?' Topic: '+topic:''}.
@@ -846,7 +846,7 @@ Generate 50 questions for ${boardFull} Class ${cls} ${subject}:`;
           const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: { 'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01' },
-            body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:3000, messages:[{role:'user',content:prompt}] })
+            body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:5000, messages:[{role:'user',content:prompt}] })
           });
 
           const aiData = await aiRes.json();
