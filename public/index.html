@@ -112,7 +112,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 .lb-count{font-size:13px;font-weight:700;color:var(--blue-mid);}
 
 /* ══ CHAT ══ */
-#chat-overlay{display:none;position:fixed;inset:0;z-index:50;flex-direction:column;background:linear-gradient(180deg,#060d5a,#030820);height:100dvh;height:100vh;}
+#chat-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:50;flex-direction:column;background:linear-gradient(180deg,#060d5a,#030820);height:100dvh;height:100vh;overflow:hidden;}
 #chat-overlay.open{display:flex;}
 .chat-hdr{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--blue-dark);border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;min-height:42px;}
 .chat-back{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:6px;line-height:1;}
@@ -1240,7 +1240,8 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
   <div class="chat-input-bar">
     <button class="mic-btn" id="mic-btn" onclick="toggleMic()" title="Tap to speak">🎤</button>
     <textarea class="chat-inp" id="chat-inp" placeholder="Type or tap 🎤 to speak..." rows="1"
-      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"
+      onfocus="setTimeout(()=>{this.scrollIntoView({block:'nearest'});const m=document.getElementById('chat-msgs');if(m)m.scrollTop=m.scrollHeight;},300)"></textarea>
     <button class="chat-send" onclick="sendMsg()">➤</button>
   </div>
 </div>
@@ -1814,6 +1815,47 @@ window.addEventListener('error',function(e){
     e.preventDefault();return false;
   }
 },true);
+
+// ── MOBILE KEYBOARD FIX — keep chat visible when keyboard opens ──
+function handleViewportResize(){
+  const overlay=document.getElementById('chat-overlay');
+  if(!overlay||overlay.style.display==='none')return;
+  if(window.visualViewport){
+    const vvh=window.visualViewport.height;
+    const vvt=window.visualViewport.offsetTop;
+    overlay.style.height=vvh+'px';
+    overlay.style.top=vvt+'px';
+    overlay.style.position='fixed';
+    // Scroll chat messages to bottom after resize
+    const msgs=document.getElementById('chat-msgs');
+    if(msgs)setTimeout(()=>msgs.scrollTop=msgs.scrollHeight,100);
+  }
+}
+function resetViewport(){
+  const overlay=document.getElementById('chat-overlay');
+  if(!overlay)return;
+  overlay.style.height='';
+  overlay.style.top='';
+}
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',handleViewportResize);
+  window.visualViewport.addEventListener('scroll',handleViewportResize);
+}
+// Also handle focus on input — scroll messages to bottom
+document.addEventListener('focusin',function(e){
+  if(e.target&&e.target.id==='chat-inp'){
+    setTimeout(()=>{
+      const msgs=document.getElementById('chat-msgs');
+      if(msgs)msgs.scrollTop=msgs.scrollHeight;
+      if(window.visualViewport)handleViewportResize();
+    },300);
+  }
+});
+document.addEventListener('focusout',function(e){
+  if(e.target&&e.target.id==='chat-inp'){
+    setTimeout(resetViewport,100);
+  }
+});
 
 const API_URL = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
   ? 'https://brightmind-teacher.onrender.com'   // change to your Render URL
