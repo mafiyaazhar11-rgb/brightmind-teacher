@@ -2920,6 +2920,7 @@ function startSyllabusChat(){
 
   // Show greeting immediately — voice + bubble
   addMsg('ai', greetMsg);
+  S.chatHist.push({role:'assistant',content:greetMsg.replace(/[*#_]/g,'').substring(0,200)});
   setTimeout(()=>speakText(greetMsg.replace(/[*#_]/g,'').substring(0,300)), 300);
   const bubble=document.getElementById('speech-bubble');
   if(bubble) bubble.textContent=`${tg}! Let me teach you ${SYL.topic} step by step! 📖`;
@@ -2988,8 +2989,9 @@ Keep sentences short. Talk directly to student using "you", "we", "let us". Foll
       if(loadEl&&loadEl.closest('.msg'))loadEl.closest('.msg').remove();
       
       if(reply){
-        S.chatHist.push({role:'user',content:teachPrompt});
-        S.chatHist.push({role:'assistant',content:reply});
+        // Store SHORT summary in chatHist — not full teachPrompt (saves tokens for next messages)
+        S.chatHist.push({role:'user',content:'Please teach me '+topic+' from '+chapter+' step by step.'});
+        S.chatHist.push({role:'assistant',content:reply.substring(0,800)+'...[lesson delivered]'});
         addMsg('ai',reply);
         const isMobile=/Android|iPhone|iPad/i.test(navigator.userAgent);
         speakText(reply.replace(/[#*_🎯📖🔑⭐💡📝]/g,'').substring(0,isMobile?600:300));
@@ -3739,11 +3741,39 @@ if(window.speechSynthesis){
   (window.speechSynthesis&&window.speechSynthesis.getVoices?window.speechSynthesis.getVoices():[]);
 }
 
+function renderMarkdown(text){
+  if(!text)return'';
+  let h=text
+    // Tables — convert | col | col | to simple divs
+    .replace(/\|(.+)\|/g,(_,row)=>{
+      const cells=row.split('|').map(c=>c.trim()).filter(Boolean);
+      if(cells.every(c=>/^[-:]+$/.test(c)))return''; // skip separator row
+      return '<div style="display:flex;gap:8px;margin:3px 0;">'+cells.map(c=>'<span style="flex:1;background:#f0f4ff;border-radius:6px;padding:4px 8px;font-size:12px;">'+c+'</span>').join('')+'</div>';
+    })
+    // Headings
+    .replace(/^### (.+)$/gm,'<div style="font-size:13px;font-weight:800;color:var(--blue-dark);margin:10px 0 4px;border-left:3px solid var(--blue-mid);padding-left:8px;">$1</div>')
+    .replace(/^## (.+)$/gm,'<div style="font-size:14px;font-weight:800;color:var(--blue-dark);margin:12px 0 6px;">$1</div>')
+    .replace(/^# (.+)$/gm,'<div style="font-size:15px;font-weight:900;color:var(--blue-dark);margin:12px 0 6px;">$1</div>')
+    // Bold and italic
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    // Horizontal rule
+    .replace(/^---$/gm,'<hr style="border:none;border-top:1px solid #e0e0e0;margin:10px 0;">')
+    // Bullet points
+    .replace(/^[•\-\*] (.+)$/gm,'<div style="display:flex;gap:6px;margin:3px 0;"><span style="color:var(--blue-mid);flex-shrink:0;">•</span><span>$1</span></div>')
+    // Numbered lists
+    .replace(/^(\d+)\. (.+)$/gm,'<div style="display:flex;gap:6px;margin:3px 0;"><span style="color:var(--blue-mid);font-weight:700;flex-shrink:0;min-width:16px;">$1.</span><span>$2</span></div>')
+    // Line breaks
+    .replace(/\n/g,'<br>');
+  return h;
+}
+
 function addMsg(role,text){
   const m=document.getElementById('chat-msgs');
+  if(!m)return;
   const t=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
   const av=role==='user'?(S.user?.name?.[0]||'S'):'🧠';
-  const html=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  const html=renderMarkdown(text);
   m.innerHTML+=`<div class="msg ${role}"><div class="msg-av">${av}</div><div><div class="msg-bub">${html}</div><div class="msg-time">${t}</div></div></div>`;
   m.scrollTop=m.scrollHeight;
 }
@@ -3848,7 +3878,7 @@ REMEMBER: Short replies only — max 5-6 lines — then always end with a questi
         for(const line of lines){
           if(line.startsWith('data: ')){
             try{const p=JSON.parse(line.slice(6));
-              if(p.text){rep+=p.text;if(tEl){tEl.innerHTML=rep.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');msgsC&&(msgsC.scrollTop=msgsC.scrollHeight);}}
+              if(p.text){rep+=p.text;if(tEl){tEl.innerHTML=renderMarkdown(rep);msgsC&&(msgsC.scrollTop=msgsC.scrollHeight);}}
               if(p.done)rep=p.full||rep;
             }catch(e){}
           }
@@ -3863,7 +3893,7 @@ REMEMBER: Short replies only — max 5-6 lines — then always end with a questi
         if(d.error){rep='😊 Miss BrightMind is taking a short break! Please try again in a moment.';}
         else rep=d.content?.[0]?.text||'Please ask your question again!';
         const tEl=document.getElementById(streamId+'-t');
-        if(tEl)tEl.innerHTML=rep.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+        if(tEl)tEl.innerHTML=renderMarkdown(rep);
       }catch(e){rep='⚠️ Connection error. Please try again.';}
     }
     if(!rep)return;
@@ -3872,7 +3902,7 @@ REMEMBER: Short replies only — max 5-6 lines — then always end with a questi
     speakText(rep.replace(/[#*_🎯📖🔑⭐💡📝🌟😊]/g,'').replace(/\*\*/g,'').substring(0,isMobile?600:300));
     if(S.user&&S.sub?.id){if(!S.user.subjects[S.sub.id])S.user.subjects[S.sub.id]={progress:0,stars:0};S.user.subjects[S.sub.id].progress=Math.min(100,(S.user.subjects[S.sub.id].progress||0)+5);saveUser();}
     if(S.chatHist.length>=8)document.getElementById('exam-cta').style.display='block';
-    if((S.chatHist.length===16||S.chatHist.length===20)&&!S.hwGiven){S.hwGiven=true;setTimeout(()=>assignHW(txt),1500);}
+    if((S.chatHist.length===20||S.chatHist.length===24||S.chatHist.length===28)&&!S.hwGiven){S.hwGiven=true;setTimeout(()=>assignHW(txt),1500);}
   }catch(e){ty.classList.remove('show');const tEl=document.getElementById('smsg-latest');if(tEl)tEl.textContent='⚠️ Connection error. Please try again.';else addMsg('ai','⚠️ Connection error. Please try again.');}
 }
 
@@ -4171,8 +4201,21 @@ async function startExam(){
     const topics=S.chatHist.filter(m=>m.role==='user').map(m=>m.content).join(', ').substring(0,300);
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,
-        messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name}. Topics: ${topics||'general chapter concepts'}. Make questions TOUGH — test deep understanding. Return ONLY a JSON array, no other text:
-[{"q":"question","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"brief explanation"}]`}]})});
+        messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name} (Board: ${S.user?.board||'CBSE'}, Chapter: ${SYL.chapter||'General'}).
+
+CRITICAL RULES:
+1. The correct answer MUST be RANDOMLY distributed — NOT all "A". Use a mix like: B, A, C, D, A, B, D, C, B, A
+2. Make 4 plausible options — wrong options must look realistic, not obviously wrong
+3. Questions must test real understanding, not memorization
+4. Follow exact board syllabus
+
+Return ONLY a valid JSON array, no markdown, no extra text:
+[
+{"q":"What is photosynthesis?","options":["A) Process of respiration","B) Process by which plants make food using sunlight","C) Process of digestion","D) Process of reproduction"],"correct":"B","explanation":"Photosynthesis is the process by which plants use sunlight to make food."},
+{"q":"Which gas do plants absorb?","options":["A) Oxygen","B) Nitrogen","C) Carbon Dioxide","D) Hydrogen"],"correct":"C","explanation":"Plants absorb CO2 during photosynthesis."}
+]
+
+Make 10 questions with correct answers spread across A, B, C, D — never all the same letter.`}]})});
     const d=await r.json();let raw=d.content?.[0]?.text||'[]';
     // Strip markdown code fences and any leading/trailing text
     raw=raw.replace(/```json|```/gi,'').trim();
@@ -4181,15 +4224,50 @@ async function startExam(){
     if(arrMatch)raw=arrMatch[0];
     S.examQs=JSON.parse(raw);
     // Validate — ensure correct field matches option letter
+    // Validate and fix correct answers
     S.examQs=S.examQs.map(q=>({
       ...q,
       correct:(q.correct||'A').toString().toUpperCase().charAt(0),
       options:Array.isArray(q.options)?q.options:['A) Option A','B) Option B','C) Option C','D) Option D']
     }));
+    // Safety check: if ALL correct answers are same letter — shuffle them
+    const allSame=S.examQs.every(q=>q.correct===S.examQs[0].correct);
+    if(allSame){
+      const letters=['A','B','C','D'];
+      S.examQs=S.examQs.map((q,i)=>{
+        const newCorrect=letters[i%4]; // distribute A,B,C,D,A,B,C,D...
+        const oldCorrect=q.correct;
+        if(newCorrect===oldCorrect)return q;
+        // Swap options so the correct answer moves to new position
+        const opts=[...q.options];
+        const oldIdx=letters.indexOf(oldCorrect);
+        const newIdx=letters.indexOf(newCorrect);
+        const correctText=opts[oldIdx];
+        opts[oldIdx]=opts[newIdx];
+        opts[newIdx]=correctText;
+        // Re-label A) B) C) D)
+        const relabeled=opts.map((o,i)=>{
+          const txt=o.replace(/^[A-D]\)\s*/,'');
+          return letters[i]+') '+txt;
+        });
+        return {...q,correct:newCorrect,options:relabeled};
+      });
+    }
   }catch(e){S.examQs=fallbackQs();}
   startTimer();renderExamQ();
 }
-function fallbackQs(){return Array(10).fill(null).map((_,i)=>({q:`Question ${i+1}: Which of the following best describes a core concept in this chapter?`,options:['A) Correct answer','B) Wrong option','C) Wrong option','D) Wrong option'],correct:'A',explanation:'This is the correct fundamental concept.'}));}
+function fallbackQs(){
+  const letters=['A','B','C','D'];
+  const subjects={
+    Mathematics:['What is 2+2?','What is the value of π?','What is a prime number?','What is the quadratic formula?','What is an integer?','What is a fraction?','What is LCM?','What is HCF?','What is an angle?','What is probability?'],
+    Science:['What is photosynthesis?','What is Newton's first law?','What is an atom?','What is osmosis?','What is gravity?','What is DNA?','What is force?','What is energy?','What is a cell?','What is respiration?']
+  };
+  return Array(10).fill(null).map((_,i)=>{
+    const correct=letters[i%4];
+    const opts=letters.map((l,j)=>l+') '+(j===letters.indexOf(correct)?'Correct answer for Q'+(i+1):'Wrong option '+(j+1)));
+    return {q:`Q${i+1}: Test question for this chapter`,options:opts,correct:correct,explanation:'This is the correct answer.'};
+  });
+}
 function startTimer(){
   S.examSecs=900;if(S.examTimer)clearInterval(S.examTimer);
   S.examTimer=setInterval(()=>{S.examSecs--;const m=Math.floor(S.examSecs/60),s=S.examSecs%60;
@@ -5163,8 +5241,8 @@ Generate 10 such questions now for ${subjectName}:`}]})});
     // Fallback with subject-specific real questions
     const fbQs={
       'Mathematics':[
-        {q:'What is the value of π (pi) approximately?',options:['A) 3.14159','B) 2.71828','C) 1.41421','D) 1.73205'],correct:'A',explanation:'π ≈ 3.14159, ratio of circumference to diameter of a circle.'},
-        {q:'What is the quadratic formula?',options:['A) x = (-b ± √(b²-4ac)) / 2a','B) x = -b/2a','C) x = b² - 4ac','D) x = (a+b)²'],correct:'A',explanation:'The quadratic formula solves ax²+bx+c=0.'},
+        {q:'What is the value of π (pi) approximately?',options:['A) 2.71828','B) 1.41421','C) 3.14159','D) 1.73205'],correct:'C',explanation:'π ≈ 3.14159, ratio of circumference to diameter of a circle.'},
+        {q:'What is the quadratic formula?',options:['A) x = -b/2a','B) x = b² - 4ac','C) x = (a+b)²','D) x = (-b ± √(b²-4ac)) / 2a'],correct:'D',explanation:'The quadratic formula solves ax²+bx+c=0.'},
         {q:'What is the area of a circle with radius r?',options:['A) πr²','B) 2πr','C) πd','D) r²'],correct:'A',explanation:'Area of circle = πr².'},
         {q:'What is the Pythagorean theorem?',options:['A) a² + b² = c²','B) a + b = c','C) a² - b² = c','D) (a+b)² = c²'],correct:'A',explanation:'In a right triangle, the square of the hypotenuse equals the sum of squares of the other two sides.'},
         {q:'What is the sum of angles in a triangle?',options:['A) 180°','B) 360°','C) 90°','D) 270°'],correct:'A',explanation:'The sum of interior angles of any triangle is always 180°.'},
