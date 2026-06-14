@@ -831,31 +831,58 @@ app.post('/api/admin/qbank/auto-bulk', async (req, res) => {
             continue;
           }
 
-          const prompt = `Generate EXACTLY 50 MCQ questions for ${boardFull} Class ${cls} ${subject} covering the FULL syllabus.
-Rules:
-1. Cover ALL major chapters/topics in the syllabus
-2. Mix: definitions(30%) + applications(40%) + analysis(30%)
-3. Options must be realistic — no obviously wrong answers
-4. Correct answers: distribute A/B/C/D (not all same letter)
-5. Return ONLY valid JSON array, no other text
+          const prompt = `[{"q":"What is photosynthesis?","a":"Process of making food","b":"Process of breathing","c":"Process of digestion","d":"Process of reproduction","correct":"A","explanation":"Plants make food using sunlight","difficulty":"easy","chapter":"Life Processes"},{"q":"example2","a":"opt1","b":"opt2","c":"opt3","d":"opt4","correct":"B","explanation":"reason","difficulty":"medium","chapter":"chapter"}]
 
-[{"q":"question","a":"option text","b":"option text","c":"option text","d":"option text","correct":"B","explanation":"brief reason","difficulty":"medium","chapter":"chapter name"}]
+Above is the EXACT JSON format. Now generate 30 MCQ questions for ${boardFull} Class ${cls} ${subject}.
+STRICT RULES:
+- Output ONLY the JSON array starting with [ and ending with ]
+- NO explanation text before or after
+- NO markdown, NO backticks, NO \`\`\`json
+- Each object must have: q, a, b, c, d, correct, explanation, difficulty, chapter
+- correct must be exactly: A or B or C or D
+- Mix correct answers: use A, B, C, D in rotation
 
-Generate 50 questions for ${boardFull} Class ${cls} ${subject}:`;
+Start with [ now:`;
 
           const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: { 'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01' },
-            body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:5000, messages:[{role:'user',content:prompt}] })
+            body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:4000, messages:[{role:'user',content:prompt}] })
           });
 
           const aiData = await aiRes.json();
           if (aiData.error) { errors.push(`${cls} ${subject}: ${aiData.error.message}`); continue; }
 
-          let raw = (aiData.content?.[0]?.text||'[]').replace(/```json|```/g,'').trim();
+          let raw = (aiData.content?.[0]?.text||'[]');
+          // Aggressive cleanup — extract just the JSON array
+          raw = raw.replace(/```json/g,'').replace(/```/g,'').trim();
+          // Find the JSON array boundaries
+          const startIdx = raw.indexOf('[');
+          const endIdx = raw.lastIndexOf(']');
+          if (startIdx === -1 || endIdx === -1) {
+            errors.push(`${cls} ${subject}: no JSON array found`);
+            console.error(`❌ ${cls} ${subject} raw:`, raw.substring(0,200));
+            continue;
+          }
+          raw = raw.substring(startIdx, endIdx + 1);
           let questions;
-          try { questions = JSON.parse(raw); } catch(e) { errors.push(`${cls} ${subject}: parse error`); continue; }
-          if (!Array.isArray(questions)||!questions.length) continue;
+          try { 
+            questions = JSON.parse(raw); 
+          } catch(e) { 
+            // Try fixing common JSON issues
+            try {
+              raw = raw.replace(/,\s*]/g,']').replace(/,\s*}/g,'}');
+              questions = JSON.parse(raw);
+            } catch(e2) {
+              errors.push(`${cls} ${subject}: parse error - ${e2.message}`);
+              console.error(`❌ ${cls} ${subject} parse fail:`, raw.substring(0,300));
+              continue;
+            }
+          }
+          if (!Array.isArray(questions)||!questions.length) {
+            errors.push(`${cls} ${subject}: empty array`);
+            continue;
+          }
 
           let saved = 0;
           for (const q of questions) {
