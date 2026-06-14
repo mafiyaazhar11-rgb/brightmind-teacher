@@ -831,10 +831,30 @@ app.post('/api/admin/qbank/auto-bulk', async (req, res) => {
             continue;
           }
 
-          const prompt = `[{"q":"What is photosynthesis?","a":"Making food using sunlight","b":"Breathing process","c":"Blood circulation","d":"Digestion of food","correct":"A","explanation":"Photosynthesis is food making process in plants","difficulty":"easy","chapter":"Life Processes"},{"q":"Newton first law states?","a":"F=ma","b":"Every action has reaction","c":"Object stays at rest unless acted upon","d":"Energy is conserved","correct":"C","explanation":"First law is law of inertia","difficulty":"medium","chapter":"Laws of Motion"}]
+          const isRegionalLang = ['Tamil','Telugu','Kannada','Malayalam','Hindi','Marathi','Bengali','Gujarati'].includes(subject);
+          const isMath = ['Mathematics','Maths','Physics','Chemistry'].includes(subject);
+          const prompt = isRegionalLang ? 
+`You must respond with ONLY a JSON array. No text before or after.
+Generate 50 MCQ questions for ${boardFull} Class ${cls} ${subject}.
+Questions, options and explanations must be in ${subject} language.
+Use this exact format - each field must be properly escaped for JSON:
 
-Generate EXACTLY 50 MCQ questions for ${boardFull} Class ${cls} ${subject} in the SAME JSON format above.
-Output ONLY the JSON array. Start immediately with [ and end with ]. No other text.`;
+[{"q":"question in ${subject}","a":"option1","b":"option2","c":"option3","d":"option4","correct":"A","explanation":"reason in ${subject}","difficulty":"easy","chapter":"chapter name in English"}]
+
+CRITICAL JSON RULES:
+1. Use only straight double quotes "
+2. No line breaks inside any string value
+3. Escape any special characters with backslash
+4. Keep each question on concept short - max 100 characters per field
+5. Chapter name must be in English only
+
+Start the JSON array now with [:` 
+:
+`[{"q":"What is photosynthesis?","a":"Making food using sunlight","b":"Breathing process","c":"Blood circulation","d":"Digestion of food","correct":"A","explanation":"Photosynthesis is food making process in plants","difficulty":"easy","chapter":"Life Processes"},{"q":"Newton first law?","a":"F=ma","b":"Every action has reaction","c":"Object stays at rest","d":"Energy conserved","correct":"C","explanation":"Law of inertia","difficulty":"medium","chapter":"Laws of Motion"}]
+
+Generate 50 MCQ questions for ${boardFull} Class ${cls} ${subject} in same format.
+${isMath ? 'MATH RULES: Write formulas in simple text only. Use sin(x) not sin⁻¹. Use sqrt(x) not √x. Use pi not π. Keep each field under 80 characters. No special symbols.' : ''}
+Output ONLY the JSON array starting with [ ending with ]. No other text.`;
 
           const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
