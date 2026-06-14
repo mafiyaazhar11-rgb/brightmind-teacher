@@ -745,12 +745,61 @@ app.post('/api/admin/qbank/auto-bulk', async (req, res) => {
       KA: {
         '9':  ['Kannada','English','Mathematics','Science','Social Science'],
         '10': ['Kannada','English','Mathematics','Science','Social Science'],
-        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics'],
-        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics']
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
+      },
+      AP: {
+        '9':  ['Telugu','English','Mathematics','Physical Science','Biological Science','Social Studies'],
+        '10': ['Telugu','English','Mathematics','Physical Science','Biological Science','Social Studies'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
+      },
+      TS: {
+        '9':  ['Telugu','English','Mathematics','Physical Science','Biological Science','Social Studies'],
+        '10': ['Telugu','English','Mathematics','Physical Science','Biological Science','Social Studies'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
+      },
+      MH: {
+        '9':  ['Marathi','English','Mathematics','Science','Social Science'],
+        '10': ['Marathi','English','Mathematics','Science','Social Science'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History','Geography'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History','Geography']
+      },
+      UP: {
+        '9':  ['Hindi','English','Mathematics','Science','Social Science'],
+        '10': ['Hindi','English','Mathematics','Science','Social Science'],
+        '11': ['Hindi','English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['Hindi','English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
+      },
+      WB: {
+        '9':  ['Bengali','English','Mathematics','Physical Science','Life Science','Geography','History'],
+        '10': ['Bengali','English','Mathematics','Physical Science','Life Science','Geography','History'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History','Geography'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History','Geography']
+      },
+      GJ: {
+        '9':  ['Gujarati','English','Mathematics','Science','Social Science'],
+        '10': ['Gujarati','English','Mathematics','Science','Social Science'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
+      },
+      RJ: {
+        '9':  ['Hindi','English','Mathematics','Science','Social Science'],
+        '10': ['Hindi','English','Mathematics','Science','Social Science'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
       }
     };
 
-    const boardMap = {TN:'Tamil Nadu State Board',CBSE:'CBSE',KL:'Kerala Board',KA:'Karnataka State Board'};
+    const boardMap = {
+      TN:'Tamil Nadu State Board', CBSE:'CBSE',
+      KL:'Kerala Board (SCERT)', KA:'Karnataka State Board (KSEEB)',
+      AP:'Andhra Pradesh State Board', TS:'Telangana State Board',
+      MH:'Maharashtra State Board', UP:'Uttar Pradesh State Board (UPMSP)',
+      WB:'West Bengal Board (WBBSE)', GJ:'Gujarat State Board (GSEB)',
+      RJ:'Rajasthan State Board (RBSE)'
+    };
     const boardFull = boardMap[board] || board;
     const classes = SYLLABUS[board];
     if (!classes) return res.json({ ok: false, msg: 'Board not in syllabus map' });
