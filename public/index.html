@@ -1458,6 +1458,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
       <button onclick="showAdminTab('sessions',this)" id="tab-sessions" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">⏱ Sessions</button>
       <button onclick="showAdminTab('audit',this)" id="tab-audit" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📋 Audit Log</button>
       <button onclick="showAdminTab('usage',this)" id="tab-usage" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📊 Usage Audit</button>
+      <button onclick="showAdminTab('qbank',this)" id="tab-qbank" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📝 Question Bank</button>
       <button onclick="showAdminTab('support',this)" id="tab-support" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💬 Support</button>
     </div>
     <div id="adm-tab-students">
@@ -1472,6 +1473,74 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
       <div class="sec-title">⏱ Student Sessions</div>
       <div id="adm-sessions-list"></div>
     </div>
+    <div id="adm-tab-qbank" style="display:none;">
+      <!-- QUESTION BANK GENERATOR -->
+      <div style="background:linear-gradient(135deg,#1a237e,#283593);border-radius:16px;padding:16px;margin-bottom:14px;color:#fff;">
+        <div style="font-size:15px;font-weight:800;margin-bottom:4px;">📝 Question Bank Generator</div>
+        <div style="font-size:12px;opacity:.8;">Generate questions ONCE → serve forever. Zero AI cost per exam!</div>
+      </div>
+      <!-- Stats -->
+      <div id="qbank-stats" style="background:#fff;border-radius:12px;padding:12px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+        <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:8px;">CURRENT BANK SIZE</div>
+        <div id="qbank-stats-content" style="font-size:13px;color:var(--gray-text);">Loading...</div>
+      </div>
+      <!-- Generate form -->
+      <div style="background:#fff;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:10px;">GENERATE NEW QUESTIONS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <select id="qb-board" style="padding:8px;border:1px solid var(--gray-mid);border-radius:8px;font-size:12px;">
+            <option value="TN">Tamil Nadu Board</option>
+            <option value="CBSE">CBSE</option>
+            <option value="KL">Kerala Board</option>
+            <option value="KA">Karnataka Board</option>
+            <option value="AP">AP Board</option>
+          </select>
+          <select id="qb-class" style="padding:8px;border:1px solid var(--gray-mid);border-radius:8px;font-size:12px;">
+            <option value="9">Class 9</option>
+            <option value="10">Class 10</option>
+            <option value="11">Class 11</option>
+            <option value="12">Class 12</option>
+          </select>
+        </div>
+        <input id="qb-subject" placeholder="Subject (e.g. Mathematics, Science, Tamil)" style="width:100%;padding:8px;border:1px solid var(--gray-mid);border-radius:8px;font-size:12px;box-sizing:border-box;margin-bottom:8px;"/>
+        <input id="qb-chapter" placeholder="Chapter (optional)" style="width:100%;padding:8px;border:1px solid var(--gray-mid);border-radius:8px;font-size:12px;box-sizing:border-box;margin-bottom:8px;"/>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <label style="font-size:12px;color:var(--gray-text);">Questions to generate:</label>
+          <select id="qb-count" style="padding:6px;border:1px solid var(--gray-mid);border-radius:8px;font-size:12px;">
+            <option value="20">20</option>
+            <option value="30" selected>30</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <button onclick="generateQBank()" style="width:100%;background:linear-gradient(135deg,#1a237e,#283593);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
+          ⚡ Generate &amp; Save to Bank
+        </button>
+        <div id="qb-result" style="margin-top:10px;font-size:12px;text-align:center;"></div>
+      </div>
+      <!-- AUTO BULK — one click does everything -->
+      <div style="background:linear-gradient(135deg,#004d40,#00695c);border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.1);margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:6px;">🚀 AUTO BULK GENERATE — One Click!</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.8);margin-bottom:12px;">Generates ALL subjects for all classes automatically. Runs in background. Takes 5-10 minutes.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button onclick="autoBulkGenerate('TN')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:12px 8px;font-size:12px;font-weight:800;cursor:pointer;">
+            🏫 Tamil Nadu Board<br><small style="font-weight:400;opacity:.7;">Class 9-12 · All subjects</small>
+          </button>
+          <button onclick="autoBulkGenerate('CBSE')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:12px 8px;font-size:12px;font-weight:800;cursor:pointer;">
+            🏫 CBSE Board<br><small style="font-weight:400;opacity:.7;">Class 9-12 · All subjects</small>
+          </button>
+          <button onclick="autoBulkGenerate('KL')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:12px 8px;font-size:12px;font-weight:800;cursor:pointer;">
+            🏫 Kerala Board<br><small style="font-weight:400;opacity:.7;">Class 9-12 · All subjects</small>
+          </button>
+          <button onclick="autoBulkGenerate('KA')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:12px 8px;font-size:12px;font-weight:800;cursor:pointer;">
+            🏫 Karnataka Board<br><small style="font-weight:400;opacity:.7;">Class 9-12 · All subjects</small>
+          </button>
+        </div>
+        <div id="bulk-status" style="margin-top:10px;font-size:12px;color:rgba(255,255,255,.9);text-align:center;"></div>
+        <button onclick="checkBulkStatus()" style="margin-top:8px;width:100%;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:8px;font-size:11px;cursor:pointer;">🔄 Refresh Status</button>
+      </div>
+    </div>
+
     <div id="adm-tab-usage" style="display:none;"><div id="adm-usage-list"><div style="text-align:center;padding:20px;color:var(--gray-text);">Loading usage data...</div></div></div>
     <div id="adm-tab-audit" style="display:none;">
       <div class="sec-title">📋 Audit Log</div>
@@ -4252,12 +4321,34 @@ async function startExam(){
   document.getElementById('result-overlay').classList.remove('open');
   document.getElementById('exam-overlay').classList.add('open');
   document.getElementById('exam-title').textContent=S.examSub.name+' — Chapter Exam';
-  document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">🧠 Generating exam questions...<br><br>Please wait...</div>';
+  document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">📚 Loading exam questions...<br><br>Please wait...</div>';
+
+  // ── STEP 1: Try question bank from DB (zero AI cost) ──
+  try{
+    const board=S.user?.board||'CBSE';
+    const cls=S.user?.class||'9';
+    const subj=S.examSub?.name||SYL.subject||'General';
+    const qbRes=await fetch(`${API_URL}/api/qbank/exam?board=${encodeURIComponent(board)}&class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(subj)}&count=15`);
+    const qbData=await qbRes.json();
+    if(qbData.ok && qbData.questions && qbData.questions.length>=5){
+      // Got questions from DB — zero AI tokens used!
+      S.examQs=qbData.questions.map(q=>({
+        ...q,
+        correct:(q.correct||'A').toString().toUpperCase().charAt(0),
+        options:Array.isArray(q.options)?q.options:['A) -','B) -','C) -','D) -']
+      }));
+      renderExam();
+      return;
+    }
+  }catch(e){ console.log('QBank unavailable, using AI:', e.message); }
+
+  // ── STEP 2: AI fallback — only if question bank empty ──
+  document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">🧠 Generating questions...<br><small style="opacity:.6">No questions in bank yet for this subject</small></div>';
   try{
     const topics=S.chatHist.filter(m=>m.role==='user').map(m=>m.content).join(', ').substring(0,300);
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,
-        messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name} (Board: ${S.user?.board||'CBSE'}, Chapter: ${SYL.chapter||'General'}).
+        messages:[{role:'user',content:`Create exactly 15 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name} (Board: ${S.user?.board||'CBSE'}, Chapter: ${SYL.chapter||'General'}).
 
 CRITICAL RULES:
 1. The correct answer MUST be RANDOMLY distributed — NOT all "A". Use a mix like: B, A, C, D, A, B, D, C, B, A
@@ -4318,7 +4409,7 @@ function fallbackQs(){
     Mathematics:['What is 2+2?','What is the value of π?','What is a prime number?','What is the quadratic formula?','What is an integer?','What is a fraction?','What is LCM?','What is HCF?','What is an angle?','What is probability?'],
     Science:['What is photosynthesis?','What is Newton first law?','What is an atom?','What is osmosis?','What is gravity?','What is DNA?','What is force?','What is energy?','What is a cell?','What is respiration?']
   };
-  return Array(10).fill(null).map((_,i)=>{
+  return Array(15).fill(null).map((_,i)=>{
     const correct=letters[i%4];
     const opts=letters.map((l,j)=>l+') '+(j===letters.indexOf(correct)?'Correct answer for Q'+(i+1):'Wrong option '+(j+1)));
     return {q:`Q${i+1}: Test question for this chapter`,options:opts,correct:correct,explanation:'This is the correct answer.'};
@@ -4659,7 +4750,7 @@ function renderParentView(u){
 // ADMIN
 // ══════════════════════════════════════
 function showAdminTab(tab, btn){
-  ['students','revenue','sessions','audit','support','usage'].forEach(t=>{
+  ['students','revenue','sessions','audit','support','usage','qbank'].forEach(t=>{
     const el=document.getElementById('adm-tab-'+t);
     if(el)el.style.display=t===tab?'block':'none';
     const b=document.getElementById('tab-'+t);
@@ -4669,6 +4760,8 @@ function showAdminTab(tab, btn){
   if(tab==='sessions')loadAdminSessions();
   if(tab==='audit')loadAdminAudit();
   if(tab==='support')loadAdminSupport();
+  if(tab==='usage')loadAdminUsage();
+  if(tab==='qbank'){loadQBankStats();}
 }
 
 async function loadAdminSupport(){
@@ -4795,6 +4888,95 @@ async function loadAdminSessions(){
       <div style="font-size:11px;color:var(--blue-mid);margin-top:2px;">Questions: ${s.questions_in_session||0}</div>
     </div>`;
   }).join('');
+}
+
+async function loadQBankStats(){
+  const el=document.getElementById('qbank-stats-content');
+  if(!el)return;
+  try{
+    const d=await apiGet('/api/admin/qbank/stats',{'x-admin-key':'azhar2026'});
+    if(!d||!d.ok){el.textContent='No questions yet. Generate some below!';return;}
+    if(!d.total){el.innerHTML='<span style="color:var(--orange);">⚠️ Bank is empty — generate questions to enable DB-served exams!</span>';return;}
+    el.innerHTML=`<div style="font-size:20px;font-weight:900;color:var(--blue-dark);margin-bottom:8px;">Total: ${d.total} questions</div>`+
+      d.breakdown.map(b=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--gray-light);font-size:12px;">
+        <span>${b.board} · Class ${b.class} · ${b.subject}</span>
+        <span style="font-weight:700;color:var(--blue-mid);">${b.count} Q</span>
+      </div>`).join('');
+  }catch(e){el.textContent='Error: '+e.message;}
+}
+
+async function generateQBank(){
+  const board=document.getElementById('qb-board')?.value;
+  const cls=document.getElementById('qb-class')?.value;
+  const subject=document.getElementById('qb-subject')?.value?.trim();
+  const chapter=document.getElementById('qb-chapter')?.value?.trim();
+  const count=parseInt(document.getElementById('qb-count')?.value||'30');
+  if(!subject){alert('Please enter a subject!');return;}
+  const resultEl=document.getElementById('qb-result');
+  if(resultEl)resultEl.innerHTML='<span style="color:var(--blue-mid);">⏳ Generating '+count+' questions... (30-60 seconds)</span>';
+  try{
+    const d=await fetch(API_URL+'/api/admin/qbank/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},
+      body:JSON.stringify({board,class:cls,subject,chapter,count})
+    }).then(r=>r.json());
+    if(d.ok){
+      if(resultEl)resultEl.innerHTML=`<span style="color:var(--green);">✅ Done! Generated: ${d.generated} · Saved: ${d.saved} questions</span>`;
+      loadQBankStats();
+    }else{
+      if(resultEl)resultEl.innerHTML=`<span style="color:var(--red);">❌ ${d.msg}</span>`;
+    }
+  }catch(e){
+    if(resultEl)resultEl.innerHTML=`<span style="color:var(--red);">❌ ${e.message}</span>`;
+  }
+}
+
+async function autoBulkGenerate(board){
+  const names={TN:'Tamil Nadu Board',CBSE:'CBSE',KL:'Kerala Board',KA:'Karnataka Board'};
+  const statusEl=document.getElementById('bulk-status');
+  if(!confirm(`Generate ALL questions for ${names[board]||board}?\n\nThis will:\n• Generate 30 questions per subject per class\n• Cover Classes 9-12 all subjects\n• Run in background (5-15 min)\n• Use Haiku model (low cost)\n\nStart?`))return;
+  if(statusEl)statusEl.innerHTML='⏳ Starting bulk generation for '+names[board]+'... Please wait.';
+  try{
+    const d=await fetch(API_URL+'/api/admin/qbank/auto-bulk',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},
+      body:JSON.stringify({board})
+    }).then(r=>r.json());
+    if(d.ok){
+      if(statusEl)statusEl.innerHTML='✅ Generation started in background!<br>Check status in 5-10 minutes using Refresh Status.';
+      // Auto refresh stats every 30s
+      setTimeout(loadQBankStats, 30000);
+      setTimeout(loadQBankStats, 60000);
+      setTimeout(loadQBankStats, 120000);
+    }else{
+      if(statusEl)statusEl.innerHTML='❌ '+d.msg;
+    }
+  }catch(e){
+    if(statusEl)statusEl.innerHTML='❌ '+e.message;
+  }
+}
+
+async function checkBulkStatus(){
+  const statusEl=document.getElementById('bulk-status');
+  if(statusEl)statusEl.innerHTML='⏳ Checking...';
+  await loadQBankStats();
+  if(statusEl)statusEl.innerHTML='✅ Stats refreshed above!';
+}
+
+async function quickGenerate(board,cls,subject){
+  const resultEl=document.getElementById('qb-result');
+  if(resultEl)resultEl.innerHTML=`<span style="color:var(--blue-mid);">⏳ Generating ${subject} Class ${cls}...</span>`;
+  try{
+    const d=await fetch(API_URL+'/api/admin/qbank/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},
+      body:JSON.stringify({board,class:cls,subject,count:30})
+    }).then(r=>r.json());
+    if(d.ok){
+      if(resultEl)resultEl.innerHTML=`<span style="color:var(--green);">✅ ${subject} Cl${cls}: ${d.saved} questions saved!</span>`;
+      loadQBankStats();
+    }
+  }catch(e){}
 }
 
 async function loadAdminUsage(){
@@ -5314,7 +5496,7 @@ async function openInstantExam(subjectId, subjectName, icon){
     const r = await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,
         messages:[{role:'user',content:`You are an exam question generator for Indian school students.
-Generate EXACTLY 10 real multiple choice questions for Class ${S.user?.class||11} ${subjectName} (${board} board).
+Generate EXACTLY 15 real multiple choice questions for Class ${S.user?.class||11} ${subjectName} (${board} board).
 Each question must have REAL content - actual facts, formulas, definitions from the syllabus.
 IMPORTANT: Every option must be a real meaningful answer, NOT "Option 1" or "opt1".
 
@@ -5349,7 +5531,7 @@ Generate 10 such questions now for ${subjectName}:`}]})});
       {q:`Which approach helps most in ${subjectName} exams?`,options:['A) Regular practice and revision','B) Last minute studying only','C) Ignoring previous papers','D) Avoiding difficult topics'],correct:'A',explanation:'Consistent practice and revision leads to the best exam performance.'},
     ];
     const subjectQs = fbQs[subjectName]||defaultQs;
-    IE.questions = Array(10).fill(null).map((_,i)=>{
+    IE.questions = Array(15).fill(null).map((_,i)=>{
       const q = subjectQs[i%subjectQs.length];
       return {...q, marks:1};
     });
