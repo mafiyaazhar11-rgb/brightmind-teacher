@@ -1519,7 +1519,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
             <option value="100">100</option>
           </select>
         </div>
-        <button onclick="generateQBank()" style="width:100%;background:linear-gradient(135deg,#1a237e,#283593);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
+        <button onclick="generateQBank()" style="width:100%;background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
           ⚡ Generate &amp; Save to Bank
         </button>
         <div id="qb-result" style="margin-top:10px;font-size:12px;text-align:center;"></div>
@@ -4961,7 +4961,7 @@ async function generateQBank(){
 async function autoBulkGenerate(board){
   const names={TN:'Tamil Nadu Board',CBSE:'CBSE',KL:'Kerala Board',KA:'Karnataka Board',AP:'Andhra Pradesh Board',TS:'Telangana Board',MH:'Maharashtra Board',UP:'Uttar Pradesh Board',WB:'West Bengal Board',GJ:'Gujarat Board',RJ:'Rajasthan Board'};
   const statusEl=document.getElementById('bulk-status');
-  if(!confirm(`Generate ALL questions for ${names[board]||board}?\n\nThis will:\n• Generate 30 questions per subject per class\n• Cover Classes 9-12 all subjects\n• Run in background (5-15 min)\n• Use Haiku model (low cost)\n\nStart?`))return;
+  if(!confirm(`Generate ALL questions for ${names[board]||board}?\n\nThis will:\n• Generate 50 questions per subject per class\n• Cover Classes 9-12 all subjects\n• Run in background (5-15 min)\n• Use Haiku model (low cost)\n\nStart?`))return;
   if(statusEl)statusEl.innerHTML='⏳ Starting bulk generation for '+names[board]+'... Please wait.';
   try{
     const d=await fetch(API_URL+'/api/admin/qbank/auto-bulk',{
