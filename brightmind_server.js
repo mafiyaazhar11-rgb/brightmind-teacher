@@ -833,30 +833,36 @@ app.post('/api/admin/qbank/auto-bulk', async (req, res) => {
 
           const isRegionalLang = ['Tamil','Telugu','Kannada','Malayalam','Hindi','Marathi','Bengali','Gujarati'].includes(subject);
           const isMath = ['Mathematics','Maths','Physics','Chemistry'].includes(subject);
-          const prompt = isRegionalLang ? 
-`You must respond with ONLY a JSON array. No text before or after.
+          
+          let prompt;
+          if (isRegionalLang) {
+            prompt = `Return ONLY a JSON array. No text before or after. Start with [
 Generate 50 MCQ questions for ${boardFull} Class ${cls} ${subject}.
-Questions, options and explanations must be in ${subject} language.
-Use this exact format - each field must be properly escaped for JSON:
+Write ALL fields in ${subject} language. Chapter name in English only.
+STRICT: max 50 chars per field. No long sentences. No line breaks in strings.
+Format: [{"q":"question","a":"opt1","b":"opt2","c":"opt3","d":"opt4","correct":"A","explanation":"reason","difficulty":"easy","chapter":"ChapterName"}]
+Output only the JSON array:`;
+          } else if (isMath) {
+            prompt = `Return ONLY a JSON array. No text before or after. Start with [
+Generate 50 MCQ questions for ${boardFull} Class ${cls} ${subject}.
+Use proper math symbols in questions and options (π, √, sin⁻¹, etc).
+STRICT RULES to avoid JSON errors:
+- "explanation" field: MAX 30 characters, very short reason only
+- "q" field: MAX 80 characters
+- "a","b","c","d" fields: MAX 40 characters each
+- NO line breaks inside any string value
+- "chapter" in English only
+Format: [{"q":"What is sin(30°)?","a":"1/2","b":"√3/2","c":"1","d":"0","correct":"A","explanation":"Standard value","difficulty":"easy","chapter":"Trigonometry"}]
+Output only the JSON array:`;
+          } else {
+            prompt = `Return ONLY a JSON array. No text before or after. Start with [
+Generate 50 MCQ questions for ${boardFull} Class ${cls} ${subject} (${boardFull} board).
+Max 100 chars per field. No line breaks in strings.
+Format: [{"q":"question","a":"opt1","b":"opt2","c":"opt3","d":"opt4","correct":"A","explanation":"reason","difficulty":"easy","chapter":"ChapterName"}]
+Output only the JSON array:`;
+          }
 
-[{"q":"question in ${subject}","a":"option1","b":"option2","c":"option3","d":"option4","correct":"A","explanation":"reason in ${subject}","difficulty":"easy","chapter":"chapter name in English"}]
-
-CRITICAL JSON RULES:
-1. Use only straight double quotes "
-2. No line breaks inside any string value
-3. Escape any special characters with backslash
-4. Keep each question on concept short - max 100 characters per field
-5. Chapter name must be in English only
-
-Start the JSON array now with [:` 
-:
-`[{"q":"What is photosynthesis?","a":"Making food using sunlight","b":"Breathing process","c":"Blood circulation","d":"Digestion of food","correct":"A","explanation":"Photosynthesis is food making process in plants","difficulty":"easy","chapter":"Life Processes"},{"q":"Newton first law?","a":"F=ma","b":"Every action has reaction","c":"Object stays at rest","d":"Energy conserved","correct":"C","explanation":"Law of inertia","difficulty":"medium","chapter":"Laws of Motion"}]
-
-Generate 50 MCQ questions for ${boardFull} Class ${cls} ${subject} in same format.
-${isMath ? 'MATH RULES: Write formulas in simple text only. Use sin(x) not sin⁻¹. Use sqrt(x) not √x. Use pi not π. Keep each field under 80 characters. No special symbols.' : ''}
-Output ONLY the JSON array starting with [ ending with ]. No other text.`;
-
-          const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+                    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: { 'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01' },
             body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:4000, messages:[{role:'user',content:prompt}] })
