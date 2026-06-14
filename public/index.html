@@ -1636,7 +1636,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
       <div class="fg"><label>Email</label><input id="demo-email" type="email" placeholder="student@email.com"/></div>
       <div class="fg"><label>Password</label><input id="demo-pass" placeholder="Set password for them"/></div>
       <div class="fg"><label>Board</label>
-        <select id="demo-board"><option value="CBSE">CBSE</option><option value="TN">Tamil Nadu Board</option><option value="KL">Kerala Board</option><option value="KA">Karnataka Board</option><option value="AP">AP Board</option><option value="TS">Telangana Board</option></select>
+        <select id="demo-board"><option value="TN">Tamil Nadu Board</option><option value="CBSE">CBSE</option><option value="KL">Kerala Board</option><option value="KA">Karnataka Board</option><option value="AP">AP Board</option><option value="TS">Telangana Board</option></select>
       </div>
       <div class="fg"><label>Class</label>
         <select id="demo-class"><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
@@ -4309,15 +4309,23 @@ async function startExam(){
   document.getElementById('result-overlay').classList.remove('open');
   document.getElementById('exam-overlay').classList.add('open');
   document.getElementById('exam-title').textContent=S.examSub.name+' — Chapter Exam';
-  document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">📚 Loading exam questions...<br><br>Please wait...</div>';
+  document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">📦 Loading from question bank...<br><br>Please wait...</div>';
 
   // ── STEP 1: Try question bank from DB (zero AI cost) ──
   try{
     const board=S.user?.board||'CBSE';
     const cls=S.user?.class||'9';
     const subj=S.examSub?.name||SYL.subject||'General';
-    const qbRes=await fetch(`${API_URL}/api/qbank/exam?board=${encodeURIComponent(board)}&class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(subj)}&count=15`);
-    const qbData=await qbRes.json();
+    console.log('QBank lookup:',board, cls, subj);
+    // Try exact board match first
+    let qbRes=await fetch(`${API_URL}/api/qbank/exam?board=${encodeURIComponent(board)}&class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(subj)}&count=15`);
+    let qbData=await qbRes.json();
+    // If not found, try TN board as fallback (most questions are TN)
+    if(!qbData.ok || !qbData.questions || qbData.questions.length<5){
+      console.log('Board not found, trying TN fallback...');
+      qbRes=await fetch(`${API_URL}/api/qbank/exam?board=TN&class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(subj)}&count=15`);
+      qbData=await qbRes.json();
+    }
     if(qbData.ok && qbData.questions && qbData.questions.length>=5){
       // Got questions from DB — zero AI tokens used!
       S.examQs=qbData.questions.map(q=>({
@@ -4331,7 +4339,7 @@ async function startExam(){
   }catch(e){ console.log('QBank unavailable, using AI:', e.message); }
 
   // ── STEP 2: AI fallback — only if question bank empty ──
-  document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">🧠 Generating questions...<br><small style="opacity:.6">No questions in bank yet for this subject</small></div>';
+  document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">🤖 AI is creating questions...<br><small style="opacity:.6">Bank empty for this subject — generating from AI</small></div>';
   try{
     const topics=S.chatHist.filter(m=>m.role==='user').map(m=>m.content).join(', ').substring(0,300);
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -5467,7 +5475,7 @@ async function openInstantExam(subjectId, subjectName, icon){
   if(!S.isPaid && checkTrial(S.user)==='expired'){checkPaywall();return;}
   IE = {subject:subjectName, subjectId, icon, questions:[], answers:{}, currentQ:0, timer:null, secs:900, startTime:Date.now()};
   document.getElementById('ie-title').textContent = icon+' '+subjectName+' — Quick Exam';
-  document.getElementById('ie-subtitle').textContent = '10 questions · AI corrects with red pen';
+  document.getElementById('ie-subtitle').textContent = '15 questions · AI corrects with red pen';
   document.getElementById('ie-body').innerHTML = `
     <div style="text-align:center;padding:40px 20px;">
       <div style="font-size:48px;margin-bottom:12px;">${icon}</div>
