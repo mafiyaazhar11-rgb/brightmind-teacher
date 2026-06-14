@@ -118,6 +118,28 @@ async function initDB() {
       questions_in_session INTEGER DEFAULT 0,
       subjects_studied JSONB DEFAULT '[]'
     );
+
+    -- QUESTION BANK TABLE
+    CREATE TABLE IF NOT EXISTS bmt_question_bank (
+      id BIGSERIAL PRIMARY KEY,
+      board VARCHAR(20) NOT NULL,
+      class VARCHAR(5) NOT NULL,
+      subject VARCHAR(100) NOT NULL,
+      chapter VARCHAR(200),
+      topic VARCHAR(200),
+      question TEXT NOT NULL,
+      option_a TEXT NOT NULL,
+      option_b TEXT NOT NULL,
+      option_c TEXT NOT NULL,
+      option_d TEXT NOT NULL,
+      correct_answer VARCHAR(1) NOT NULL,
+      explanation TEXT,
+      difficulty VARCHAR(10) DEFAULT 'medium',
+      marks INTEGER DEFAULT 1,
+      created_at TIMESTAMP DEFAULT NOW(),
+      created_by VARCHAR(50) DEFAULT 'admin'
+    );
+    CREATE INDEX IF NOT EXISTS idx_qbank_lookup ON bmt_question_bank(board, class, subject);
   `);
   console.log('✅ BrightMind DB tables ready');
 }
@@ -610,6 +632,251 @@ app.get('/api/subscription/:id', async (req, res) => {
 });
 
 // ══════════════════════════════════════════════════
+// ══════════════════════════════════════
+// QUESTION BANK — serve from DB, zero AI cost per exam
+// ══════════════════════════════════════
+
+// GET random questions for student exam from bank
+app.get('/api/qbank/exam', async (req, res) => {
+  try {
+    const { board, class: cls, subject, count = 10 } = req.query;
+    if (!board || !cls || !subject) return res.json({ ok: false, msg: 'Missing params' });
+    const result = await pool.query(
+      `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks
+       FROM bmt_question_bank
+       WHERE board=$1 AND class=$2 AND LOWER(subject) LIKE LOWER($3)
+       ORDER BY RANDOM() LIMIT $4`,
+      [board, cls, `%${subject}%`, parseInt(count)]
+    );
+    if (result.rows.length < 8) return res.json({ ok: false, msg: 'no_questions' });
+    const questions = result.rows.map(q => ({
+      q: q.question,
+      options: ['A) '+q.option_a,'B) '+q.option_b,'C) '+q.option_c,'D) '+q.option_d],
+      correct: q.correct_answer,
+      explanation: q.explanation || '',
+      marks: q.marks || 1
+    }));
+    res.json({ ok: true, questions });
+  } catch(e) { res.json({ ok: false, msg: e.message }); }
+});
+
+// GET question bank stats (admin)
+app.get('/api/admin/qbank/stats', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
+    const result = await pool.query(
+      `SELECT board, class, subject, COUNT(*) as count FROM bmt_question_bank GROUP BY board, class, subject ORDER BY board, class, subject`
+    );
+    const total = await pool.query('SELECT COUNT(*) FROM bmt_question_bank');
+    res.json({ ok: true, breakdown: result.rows, total: parseInt(total.rows[0].count) });
+  } catch(e) { res.json({ ok: false, msg: e.message }); }
+});
+
+// POST bulk generate questions — admin calls AI ONCE, saves forever
+app.post('/api/admin/qbank/generate', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
+    const { board, class: cls, subject, chapter, topic, count = 30 } = req.body;
+    if (!board || !cls || !subject) return res.status(400).json({ ok: false, msg: 'Missing params' });
+    const boardFull = {CBSE:'CBSE',TN:'Tamil Nadu State Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board'}[board]||board;
+    const prompt = `Generate EXACTLY ${count} MCQ questions for ${boardFull} Class ${cls} ${subject}${chapter?' Chapter: '+chapter:''}${topic?' Topic: '+topic:''}.
+Rules: Real syllabus content. 4 realistic options each. Correct answers mixed (A/B/C/D varied). Include easy(30%)/medium(40%)/hard(30%).
+Return ONLY valid JSON array:
+[{"q":"question","a":"optionA","b":"optionB","c":"optionC","d":"optionD","correct":"B","explanation":"why","difficulty":"medium","chapter":"chap name"}]`;
+    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01'},
+      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:4000, messages:[{role:'user',content:prompt}] })
+    });
+    const aiData = await aiRes.json();
+    if (aiData.error) return res.json({ ok:false, msg:aiData.error.message });
+    let raw = (aiData.content?.[0]?.text||'[]').replace(/```json|```/g,'').trim();
+    let questions;
+    try { questions = JSON.parse(raw); } catch(e) { return res.json({ ok:false, msg:'Invalid JSON from AI', raw:raw.substring(0,300) }); }
+    if (!Array.isArray(questions)||!questions.length) return res.json({ ok:false, msg:'No questions returned' });
+    let saved = 0;
+    for (const q of questions) {
+      if (!q.q||!q.a||!q.correct) continue;
+      try {
+        await pool.query(
+          `INSERT INTO bmt_question_bank (board,class,subject,chapter,topic,question,option_a,option_b,option_c,option_d,correct_answer,explanation,difficulty)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+          [board,cls,subject,q.chapter||chapter||'',topic||'',q.q,q.a,q.b||'',q.c||'',q.d||'',
+           (q.correct||'A').toUpperCase().charAt(0),q.explanation||'',q.difficulty||'medium']
+        );
+        saved++;
+      } catch(e) { /* skip duplicates */ }
+    }
+    res.json({ ok:true, generated:questions.length, saved, board, class:cls, subject });
+  } catch(e) { res.json({ ok:false, msg:e.message }); }
+});
+
+// AUTO BULK GENERATE — one API call generates ALL subjects for a board
+app.post('/api/admin/qbank/auto-bulk', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
+
+    const { board } = req.body;
+    if (!board) return res.status(400).json({ ok: false, msg: 'Board required' });
+
+    // Full syllabus map
+    const SYLLABUS = {
+      TN: {
+        '9':  ['Tamil','English','Mathematics','Science','Social Science'],
+        '10': ['Tamil','English','Mathematics','Science','Social Science'],
+        '11': ['Tamil','English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','Accountancy','History','Geography'],
+        '12': ['Tamil','English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','Accountancy','History','Geography']
+      },
+      CBSE: {
+        '9':  ['English','Mathematics','Science','Social Science','Hindi'],
+        '10': ['English','Mathematics','Science','Social Science','Hindi'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Accountancy','Business Studies','Economics','History','Geography'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Accountancy','Business Studies','Economics','History','Geography']
+      },
+      KL: {
+        '9':  ['Malayalam','English','Mathematics','Physics','Chemistry','Biology','Social Science'],
+        '10': ['Malayalam','English','Mathematics','Physics','Chemistry','Biology','Social Science'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
+      },
+      KA: {
+        '9':  ['Kannada','English','Mathematics','Science','Social Science'],
+        '10': ['Kannada','English','Mathematics','Science','Social Science'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics']
+      }
+    };
+
+    const boardMap = {TN:'Tamil Nadu State Board',CBSE:'CBSE',KL:'Kerala Board',KA:'Karnataka State Board'};
+    const boardFull = boardMap[board] || board;
+    const classes = SYLLABUS[board];
+    if (!classes) return res.json({ ok: false, msg: 'Board not in syllabus map' });
+
+    // Send back immediately — process in background
+    res.json({ ok: true, msg: 'Bulk generation started in background', board, boardFull });
+
+    // Background processing — generate all subjects sequentially
+    (async () => {
+      let totalSaved = 0;
+      let errors = [];
+      const allCombos = [];
+      for (const [cls, subjects] of Object.entries(classes)) {
+        for (const subject of subjects) {
+          allCombos.push({ cls, subject });
+        }
+      }
+      console.log(`🚀 Auto-bulk started: ${board} — ${allCombos.length} subject-class combos`);
+
+      for (const { cls, subject } of allCombos) {
+        try {
+          // Check if already has 20+ questions
+          const existing = await pool.query(
+            'SELECT COUNT(*) FROM bmt_question_bank WHERE board=$1 AND class=$2 AND LOWER(subject)=LOWER($3)',
+            [board, cls, subject]
+          );
+          if (parseInt(existing.rows[0].count) >= 20) {
+            console.log(`⏭️ Skip ${board} Cl${cls} ${subject} — already has ${existing.rows[0].count} questions`);
+            continue;
+          }
+
+          const prompt = `Generate EXACTLY 50 MCQ questions for ${boardFull} Class ${cls} ${subject} covering the FULL syllabus.
+Rules:
+1. Cover ALL major chapters/topics in the syllabus
+2. Mix: definitions(30%) + applications(40%) + analysis(30%)
+3. Options must be realistic — no obviously wrong answers
+4. Correct answers: distribute A/B/C/D (not all same letter)
+5. Return ONLY valid JSON array, no other text
+
+[{"q":"question","a":"option text","b":"option text","c":"option text","d":"option text","correct":"B","explanation":"brief reason","difficulty":"medium","chapter":"chapter name"}]
+
+Generate 50 questions for ${boardFull} Class ${cls} ${subject}:`;
+
+          const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01' },
+            body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:3000, messages:[{role:'user',content:prompt}] })
+          });
+
+          const aiData = await aiRes.json();
+          if (aiData.error) { errors.push(`${cls} ${subject}: ${aiData.error.message}`); continue; }
+
+          let raw = (aiData.content?.[0]?.text||'[]').replace(/```json|```/g,'').trim();
+          let questions;
+          try { questions = JSON.parse(raw); } catch(e) { errors.push(`${cls} ${subject}: parse error`); continue; }
+          if (!Array.isArray(questions)||!questions.length) continue;
+
+          let saved = 0;
+          for (const q of questions) {
+            if (!q.q||!q.a||!q.correct) continue;
+            try {
+              await pool.query(
+                `INSERT INTO bmt_question_bank (board,class,subject,chapter,question,option_a,option_b,option_c,option_d,correct_answer,explanation,difficulty)
+                 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+                [board,cls,subject,q.chapter||'',q.q,q.a,q.b||'-',q.c||'-',q.d||'-',
+                 (q.correct||'A').toUpperCase().charAt(0),q.explanation||'',q.difficulty||'medium']
+              );
+              saved++;
+            } catch(e) { /* skip */ }
+          }
+          totalSaved += saved;
+          console.log(`✅ ${board} Cl${cls} ${subject}: ${saved} saved`);
+
+          // Rate limit — wait 1s between calls to avoid hitting API limits
+          await new Promise(r => setTimeout(r, 1200));
+
+        } catch(e) {
+          errors.push(`${cls} ${subject}: ${e.message}`);
+          console.error(`❌ ${cls} ${subject}:`, e.message);
+        }
+      }
+      console.log(`🎉 Auto-bulk complete: ${totalSaved} total questions saved. Errors: ${errors.length}`);
+      if (errors.length) console.log('Errors:', errors);
+    })();
+
+  } catch(e) {
+    console.error('Auto-bulk error:', e.message);
+    res.json({ ok: false, msg: e.message });
+  }
+});
+
+// GET bulk generation status
+app.get('/api/admin/qbank/status', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
+    const board = req.query.board;
+    const result = await pool.query(
+      `SELECT class, subject, COUNT(*) as count FROM bmt_question_bank
+       WHERE ($1::text IS NULL OR board=$1)
+       GROUP BY class, subject ORDER BY class, subject`,
+      [board || null]
+    );
+    const total = await pool.query(
+      `SELECT COUNT(*) FROM bmt_question_bank WHERE ($1::text IS NULL OR board=$1)`,
+      [board || null]
+    );
+    res.json({ ok: true, breakdown: result.rows, total: parseInt(total.rows[0].count) });
+  } catch(e) { res.json({ ok: false, msg: e.message }); }
+});
+
+// DELETE questions (admin)
+app.delete('/api/admin/qbank/clear', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok:false });
+    const { board, class: cls, subject } = req.body;
+    let q = 'DELETE FROM bmt_question_bank WHERE 1=1'; const params = [];
+    if (board) { params.push(board); q+=` AND board=$${params.length}`; }
+    if (cls) { params.push(cls); q+=` AND class=$${params.length}`; }
+    if (subject) { params.push(`%${subject}%`); q+=` AND LOWER(subject) LIKE LOWER($${params.length})`; }
+    const r = await pool.query(q, params);
+    res.json({ ok:true, deleted:r.rowCount });
+  } catch(e) { res.json({ ok:false, msg:e.message }); }
+});
+
 // AI PROXY — Routes Anthropic calls securely
 // ══════════════════════════════════════════════════
 app.post('/api/ai', async (req, res) => {
