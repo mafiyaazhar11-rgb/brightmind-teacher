@@ -1718,7 +1718,8 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     </div>
 
     <!-- STEP 2: DURATION -->
-    <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:8px;letter-spacing:1px;">STEP 2 — SELECT DURATION</div>
+    <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:4px;letter-spacing:1px;">STEP 2 — SELECT DURATION</div>
+    <div style="font-size:11px;color:var(--gray-text);margin-bottom:10px;" id="plan-selected-label">Selected: Basic Plan (30Q/day · 2 photos/day)</div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="duration-opts">
       <div class="plan-opt sel" onclick="selDuration(this,'monthly')" id="dur-monthly">
         <div>
@@ -1731,32 +1732,40 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
       </div>
       <div class="plan-opt" onclick="selDuration(this,'quarterly')" id="dur-quarterly">
         <div>
-          <div class="pn">Quarterly <span class="best-val" style="background:#4caf50;">SAVE 5%</span></div>
+          <div class="pn">Quarterly <span class="best-val" style="background:#4caf50;" id="badge-quarterly">SAVE 10%</span></div>
           <div class="pd">Pay every 3 months · Better value</div>
         </div>
         <div style="text-align:right;">
           <div style="font-size:11px;color:var(--gray-text);">3 months</div>
-          <div class="pp" id="price-quarterly">₹567<small></small></div>
-          <div style="font-size:10px;color:var(--green);font-weight:700;" id="save-quarterly">Save ₹30!</div>
+          <div class="pp" id="price-quarterly">₹537</div>
+          <div style="font-size:10px;color:var(--green);font-weight:700;" id="save-quarterly">Save ₹60!</div>
+          <div style="font-size:9px;color:var(--gray-text);" id="per-month-quarterly">₹179/mo</div>
         </div>
       </div>
       <div class="plan-opt" onclick="selDuration(this,'annual')" id="dur-yearly">
         <div>
-          <div class="pn">Annual <span class="best-val" style="background:#e91e63;">SAVE 10%</span></div>
+          <div class="pn">Annual <span class="best-val" style="background:#e91e63;" id="badge-yearly">SAVE 25%</span></div>
           <div class="pd">Pay once a year · Maximum savings</div>
         </div>
         <div style="text-align:right;">
           <div style="font-size:11px;color:var(--gray-text);">12 months</div>
-          <div class="pp" id="price-yearly">₹2,149<small></small></div>
-          <div style="font-size:10px;color:var(--green);font-weight:700;" id="save-yearly">Save ₹239!</div>
+          <div class="pp" id="price-yearly">₹1,791</div>
+          <div style="font-size:10px;color:var(--green);font-weight:700;" id="save-yearly">Save ₹597!</div>
+          <div style="font-size:9px;color:var(--gray-text);" id="per-month-yearly">₹149/mo</div>
         </div>
       </div>
     </div>
 
-    <!-- TOTAL -->
-    <div style="background:var(--gray-light);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-size:13px;color:var(--gray-text);">Total to pay today</div>
-      <div style="font-size:22px;font-weight:900;color:var(--blue-mid);" id="modal-total">₹199</div>
+    <!-- TOTAL — clear breakdown -->
+    <div style="background:linear-gradient(135deg,#e8eaf6,#f3e5f5);border-radius:12px;padding:14px 16px;margin-bottom:14px;border:2px solid rgba(63,81,181,0.2);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--blue-dark);">Total to pay today</div>
+          <div style="font-size:10px;color:var(--gray-text);" id="total-breakdown">Basic Plan · Monthly</div>
+        </div>
+        <div style="font-size:26px;font-weight:900;color:var(--blue-mid);" id="modal-total">₹199</div>
+      </div>
+      <div style="font-size:10px;color:var(--gray-text);">✅ Secure payment · Cancel anytime · Instant activation</div>
     </div>
 
     <button class="btn-main" onclick="subscribePlan()">Pay with Razorpay →</button>
@@ -4585,29 +4594,64 @@ function selDuration(el, duration){
 
 function updatePriceDisplay(){
   const base=BASE_PRICES[selectedPlanType]||199;
-  // Monthly prices
+  const isPremium=selectedPlanType==='premium';
+  const planName=isPremium?'Premium Plan (60Q/day · 5 photos/day)':'Basic Plan (30Q/day · 2 photos/day)';
+  const planShort=isPremium?'Premium Plan':'Basic Plan';
+
+  // Calculate prices — bigger discounts for longer plans, Premium gets better deals
   const monthly=base;
-  const quarterly=Math.round(base*3*0.95); // 5% off
-  const yearly=Math.round(base*12*0.90);   // 10% off
+  let quarterly, yearly;
+  if(isPremium){
+    quarterly=Math.round(base*3*0.90);   // Premium Quarterly: 10% off = ₹1,077
+    yearly=Math.round(base*12*0.60);     // Premium Annual: 40% off = ₹2,868 (₹239/mo — HUGE SAVING)
+  } else {
+    quarterly=Math.round(base*3*0.90);   // Basic Quarterly: 10% off = ₹537
+    yearly=Math.round(base*12*0.75);     // Basic Annual: 25% off = ₹1,791 (₹149/mo)
+  }
   const savingsQ=Math.round(base*3-quarterly);
   const savingsY=Math.round(base*12-yearly);
+  const perMonthQ=Math.round(quarterly/3);
+  const perMonthY=Math.round(yearly/12);
 
-  // Update duration option prices
+  // Update plan selected label
+  const planLabel=document.getElementById('plan-selected-label');
+  if(planLabel)planLabel.textContent='Selected: '+planName;
+
+  // Update duration prices
   const pm=document.getElementById('price-monthly');
   const pq=document.getElementById('price-quarterly');
   const py=document.getElementById('price-yearly');
   const sq=document.getElementById('save-quarterly');
   const sy=document.getElementById('save-yearly');
-  if(pm)pm.innerHTML=`₹${monthly}<small>/mo</small>`;
+  const pmQ=document.getElementById('per-month-quarterly');
+  const pmY=document.getElementById('per-month-yearly');
+  if(pm)pm.innerHTML=`₹${monthly.toLocaleString('en-IN')}<small>/mo</small>`;
   if(pq)pq.innerHTML=`₹${quarterly.toLocaleString('en-IN')}`;
   if(py)py.innerHTML=`₹${yearly.toLocaleString('en-IN')}`;
   if(sq)sq.textContent=`Save ₹${savingsQ}!`;
   if(sy)sy.textContent=`Save ₹${savingsY}!`;
+  // Update discount % badges
+  const bq=document.getElementById('badge-quarterly');
+  const by=document.getElementById('badge-yearly');
+  if(bq)bq.textContent=isPremium?'SAVE 10%':'SAVE 10%';
+  if(by)by.textContent=isPremium?'SAVE 40%':'SAVE 25%';
+  if(pmQ)pmQ.textContent=`₹${perMonthQ}/mo`;
+  if(pmY)pmY.textContent=`₹${perMonthY}/mo`;
 
-  // Update total
-  const total=selectedDuration==='monthly'?monthly:selectedDuration==='quarterly'?quarterly:yearly; // yearly=annual
+  // Update total + breakdown label
+  const total=selectedDuration==='monthly'?monthly:selectedDuration==='quarterly'?quarterly:yearly;
+  const durLabel=selectedDuration==='monthly'?'Monthly':selectedDuration==='quarterly'?'Quarterly (3 months)':'Annual (12 months)';
   const totalEl=document.getElementById('modal-total');
+  const breakdownEl=document.getElementById('total-breakdown');
   if(totalEl)totalEl.textContent='₹'+total.toLocaleString('en-IN');
+  if(breakdownEl)breakdownEl.textContent=planShort+' · '+durLabel;
+
+  // Update pay button color for premium
+  const payBtn=document.querySelector('#sub-modal .btn-main');
+  if(payBtn){
+    payBtn.style.background=isPremium?'linear-gradient(135deg,#7b1fa2,#4a148c)':'';
+    payBtn.textContent=isPremium?'⭐ Pay with Razorpay →':'Pay with Razorpay →';
+  }
 }
 
 function subscribePlan(){
