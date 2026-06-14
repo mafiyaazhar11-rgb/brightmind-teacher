@@ -1724,7 +1724,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
       <div class="plan-opt sel" onclick="selPlan(this,'all')">
         <div>
           <div class="pn">Basic Plan</div>
-          <div class="pd">30 Q/day · 2 photos/day · All subjects · Exams</div>
+          <div class="pd">45 Q/day · 2 photos/day · All subjects · Exams</div>
           <div style="font-size:10px;color:var(--red);font-weight:700;margin-top:2px;">Was ₹399 · Save 50%!</div>
         </div>
         <div style="text-align:right;">
@@ -1736,7 +1736,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
       <div class="plan-opt" onclick="selPlan(this,'premium')">
         <div>
           <div class="pn">Premium Plan <span class="best-val" style="background:linear-gradient(135deg,#7b1fa2,#4a148c);">⭐ PREMIUM</span></div>
-          <div class="pd">60 Q/day · 5 photos/day · All subjects · Priority</div>
+          <div class="pd">75 Q/day · 5 photos/day · All subjects · Priority</div>
           <div style="font-size:10px;color:#7b1fa2;font-weight:700;margin-top:2px;">Best for serious students!</div>
         </div>
         <div style="text-align:right;">
@@ -2426,9 +2426,9 @@ function loginUser(u){
   // Admin account — completely unlimited, no restrictions
   if(u.name==='admin'||u.email==='admin'||u.plan==='admin'||u.isAdmin){
     S.freeLimit=9999; S.photoLimit=9999; S.isPaid=true;
-  } else if(!u.isPaid){ S.freeLimit=5; S.photoLimit=1; } // 5 real questions + 1 photo free
-  else if(u.plan==='premium'){ S.freeLimit=60; S.photoLimit=5; }
-  else { S.freeLimit=u.daily_q_limit||30; S.photoLimit=u.daily_photo_limit||2; }
+  } else if(!u.isPaid){ S.freeLimit=5; S.photoLimit=1; } // 5 real questions + 1 photo free demo
+  else if(u.plan==='premium'){ S.freeLimit=75; S.photoLimit=5; }
+  else { S.freeLimit=u.daily_q_limit||45; S.photoLimit=u.daily_photo_limit||2; }
   S.photoUsed=parseInt(localStorage.getItem('bmt_photo_date_'+u.id)===new Date().toDateString()?localStorage.getItem('bmt_photo_'+u.id)||'0':'0');
   if(localStorage.getItem('bmt_photo_date_'+u.id)!==new Date().toDateString()){
     localStorage.setItem('bmt_photo_'+u.id,'0');
@@ -2979,7 +2979,7 @@ Keep sentences short. Talk directly to student using "you", "we", "let us". Foll
       const sys=(LANG_SYS[lang]||LANG_SYS['en'])+` You are Miss BrightMind, expert ${bf} teacher for Class ${cls} ${subj}. Topic: "${topic}". Chapter: "${chapter}". Teach warmly, sentence by sentence. Give homework at end.`;
       
       const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,system:sys,
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,system:sys,
           messages:[{role:'user',content:teachPrompt}]})});
       const d=await r.json();
       const reply=(d.content&&d.content[0]&&d.content[0].text)||'';
@@ -3441,7 +3441,7 @@ async function handleBBPhotoUpload(event){
 {"step":N,"title":"FINAL ANSWER","content":"complete answer","speak":"..."}]
 Return ONLY JSON array.`;
       const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,system:sys,
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,system:sys,
           messages:[{role:'user',content:[
             {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
             {type:'text',text:'Please solve this question from my photo step by step on the blackboard.'}
@@ -3923,7 +3923,7 @@ async function assignHW(topic){
   if(chatMsgsEl)chatMsgsEl.innerHTML+=`<div class="msg ai" id="${hwPreviewId}"><div class="msg-av">🧠</div><div><div class="msg-bub">${hwPreviewHtml} ⏳</div></div></div>`;
   try{
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,
         messages:[{role:'user',content:`Create exactly 3 homework questions for a Class ${S.user?.class||11} ${S.sub?.name||SYL.subject} student studying "${SYL.topic||topic}" from "${SYL.chapter||'Chapter'}" as per ${bf} syllabus.
 
 Format EXACTLY like this:
@@ -4149,7 +4149,7 @@ Be structured, clear, and always encouraging — react like a real teacher proud
 
   try{
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sys,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:700,system:sys,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:guidePhotoType,data:guidePhotoBase64}},
           {type:'text',text:userMsg}
@@ -4200,7 +4200,7 @@ async function startExam(){
   try{
     const topics=S.chatHist.filter(m=>m.role==='user').map(m=>m.content).join(', ').substring(0,300);
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:800,
         messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name} (Board: ${S.user?.board||'CBSE'}, Chapter: ${SYL.chapter||'General'}).
 
 CRITICAL RULES:
@@ -4260,7 +4260,7 @@ function fallbackQs(){
   const letters=['A','B','C','D'];
   const subjects={
     Mathematics:['What is 2+2?','What is the value of π?','What is a prime number?','What is the quadratic formula?','What is an integer?','What is a fraction?','What is LCM?','What is HCF?','What is an angle?','What is probability?'],
-    Science:['What is photosynthesis?','What is Newton's first law?','What is an atom?','What is osmosis?','What is gravity?','What is DNA?','What is force?','What is energy?','What is a cell?','What is respiration?']
+    Science:['What is photosynthesis?','What is Newton first law?','What is an atom?','What is osmosis?','What is gravity?','What is DNA?','What is force?','What is energy?','What is a cell?','What is respiration?']
   };
   return Array(10).fill(null).map((_,i)=>{
     const correct=letters[i%4];
@@ -4427,7 +4427,7 @@ function renderProfile(){
   const best=Math.max(0,...(u.examHist||[]).map(e=>e.score));
   document.getElementById('pb-best').textContent=best?best+'/100':'—';
   const planName=u.plan==='premium'?'⭐ Premium Plan':u.isPaid?'✅ Basic Plan':'🆓 Free Plan';
-  const planDesc=u.plan==='premium'?'60 Q/day · 5 photos/day · All features':u.isPaid?'30 Q/day · 2 photos/day · All features':'3 questions only · Limited';
+  const planDesc=u.plan==='premium'?'75 Q/day · 5 photos/day · All features':u.isPaid?'45 Q/day · 2 photos/day · All features':'3 questions only · Limited';
   document.getElementById('plan-title').textContent=planName;
   document.getElementById('plan-sub').textContent=planDesc;
 
@@ -4846,7 +4846,7 @@ function selDuration(el, duration){
 function updatePriceDisplay(){
   const base=BASE_PRICES[selectedPlanType]||199;
   const isPremium=selectedPlanType==='premium';
-  const planName=isPremium?'Premium Plan (60Q/day · 5 photos/day)':'Basic Plan (30Q/day · 2 photos/day)';
+  const planName=isPremium?'Premium Plan (75Q/day · 5 photos/day)':'Basic Plan (45Q/day · 2 photos/day)';
   const planShort=isPremium?'⭐ Premium Plan':'Basic Plan';
   const monthly=base;
   const quarterly=Math.round(base*3*0.90);  // 10% off both plans
@@ -6050,7 +6050,7 @@ Return ONLY this JSON:
 }`;
 
     const r = await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:3000,
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,
         messages:[{role:'user',content:prompt}]})});
     const d = await r.json();
     let raw = d.content?.[0]?.text||'{}';
@@ -6147,7 +6147,7 @@ Return ONLY a JSON object:
 Make questions exam-realistic and curriculum-appropriate. Return ONLY JSON.`;
 
     const r = await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:3000,
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,
         messages:[{role:'user',content:prompt}]})});
     const d = await r.json();
     let raw = d.content?.[0]?.text||'{}';
