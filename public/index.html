@@ -3923,7 +3923,7 @@ async function assignHW(topic){
   if(chatMsgsEl)chatMsgsEl.innerHTML+=`<div class="msg ai" id="${hwPreviewId}"><div class="msg-av">🧠</div><div><div class="msg-bub">${hwPreviewHtml} ⏳</div></div></div>`;
   try{
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:400,
         messages:[{role:'user',content:`Create exactly 3 homework questions for a Class ${S.user?.class||11} ${S.sub?.name||SYL.subject} student studying "${SYL.topic||topic}" from "${SYL.chapter||'Chapter'}" as per ${bf} syllabus.
 
 Format EXACTLY like this:
@@ -4200,7 +4200,7 @@ async function startExam(){
   try{
     const topics=S.chatHist.filter(m=>m.role==='user').map(m=>m.content).join(', ').substring(0,300);
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:800,
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,
         messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name} (Board: ${S.user?.board||'CBSE'}, Chapter: ${SYL.chapter||'General'}).
 
 CRITICAL RULES:
