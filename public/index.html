@@ -1489,11 +1489,17 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
         <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:10px;">GENERATE NEW QUESTIONS</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
           <select id="qb-board" style="padding:8px;border:1px solid var(--gray-mid);border-radius:8px;font-size:12px;">
-            <option value="TN">Tamil Nadu Board</option>
+            <option value="TN">Tamil Nadu</option>
             <option value="CBSE">CBSE</option>
-            <option value="KL">Kerala Board</option>
-            <option value="KA">Karnataka Board</option>
-            <option value="AP">AP Board</option>
+            <option value="KL">Kerala</option>
+            <option value="KA">Karnataka</option>
+            <option value="AP">Andhra Pradesh</option>
+            <option value="TS">Telangana</option>
+            <option value="MH">Maharashtra</option>
+            <option value="UP">Uttar Pradesh</option>
+            <option value="WB">West Bengal</option>
+            <option value="GJ">Gujarat</option>
+            <option value="RJ">Rajasthan</option>
           </select>
           <select id="qb-class" style="padding:8px;border:1px solid var(--gray-mid);border-radius:8px;font-size:12px;">
             <option value="9">Class 9</option>
@@ -1523,17 +1529,38 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
         <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:6px;">🚀 AUTO BULK GENERATE — One Click!</div>
         <div style="font-size:11px;color:rgba(255,255,255,.8);margin-bottom:12px;">Generates ALL subjects for all classes automatically. Runs in background. Takes 5-10 minutes.</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <button onclick="autoBulkGenerate('TN')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:12px 8px;font-size:12px;font-weight:800;cursor:pointer;">
-            🏫 Tamil Nadu Board<br><small style="font-weight:400;opacity:.7;">Class 9-12 · All subjects</small>
+          <button onclick="autoBulkGenerate('TN')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;cursor:pointer;">
+            🏫 Tamil Nadu<br><small style="font-weight:400;opacity:.7;">5 subjects · 4 classes</small>
           </button>
-          <button onclick="autoBulkGenerate('CBSE')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:12px 8px;font-size:12px;font-weight:800;cursor:pointer;">
-            🏫 CBSE Board<br><small style="font-weight:400;opacity:.7;">Class 9-12 · All subjects</small>
+          <button onclick="autoBulkGenerate('CBSE')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;cursor:pointer;">
+            🏫 CBSE<br><small style="font-weight:400;opacity:.7;">5 subjects · 4 classes</small>
           </button>
-          <button onclick="autoBulkGenerate('KL')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:12px 8px;font-size:12px;font-weight:800;cursor:pointer;">
-            🏫 Kerala Board<br><small style="font-weight:400;opacity:.7;">Class 9-12 · All subjects</small>
+          <button onclick="autoBulkGenerate('KL')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;cursor:pointer;">
+            🏫 Kerala<br><small style="font-weight:400;opacity:.7;">7 subjects · 4 classes</small>
           </button>
-          <button onclick="autoBulkGenerate('KA')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:12px 8px;font-size:12px;font-weight:800;cursor:pointer;">
-            🏫 Karnataka Board<br><small style="font-weight:400;opacity:.7;">Class 9-12 · All subjects</small>
+          <button onclick="autoBulkGenerate('KA')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;cursor:pointer;">
+            🏫 Karnataka<br><small style="font-weight:400;opacity:.7;">5 subjects · 4 classes</small>
+          </button>
+          <button onclick="autoBulkGenerate('AP')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;cursor:pointer;">
+            🏫 Andhra Pradesh<br><small style="font-weight:400;opacity:.7;">6 subjects · 4 classes</small>
+          </button>
+          <button onclick="autoBulkGenerate('TS')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;cursor:pointer;">
+            🏫 Telangana<br><small style="font-weight:400;opacity:.7;">6 subjects · 4 classes</small>
+          </button>
+          <button onclick="autoBulkGenerate('MH')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;cursor:pointer;">
+            🏫 Maharashtra<br><small style="font-weight:400;opacity:.7;">5 subjects · 4 classes</small>
+          </button>
+          <button onclick="autoBulkGenerate('UP')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;cursor:pointer;">
+            🏫 Uttar Pradesh<br><small style="font-weight:400;opacity:.7;">5 subjects · 4 classes</small>
+          </button>
+          <button onclick="autoBulkGenerate('WB')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;cursor:pointer;">
+            🏫 West Bengal<br><small style="font-weight:400;opacity:.7;">7 subjects · 4 classes</small>
+          </button>
+          <button onclick="autoBulkGenerate('GJ')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;cursor:pointer;">
+            🏫 Gujarat<br><small style="font-weight:400;opacity:.7;">5 subjects · 4 classes</small>
+          </button>
+          <button onclick="autoBulkGenerate('RJ')" style="background:#fff;color:#004d40;border:none;border-radius:10px;padding:10px 8px;font-size:11px;font-weight:800;cursor:pointer;">
+            🏫 Rajasthan<br><small style="font-weight:400;opacity:.7;">5 subjects · 4 classes</small>
           </button>
         </div>
         <div id="bulk-status" style="margin-top:10px;font-size:12px;color:rgba(255,255,255,.9);text-align:center;"></div>
@@ -4932,7 +4959,7 @@ async function generateQBank(){
 }
 
 async function autoBulkGenerate(board){
-  const names={TN:'Tamil Nadu Board',CBSE:'CBSE',KL:'Kerala Board',KA:'Karnataka Board'};
+  const names={TN:'Tamil Nadu Board',CBSE:'CBSE',KL:'Kerala Board',KA:'Karnataka Board',AP:'Andhra Pradesh Board',TS:'Telangana Board',MH:'Maharashtra Board',UP:'Uttar Pradesh Board',WB:'West Bengal Board',GJ:'Gujarat Board',RJ:'Rajasthan Board'};
   const statusEl=document.getElementById('bulk-status');
   if(!confirm(`Generate ALL questions for ${names[board]||board}?\n\nThis will:\n• Generate 30 questions per subject per class\n• Cover Classes 9-12 all subjects\n• Run in background (5-15 min)\n• Use Haiku model (low cost)\n\nStart?`))return;
   if(statusEl)statusEl.innerHTML='⏳ Starting bulk generation for '+names[board]+'... Please wait.';
