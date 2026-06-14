@@ -493,6 +493,45 @@ app.post('/api/payment/verify', async (req, res) => {
   }
 });
 
+// ── EMERGENCY: Manually activate premium for a student by name or phone ──
+app.post('/api/admin/activate-student', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false, msg: 'Unauthorized' });
+    const { student_id, student_name, months, subscription_type } = req.body;
+    if (!student_id && !student_name) return res.json({ ok: false, msg: 'Need student_id or student_name' });
+
+    const expiry = new Date();
+    const m = parseInt(months) || 1;
+    expiry.setMonth(expiry.getMonth() + m);
+
+    let query, params;
+    if (student_id) {
+      query = `UPDATE bmt_students SET is_paid=true, plan='all', subscription_type=$1,
+               subscription_start=NOW(), subscription_end=$2, next_due_date=$2, reminder_sent=false
+               WHERE id=$3 RETURNING id, name, is_paid, subscription_end`;
+      params = [subscription_type || 'monthly', expiry, student_id];
+    } else {
+      query = `UPDATE bmt_students SET is_paid=true, plan='all', subscription_type=$1,
+               subscription_start=NOW(), subscription_end=$2, next_due_date=$2, reminder_sent=false
+               WHERE LOWER(name) LIKE LOWER($3) RETURNING id, name, is_paid, subscription_end`;
+      params = [subscription_type || 'monthly', expiry, '%' + student_name + '%'];
+    }
+    const result = await pool.query(query, params);
+    if (!result.rows.length) return res.json({ ok: false, msg: 'Student not found' });
+    const s = result.rows[0];
+    await pool.query(
+      `INSERT INTO bmt_audit_log (student_id, student_name, action, details) VALUES ($1,$2,'ADMIN_ACTIVATE',$3)`,
+      [s.id, s.name, JSON.stringify({ months: m, expiry, by: 'admin' })]
+    ).catch(() => {});
+    console.log(`🔧 ADMIN ACTIVATE: ${s.name} | ${m} month(s) | expires ${expiry}`);
+    res.json({ ok: true, student: s.name, id: s.id, is_paid: true, expiry, days: m * 30 });
+  } catch (e) {
+    console.error(e);
+    res.json({ ok: false, msg: e.message });
+  }
+});
+
 // CHECK RENEWAL REMINDERS (called daily)
 app.get('/api/admin/check-renewals', async (req, res) => {
   try {
@@ -516,6 +555,23 @@ app.get('/api/admin/check-renewals', async (req, res) => {
     res.json({ ok: true, due_students: due.rows });
   } catch (e) {
     res.json({ ok: false, due_students: [] });
+  }
+});
+
+// FIND STUDENT BY NAME (admin use)
+app.get('/api/admin/find-student', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
+    const name = req.query.name || '';
+    const result = await pool.query(
+      `SELECT id, name, is_paid, plan, subscription_type, subscription_end, reg_on
+       FROM bmt_students WHERE LOWER(name) LIKE LOWER($1) ORDER BY reg_on DESC LIMIT 10`,
+      ['%' + name + '%']
+    );
+    res.json({ ok: true, students: result.rows });
+  } catch (e) {
+    res.json({ ok: false });
   }
 });
 
