@@ -949,6 +949,71 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
       </div>
     </div>
 
+      <!-- MY GUIDE SECTION -->
+      <div id="ptab2-guide-content" style="display:none;">
+        <div style="background:linear-gradient(135deg,#4a148c,#7b1fa2);border-radius:16px;padding:16px 18px;margin-bottom:14px;">
+          <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px;">📖 Ask From Your Guide or Notes</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.85);">Photo your guide, textbook, or <strong>handwritten notes</strong> — Miss BrightMind reads everything and answers your questions!</div>
+        </div>
+
+        <!-- Upload area -->
+        <div style="border:2px dashed rgba(123,31,162,0.4);border-radius:14px;padding:20px;text-align:center;background:rgba(123,31,162,0.05);margin-bottom:14px;" onclick="document.getElementById('guide-photo-input').click()" id="guide-upload-area">
+          <div style="font-size:40px;margin-bottom:8px;">📸</div>
+          <div style="font-size:14px;font-weight:700;color:#7b1fa2;margin-bottom:4px;">Tap to upload any page</div>
+          <div style="font-size:11px;color:var(--gray-text);">Guide · Textbook · Handwritten notes · Diagrams · Max 4MB</div>
+          <div style="font-size:10px;color:#7b1fa2;margin-top:4px;font-weight:600;">✓ Miss BrightMind can read handwriting too!</div>
+          <input type="file" id="guide-photo-input" accept="image/*" capture="environment" style="display:none;" onchange="handleGuideUpload(event)"/>
+        </div>
+
+        <!-- Preview area -->
+        <div id="guide-preview-area" style="display:none;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <img id="guide-preview-img" style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:2px solid #7b1fa2;" />
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#7b1fa2;">Guide page loaded ✓</div>
+              <div style="font-size:11px;color:var(--gray-text);">Ask Miss BrightMind anything about this page</div>
+              <button onclick="clearGuidePhoto()" style="margin-top:6px;font-size:11px;color:var(--red);background:none;border:none;cursor:pointer;padding:0;">✕ Remove photo</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Question input -->
+        <div style="background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:14px;">
+          <div style="font-size:12px;font-weight:700;color:var(--gray-text);margin-bottom:8px;">YOUR QUESTION</div>
+          <textarea id="guide-question-inp" placeholder="e.g. Explain question 5 on this page... or What does this paragraph mean?..." style="width:100%;border:2px solid var(--gray-mid);border-radius:10px;padding:10px 12px;font-size:13px;font-family:'Poppins',sans-serif;resize:none;min-height:70px;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#7b1fa2'" onblur="this.style.borderColor='var(--gray-mid)'"></textarea>
+          <button onclick="askFromGuide()" style="width:100%;margin-top:10px;background:linear-gradient(135deg,#4a148c,#7b1fa2);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
+            🧠 Ask Miss BrightMind
+          </button>
+        </div>
+
+        <!-- Quick question chips -->
+        <div style="margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:700;color:var(--gray-text);margin-bottom:8px;">QUICK QUESTIONS</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <button onclick="setGuideQ('Explain this page in simple words')" style="background:rgba(123,31,162,0.08);color:#7b1fa2;border:1px solid rgba(123,31,162,0.2);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;">Explain simply</button>
+            <button onclick="setGuideQ('What are the important points to remember for exam?')" style="background:rgba(123,31,162,0.08);color:#7b1fa2;border:1px solid rgba(123,31,162,0.2);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;">Exam important points</button>
+            <button onclick="setGuideQ('Solve all the questions on this page step by step')" style="background:rgba(123,31,162,0.08);color:#7b1fa2;border:1px solid rgba(123,31,162,0.2);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;">Solve all questions</button>
+            <button onclick="setGuideQ('Give me the answer to the first question on this page')" style="background:rgba(123,31,162,0.08);color:#7b1fa2;border:1px solid rgba(123,31,162,0.2);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;">First question answer</button>
+            <button onclick="setGuideQ('Write this as short notes I can revise quickly')" style="background:rgba(123,31,162,0.08);color:#7b1fa2;border:1px solid rgba(123,31,162,0.2);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;">Short revision notes</button>
+            <button onclick="setGuideQ('What are the definitions on this page?')" style="background:rgba(123,31,162,0.08);color:#7b1fa2;border:1px solid rgba(123,31,162,0.2);border-radius:20px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;">Definitions</button>
+          </div>
+        </div>
+
+        <!-- Answer area -->
+        <div id="guide-answer-area" style="display:none;background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4a148c,#7b1fa2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🧠</div>
+            <div style="font-size:13px;font-weight:700;color:#4a148c;">Miss BrightMind says:</div>
+          </div>
+          <div id="guide-answer-text" style="font-size:13px;line-height:1.7;color:var(--blue-dark);white-space:pre-wrap;"></div>
+          <button onclick="speakGuideAnswer()" style="margin-top:12px;background:rgba(123,31,162,0.08);color:#7b1fa2;border:1px solid rgba(123,31,162,0.2);border-radius:20px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;">🔊 Read Aloud</button>
+          <button onclick="document.getElementById('guide-question-inp').value='';document.getElementById('guide-answer-area').style.display='none';" style="margin-top:12px;margin-left:8px;background:rgba(0,0,0,0.04);color:var(--gray-text);border:none;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;">Ask another</button>
+        </div>
+
+        <!-- History of questions asked -->
+        <div id="guide-history" style="margin-top:14px;"></div>
+      </div>
+
     <!-- PROFILE -->
     <div id="pg-profile" class="page">
       <div class="prof-card">
@@ -3628,6 +3693,155 @@ Keep questions EXACTLY aligned to ${bf} board exam pattern. Use simple language.
 // ══════════════════════════════════════
 // EXAM
 // ══════════════════════════════════════
+
+// ══════════════════════════════════════
+// MY GUIDE — Photo guide and get answers
+// ══════════════════════════════════════
+let guidePhotoBase64=null;
+let guidePhotoType='image/jpeg';
+let guideHistory=[];
+
+function handleGuideUpload(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  // Size check 4MB
+  if(file.size>4*1024*1024){
+    alert('⚠️ File too large! Maximum 4MB.\nYour file: '+(file.size/1024/1024).toFixed(1)+'MB');
+    event.target.value='';return;
+  }
+  // 15 per 12hr limit
+  const _uid=S.user?.id||'x';
+  const _key='bmt_uploads_'+_uid,_tsKey='bmt_uploads_ts_'+_uid,_now=Date.now();
+  const _ts=parseInt(localStorage.getItem(_tsKey)||'0');
+  if(_now-_ts>12*60*60*1000){localStorage.setItem(_tsKey,_now);localStorage.setItem(_key,'0');}
+  const _uc=parseInt(localStorage.getItem(_key)||'0');
+  if(_uc>=15){
+    const _hr=Math.ceil((12*60*60*1000-(_now-_ts))/(60*60*1000));
+    alert('⚠️ Upload limit: 15 photos per 12 hours. Resets in '+_hr+' hr(s).');
+    event.target.value='';return;
+  }
+  localStorage.setItem(_key,_uc+1);
+
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    guidePhotoBase64=e.target.result.split(',')[1];
+    guidePhotoType=file.type||'image/jpeg';
+    // Show preview
+    const prev=document.getElementById('guide-preview-img');
+    if(prev)prev.src=e.target.result;
+    document.getElementById('guide-preview-area').style.display='block';
+    document.getElementById('guide-upload-area').style.border='2px solid #7b1fa2';
+    document.getElementById('guide-upload-area').style.background='rgba(123,31,162,0.08)';
+    // Speak confirmation
+    speakText('Page loaded! I can read your handwriting too. Ask me anything!');
+    const bubble=document.getElementById('speech-bubble');
+    if(bubble)bubble.textContent='📖 Guide loaded! Ask me anything about this page!';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearGuidePhoto(){
+  guidePhotoBase64=null;
+  document.getElementById('guide-preview-area').style.display='none';
+  document.getElementById('guide-upload-area').style.border='2px dashed rgba(123,31,162,0.4)';
+  document.getElementById('guide-upload-area').style.background='rgba(123,31,162,0.05)';
+  document.getElementById('guide-answer-area').style.display='none';
+  document.getElementById('guide-photo-input').value='';
+}
+
+function setGuideQ(q){
+  const inp=document.getElementById('guide-question-inp');
+  if(inp){inp.value=q;inp.focus();}
+}
+
+async function askFromGuide(){
+  if(checkPaywall())return;
+  if(!S.isPaid&&checkTrial(S.user)==='active'&&S.qToday>=S.freeLimit){showModal('sub-modal');return;}
+
+  const q=document.getElementById('guide-question-inp').value.trim();
+  if(!q&&!guidePhotoBase64){
+    alert('Please upload a guide page and type your question first!');return;
+  }
+  if(!guidePhotoBase64){
+    alert('Please upload a photo of your guide page first! Tap the upload area above.');return;
+  }
+
+  // Update usage
+  S.qToday++;
+  if(S.user){S.user.qToday=S.qToday;S.user.totalQ=(S.user.totalQ||0)+1;S.user.xp=(S.user.xp||0)+10;saveUser();}
+  renderLimitBar();
+
+  const ansArea=document.getElementById('guide-answer-area');
+  const ansText=document.getElementById('guide-answer-text');
+  ansArea.style.display='block';
+  ansText.innerHTML='<span style="color:#7b1fa2;animation:pulse 1s infinite;">🧠 Reading your guide...</span>';
+
+  const bubble=document.getElementById('speech-bubble');
+  if(bubble)bubble.textContent='📖 Reading your guide... Please wait!';
+
+  const lang=S.lang||'en';
+  const langInstr={
+    en:'Answer in ENGLISH only.',
+    ta:'பதிலை தமிழில் மட்டும் சொல்லுங்கள்.',
+    hi:'केवल हिंदी में उत्तर दें।',
+    ml:'മലയാളത്തിൽ മാത്രം ഉത്തരം പറയൂ.',
+    kn:'ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಉತ್ತರಿಸಿ.',
+    te:'తెలుగులో మాత్రమే సమాధానం ఇవ్వండి.'
+  };
+
+  const sys=`You are Miss BrightMind, a warm expert teacher. The student has uploaded a photo of their guide/textbook page. 
+Read ALL content carefully — including any handwritten text, printed text, diagrams, and labels.
+Answer the student's question based EXACTLY on what is visible in the photo.
+${langInstr[lang]||langInstr['en']}
+Be clear, encouraging, and structured. Give the answer as it would appear in an ideal answer booklet.
+If the student asks to solve questions, solve them step by step exactly as per the content shown.
+If handwriting is unclear, make your best effort to read it and mention if any part was hard to read.`;
+
+  const userMsg=q?`Here is my question about this guide page: ${q}`:'Please explain everything on this guide page in simple words, and list all important points.';
+
+  try{
+    const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,system:sys,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:guidePhotoType,data:guidePhotoBase64}},
+          {type:'text',text:userMsg}
+        ]}]})});
+    const d=await r.json();
+    const reply=(d.content&&d.content[0]&&d.content[0].text)||'';
+    if(reply){
+      ansText.textContent=reply;
+      speakText(reply.replace(/[#*_]/g,'').substring(0,400));
+      if(bubble)bubble.textContent='📖 Answer ready! Tap 🔊 to hear it!';
+      // Add to history
+      guideHistory.unshift({q:q||'Explain this page',a:reply,time:new Date().toLocaleTimeString()});
+      renderGuideHistory();
+      // Clear question box
+      document.getElementById('guide-question-inp').value='';
+    }else{
+      ansText.textContent='Sorry, I could not read the guide clearly. Please try with a clearer photo.';
+    }
+  }catch(e){
+    ansText.textContent='Connection error. Please check your internet and try again.';
+  }
+}
+
+function speakGuideAnswer(){
+  const txt=document.getElementById('guide-answer-text').textContent;
+  if(txt)speakText(txt.replace(/[#*_]/g,'').substring(0,600));
+}
+
+function renderGuideHistory(){
+  const el=document.getElementById('guide-history');
+  if(!el||!guideHistory.length)return;
+  el.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--gray-text);margin-bottom:8px;">PREVIOUS ANSWERS</div>'+
+    guideHistory.slice(0,3).map((h,i)=>`
+    <div style="background:#fff;border-radius:12px;padding:12px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,0.06);cursor:pointer;" onclick="document.getElementById('guide-answer-text').textContent='${h.a.replace(/'/g,"\'")}';document.getElementById('guide-answer-area').style.display='block';">
+      <div style="font-size:11px;font-weight:700;color:#7b1fa2;margin-bottom:4px;">Q: ${h.q.substring(0,60)}${h.q.length>60?'...':''}</div>
+      <div style="font-size:11px;color:var(--gray-text);">${h.a.substring(0,80)}... <span style="color:#7b1fa2;">tap to see full</span></div>
+    </div>`).join('');
+}
+
+
 async function startExam(){
   if(!S.sub)return;
   S.examSub=S.sub;S.examAns={};S.examIdx=0;
@@ -5135,10 +5349,13 @@ ${IE.questions.map((q,i)=>{
 function switchPaperTab2(tab, btn){
   document.getElementById('ptab2-model-content').style.display=tab==='model'?'block':'none';
   document.getElementById('ptab2-generate-content').style.display=tab==='generate'?'block':'none';
-  document.querySelectorAll('#ptab2-model,#ptab2-generate').forEach(b=>{
+  const guideEl=document.getElementById('ptab2-guide-content');
+  if(guideEl)guideEl.style.display=tab==='guide'?'block':'none';
+  document.querySelectorAll('#ptab2-model,#ptab2-generate,#ptab2-guide').forEach(b=>{
     b.style.background='var(--gray-light)';b.style.color='var(--blue-dark)';
   });
-  btn.style.background='var(--blue-mid)';btn.style.color='#fff';
+  btn.style.background=tab==='guide'?'linear-gradient(135deg,#4a148c,#7b1fa2)':'var(--blue-mid)';
+  btn.style.color='#fff';
   if(tab==='model')renderModelPapers2('all');
 }
 
