@@ -1984,8 +1984,19 @@ function renderTrialBanner(u){
 
 function checkPaywall(){
   if(!S.user)return false;
-  // Always close paywall for paid users — never show it
+  // Paid users — always close paywall, check expiry
   if(S.user.isPaid||S.isPaid){
+    // Check if subscription has actually expired
+    if(S.user.subExpiry){
+      const expDate=new Date(S.user.subExpiry);
+      if(!isNaN(expDate)&&expDate<new Date()){
+        // Subscription expired — show renewal paywall
+        S.user.isPaid=false; S.isPaid=false; saveUser();
+        document.getElementById('paywall-overlay').classList.add('open');
+        return true;
+      }
+    }
+    // Valid paid user — force close any open paywall
     document.getElementById('paywall-overlay').classList.remove('open');
     closeModal('sub-modal');
     return false;
@@ -3512,7 +3523,7 @@ REMEMBER: Short replies only — max 5-6 lines — then always end with a questi
     S.chatHist.push({role:'assistant',content:rep});
     ty.classList.remove('show');addMsg('ai',rep);
     const isMobile=/Android|iPhone|iPad/i.test(navigator.userAgent);
-    speakText(rep.replace(/[#*_]/g,'').substring(0,isMobile?600:300));
+    speakText(rep.replace(/[#*_🎯📖🔑⭐💡📝🌟😊]/g,'').replace(/\*\*/g,'').substring(0,isMobile?600:300));
     if(S.user&&S.sub?.id){if(!S.user.subjects[S.sub.id])S.user.subjects[S.sub.id]={progress:0,stars:0};S.user.subjects[S.sub.id].progress=Math.min(100,(S.user.subjects[S.sub.id].progress||0)+5);saveUser();}
     if(S.chatHist.length>=8)document.getElementById('exam-cta').style.display='block';
     if((S.chatHist.length===16||S.chatHist.length===20)&&!S.hwGiven){S.hwGiven=true;setTimeout(()=>assignHW(txt),1500);}
@@ -4317,9 +4328,22 @@ async function verifyPayment(response, amount, plan, subscription_type='monthly'
     // ALWAYS activate premium — payment was received by Razorpay
     S.user.isPaid=true;
     S.user.plan=plan;
+    S.user.subType=subscription_type;
+    // Use server response for accurate expiry
+    if(res && res.sub_end) S.user.subExpiry=res.sub_end;
+    else if(res && res.expiry) S.user.subExpiry=res.expiry;
+    else {
+      // Fallback: calculate locally
+      const exp=new Date();
+      if(subscription_type==='annual') exp.setFullYear(exp.getFullYear()+1);
+      else if(subscription_type==='quarterly') exp.setMonth(exp.getMonth()+3);
+      else exp.setMonth(exp.getMonth()+1);
+      S.user.subExpiry=exp.toISOString();
+    }
+    S.user.subDaysLeft=res&&res.days_left?res.days_left:({annual:365,quarterly:90,monthly:30}[subscription_type]||30);
     S.iPaid=true;
     S.isPaid=true;
-    if(S.sessionTimer){clearInterval(S.sessionTimer);} // stop free trial timer
+    if(S.sessionTimer){clearInterval(S.sessionTimer);}
     saveUser();
     renderLimitBar();
     renderTrialBanner(S.user);
@@ -4328,6 +4352,8 @@ async function verifyPayment(response, amount, plan, subscription_type='monthly'
 
     // Close paywall — paid user must never see it again
     document.getElementById('paywall-overlay').classList.remove('open');
+    const smEl=document.getElementById('sub-modal');
+    if(smEl){smEl.style.display='none';smEl.classList.remove('open','show','active');}
     closeModal('sub-modal');
 
     // Fetch fresh subscription details from server for accurate days left
@@ -4354,8 +4380,18 @@ async function verifyPayment(response, amount, plan, subscription_type='monthly'
   }catch(e){
     console.error('Payment error:',e);
     // Still activate even if error
-    S.user.isPaid=true;S.isPaid=true;saveUser();renderLimitBar();
+    S.user.isPaid=true;S.isPaid=true;
+    // Set fallback expiry so student isn't asked to pay again
+    const fbExp=new Date();
+    if(subscription_type==='annual')fbExp.setFullYear(fbExp.getFullYear()+1);
+    else if(subscription_type==='quarterly')fbExp.setMonth(fbExp.getMonth()+3);
+    else fbExp.setMonth(fbExp.getMonth()+1);
+    S.user.subExpiry=fbExp.toISOString();
+    S.user.subType=subscription_type;
+    saveUser();renderLimitBar();renderTrialBanner(S.user);
     if(S.sessionTimer)clearInterval(S.sessionTimer);
+    const smEl2=document.getElementById('sub-modal');
+    if(smEl2){smEl2.style.display='none';smEl2.classList.remove('open','show','active');}
     document.getElementById('paywall-overlay').classList.remove('open');
     alert('✅ Payment received! Premium activated.\nPayment ID: '+response.razorpay_payment_id);
   }
