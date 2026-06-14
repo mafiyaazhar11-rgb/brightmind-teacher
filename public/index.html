@@ -1935,7 +1935,30 @@ function checkTrial(u){
 function renderTrialBanner(u){
   const wrap=document.getElementById('trial-banner-wrap');if(!wrap)return;
   const st=checkTrial(u);
-  if(st==='paid'){wrap.innerHTML='';return;}
+  if(st==='paid'){
+    // Show premium banner with days remaining
+    const expiry=u.subExpiry?new Date(u.subExpiry):null;
+    const now=new Date();
+    let daysLeft=null;
+    let expiryStr='Active';
+    if(expiry&&!isNaN(expiry)){
+      daysLeft=Math.max(0,Math.ceil((expiry-now)/(1000*60*60*24)));
+      expiryStr=daysLeft===0?'Expires Today!':daysLeft===1?'1 day left':daysLeft+' days left';
+    }
+    const planLabel=u.subType==='annual'?'Annual Plan':u.subType==='quarterly'?'Quarterly Plan':'Monthly Plan';
+    const urgentColor=daysLeft!==null&&daysLeft<=3?'linear-gradient(135deg,#b71c1c,#c62828)':'linear-gradient(135deg,#1b5e20,#2e7d32)';
+    wrap.innerHTML=`<div class="trial-banner" style="background:${urgentColor};border:1px solid rgba(255,214,0,0.25);cursor:default;">
+      <div class="tl">
+        <div class="tt" style="color:#fff;">💎 Premium Active</div>
+        <div class="ts" style="color:rgba(255,255,255,0.85);">Unlimited · All Subjects · ${planLabel}</div>
+      </div>
+      <div class="trial-timer" style="background:rgba(255,214,0,0.15);border:1px solid rgba(255,214,0,0.4);min-width:56px;text-align:center;">
+        <div class="tv" style="color:#ffd600;font-weight:900;font-size:${daysLeft!==null&&daysLeft<=99?'15px':'12px'};">${daysLeft!==null?daysLeft+'d':'✓'}</div>
+        <div class="tl2" style="color:rgba(255,255,255,0.7);">${daysLeft!==null?expiryStr:'ACTIVE'}</div>
+      </div>
+    </div>`;
+    return;
+  }
   if(st==='demo'){
     const regTime=new Date(u.regOn||Date.now()).getTime();
     const left=Math.max(0,(regTime+30*60*1000)-Date.now());
@@ -1960,7 +1983,13 @@ function renderTrialBanner(u){
 }
 
 function checkPaywall(){
-  if(!S.user||S.user.isPaid)return false;
+  if(!S.user)return false;
+  // Always close paywall for paid users — never show it
+  if(S.user.isPaid||S.isPaid){
+    document.getElementById('paywall-overlay').classList.remove('open');
+    closeModal('sub-modal');
+    return false;
+  }
   if(checkTrial(S.user)==='expired'){document.getElementById('paywall-overlay').classList.add('open');return true;}
   return false;
 }
@@ -2188,6 +2217,8 @@ function mapStudent(s){
     examHist:typeof s.exam_hist==='string'?JSON.parse(s.exam_hist):s.exam_hist||[],
     badges:typeof s.badges==='string'?JSON.parse(s.badges):s.badges||[],
     regOn:s.reg_on||new Date().toISOString(),
+    subExpiry:s.sub_expiry||s.expiry||null,
+    subType:s.subscription_type||s.sub_type||'monthly',
     photoGallery:[]  // stored locally per device
   };
 }
@@ -2218,8 +2249,22 @@ function loginUser(u){
   if(!localStorage.getItem(seenKey)){
     setTimeout(showOnboarding, 800);
   }
-  // Check renewal reminder for paid students
-  if(u.isPaid) setTimeout(()=>checkRenewalReminder(u), 2000);
+  // Check renewal reminder + fetch fresh subscription expiry for paid students
+  if(u.isPaid){
+    setTimeout(async()=>{
+      try{
+        const subRes=await apiGet('/api/subscription/'+u.id);
+        if(subRes&&subRes.ok){
+          S.user.subExpiry=subRes.expiry||subRes.sub_expiry||null;
+          S.user.subType=subRes.subscription_type||u.subType||'monthly';
+          S.user.subDaysLeft=subRes.days_left;
+          saveUser();
+          renderTrialBanner(S.user);
+        }
+      }catch(e){}
+      checkRenewalReminder(u);
+    },1500);
+  }
   // 30-min demo timer
   if(!u.isPaid){
     S.sessionTimer=setInterval(()=>{
@@ -4281,15 +4326,28 @@ async function verifyPayment(response, amount, plan, subscription_type='monthly'
 
     // Server already called above — payment saved
 
-    // Close paywall
+    // Close paywall — paid user must never see it again
     document.getElementById('paywall-overlay').classList.remove('open');
     closeModal('sub-modal');
 
-    // Celebrate!
-    if(bubble)bubble.textContent='🎉 Premium activated!';
+    // Fetch fresh subscription details from server for accurate days left
+    try{
+      const subRes=await apiGet('/api/subscription/'+S.user.id);
+      if(subRes&&subRes.ok){
+        S.user.subExpiry=subRes.expiry||subRes.sub_expiry||null;
+        S.user.subType=subRes.subscription_type||subscription_type;
+        S.user.subDaysLeft=subRes.days_left;
+        saveUser();
+        renderTrialBanner(S.user);
+      }
+    }catch(e){/* use fallback days */}
+
+    // Celebrate with days left!
+    const dLeft=S.user.subDaysLeft||({monthly:30,quarterly:90,annual:365}[subscription_type]||30);
+    if(bubble)bubble.textContent='🎉 Premium activated! '+dLeft+' days unlocked!';
     setTimeout(()=>{
-      alert(`🎉 Welcome to BrightMind Teacher Premium!\n\n✅ Payment of ₹${amount} received\n✅ ${plan==='all'?'All Subjects':'Single Subject'} unlocked\n✅ Unlimited questions activated\n\nThank you ${S.user.name}! Start learning! 🚀`);
-      if(bubble)bubble.textContent='🎓 Premium active! Ask me anything!';
+      alert(`🎉 Welcome to BrightMind Teacher Premium!\n\n✅ Payment of ₹${amount} received\n✅ ${plan==='all'?'All Subjects':'Single Subject'} unlocked\n✅ ${dLeft} days of unlimited access!\n\nThank you ${S.user.name}! Start learning! 🚀`);
+      if(bubble)bubble.textContent='🎓 Premium active! '+dLeft+' days left. Ask me anything!';
     },500);
 
     document.getElementById('plan-title').textContent='✅ Premium Plan';
