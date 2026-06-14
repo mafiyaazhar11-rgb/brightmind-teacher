@@ -131,7 +131,7 @@ function sanitize(s) {
     subscription_type: s.subscription_type || 'monthly',
     sub_expiry: s.subscription_end || null,
     expiry: s.subscription_end || null,
-    daily_q_limit: s.plan === 'premium' ? 60 : s.plan === 'all' ? 30 : s.daily_q_limit || 3,
+    daily_q_limit: s.plan === 'premium' ? 75 : s.plan === 'all' ? 45 : s.daily_q_limit || 3,
     daily_photo_limit: s.plan === 'premium' ? 5 : s.plan === 'all' ? 2 : 0,
     questions_today_photo: s.questions_today_photo || 0,
     xp: s.xp || 0, streak: s.streak || 0, stars: s.stars || 0,
@@ -476,7 +476,7 @@ app.post('/api/payment/verify', async (req, res) => {
       [student_id, student_name, amount, plan, razorpay_id]
     );
     // Set limits based on plan
-    const qLimit = plan === 'premium' ? 60 : 30; // premium=60, basic(all)=30
+    const qLimit = plan === 'premium' ? 75 : 45; // premium=75, basic=45
     const photoLimit = plan === 'premium' ? 5 : 2;
     await pool.query(
       `UPDATE bmt_students SET is_paid=true, plan=$1,
