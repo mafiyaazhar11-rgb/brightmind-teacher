@@ -128,6 +128,9 @@ function sanitize(s) {
     id: s.id, name: s.name, email: s.email||null, board: s.board || 'CBSE',
     class: s.class, state: s.state, stream: s.stream || 'science', stream: s.stream || 'science',
     is_paid: s.is_paid || false, plan: s.plan || 'free',
+    subscription_type: s.subscription_type || 'monthly',
+    sub_expiry: s.subscription_end || null,
+    expiry: s.subscription_end || null,
     xp: s.xp || 0, streak: s.streak || 0, stars: s.stars || 0,
     total_questions: s.total_questions || 0,
     questions_today: s.questions_today || 0,
@@ -351,7 +354,7 @@ app.get('/api/admin/students', async (req, res) => {
     const key = req.headers['x-admin-key'];
     if (key !== process.env.ADMIN_KEY) return res.status(401).json({ ok: false });
     const result = await pool.query(
-      `SELECT id,name,board,class,state,is_paid,plan,xp,streak,stars,
+      `SELECT id,name,board,class,state,is_paid,plan,subscription_type,subscription_end,xp,streak,stars,
               total_questions,questions_today,reg_on,
               jsonb_array_length(exam_hist) as exam_count,
               jsonb_array_length(homework) as hw_count
@@ -457,7 +460,7 @@ app.post('/api/payment/verify', async (req, res) => {
     if (subscription_type === 'quarterly') {
       subEnd.setMonth(subEnd.getMonth() + 3);
       nextDue.setMonth(nextDue.getMonth() + 3);
-    } else if (subscription_type === 'yearly') {
+    } else if (subscription_type === 'annual' || subscription_type === 'yearly') {
       subEnd.setFullYear(subEnd.getFullYear() + 1);
       nextDue.setFullYear(nextDue.getFullYear() + 1);
     } else {
@@ -482,7 +485,8 @@ app.post('/api/payment/verify', async (req, res) => {
       [student_id, student_name, JSON.stringify({amount, plan, subscription_type, razorpay_id, sub_end: subEnd})]
     ).catch(()=>{});
     console.log(`💰 PAYMENT: ${student_name} | ₹${amount} | ${plan} | ${subscription_type||'monthly'}`);
-    res.json({ ok: true, sub_end: subEnd });
+    const daysLeft = Math.ceil((subEnd - new Date()) / (1000*60*60*24));
+    res.json({ ok: true, sub_end: subEnd, expiry: subEnd, sub_expiry: subEnd, days_left: daysLeft, subscription_type: subscription_type||'monthly' });
   } catch (e) {
     console.error(e);
     res.json({ ok: false });
@@ -527,7 +531,13 @@ app.get('/api/subscription/:id', async (req, res) => {
     const now = new Date();
     const daysLeft = student.next_due_date ?
       Math.ceil((new Date(student.next_due_date) - now) / (1000*60*60*24)) : null;
-    res.json({ ok: true, ...student, days_left: daysLeft });
+    res.json({ 
+      ok: true, 
+      ...student, 
+      expiry: student.subscription_end,
+      sub_expiry: student.subscription_end,
+      days_left: daysLeft 
+    });
   } catch (e) {
     res.json({ ok: false });
   }
