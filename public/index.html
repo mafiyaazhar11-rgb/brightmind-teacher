@@ -909,6 +909,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
       <div style="display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;">
         <button onclick="switchPaperTab2('model',this)" id="ptab2-model" style="background:var(--blue-mid);color:#fff;border:none;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📚 Model Papers</button>
         <button onclick="switchPaperTab2('generate',this)" id="ptab2-generate" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">⚙️ Custom Paper</button>
+        <button onclick="switchPaperTab2('guide',this)" id="ptab2-guide" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📖 My Guide</button>
       </div>
 
       <!-- MODEL PAPERS -->
@@ -947,13 +948,42 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
           </button>
         </div>
       </div>
-    </div>
 
       <!-- MY GUIDE SECTION -->
       <div id="ptab2-guide-content" style="display:none;">
+        <!-- Hero banner -->
         <div style="background:linear-gradient(135deg,#4a148c,#7b1fa2);border-radius:16px;padding:16px 18px;margin-bottom:14px;">
-          <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px;">📖 Ask From Your Guide or Notes</div>
-          <div style="font-size:12px;color:rgba(255,255,255,.85);">Photo your guide, textbook, or <strong>handwritten notes</strong> — Miss BrightMind reads everything and answers your questions!</div>
+          <div style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px;">📖 My Guide &amp; Notes</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.85);">Miss BrightMind reads <strong>anything you photo</strong> — printed or handwritten!</div>
+        </div>
+
+        <!-- 4 use case cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+          <div onclick="setGuideQ('Please explain this topic from my notebook in simple words')" style="background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.07);cursor:pointer;border:2px solid transparent;transition:border .2s;" onmouseover="this.style.borderColor='#7b1fa2'" onmouseout="this.style.borderColor='transparent'">
+            <div style="font-size:24px;margin-bottom:6px;">📓</div>
+            <div style="font-size:12px;font-weight:700;color:#4a148c;margin-bottom:3px;">My Notebook</div>
+            <div style="font-size:10px;color:var(--gray-text);line-height:1.4;">Photo class notes → Miss explains the topic</div>
+          </div>
+          <div onclick="setGuideQ('Please check my rough work and tell me where I went wrong')" style="background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.07);cursor:pointer;border:2px solid transparent;transition:border .2s;" onmouseover="this.style.borderColor='#7b1fa2'" onmouseout="this.style.borderColor='transparent'">
+            <div style="font-size:24px;margin-bottom:6px;">✏️</div>
+            <div style="font-size:12px;font-weight:700;color:#4a148c;margin-bottom:3px;">My Rough Work</div>
+            <div style="font-size:10px;color:var(--gray-text);line-height:1.4;">Photo your working → Miss finds your mistake</div>
+          </div>
+          <div onclick="setGuideQ('Please label this diagram and explain what each part means')" style="background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.07);cursor:pointer;border:2px solid transparent;transition:border .2s;" onmouseover="this.style.borderColor='#7b1fa2'" onmouseout="this.style.borderColor='transparent'">
+            <div style="font-size:24px;margin-bottom:6px;">📐</div>
+            <div style="font-size:12px;font-weight:700;color:#4a148c;margin-bottom:3px;">My Diagram</div>
+            <div style="font-size:10px;color:var(--gray-text);line-height:1.4;">Photo your drawing → Miss labels and explains</div>
+          </div>
+          <div onclick="setGuideQ('Please correct my answers and give marks with feedback for each question')" style="background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.07);cursor:pointer;border:2px solid transparent;transition:border .2s;" onmouseover="this.style.borderColor='#7b1fa2'" onmouseout="this.style.borderColor='transparent'">
+            <div style="font-size:24px;margin-bottom:6px;">📝</div>
+            <div style="font-size:12px;font-weight:700;color:#4a148c;margin-bottom:3px;">My Answer Sheet</div>
+            <div style="font-size:10px;color:var(--gray-text);line-height:1.4;">Photo past paper attempt → Miss corrects it</div>
+          </div>
+        </div>
+
+        <div style="background:rgba(123,31,162,0.07);border-radius:10px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+          <div style="font-size:18px;">✍️</div>
+          <div style="font-size:11px;color:#4a148c;font-weight:600;">Miss BrightMind reads handwriting too — Tamil, Hindi, English, any language!</div>
         </div>
 
         <!-- Upload area -->
@@ -1013,6 +1043,8 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
         <!-- History of questions asked -->
         <div id="guide-history" style="margin-top:14px;"></div>
       </div>
+
+    </div>
 
     <!-- PROFILE -->
     <div id="pg-profile" class="page">
@@ -2754,48 +2786,59 @@ function startSyllabusChat(){
   const bubble=document.getElementById('speech-bubble');
   if(bubble) bubble.textContent=`${tg}! Let me teach you ${SYL.topic} step by step! 📖`;
 
-  // After greeting, fetch and deliver FULL lesson sentence by sentence
+  // After greeting, fetch and deliver FULL lesson
   setTimeout(async function(){
-    addMsg('ai','📝 Preparing your full lesson...');
-    const teachPrompt=`You are Miss BrightMind, a warm caring ${bf} teacher for Class ${SYL.cls} ${SYL.subject}.
-Topic: "${SYL.topic}" from Chapter: "${SYL.chapter}"
+    // Add loading message with unique ID so we can remove it safely
+    const loadId='lesson-loading-'+Date.now();
+    addMsg('ai','<span id="'+loadId+'" style="color:var(--gray-text);font-style:italic;">📝 Miss BrightMind is preparing your lesson... please wait!</span>');
+    
+    const topic=SYL.topic||'Introduction';
+    const chapter=SYL.chapter||SYL.subject;
+    const cls=SYL.cls||S.user?.class||'9';
+    const subj=SYL.subject||S.sub?.name||'General';
 
-Deliver a COMPLETE classroom lesson in this EXACT structure — sentence by sentence like a real teacher talking:
+    const teachPrompt=`You are Miss BrightMind, a warm caring ${bf} teacher for Class ${cls} ${subj}.
+Topic: "${topic}" from Chapter: "${chapter}"
 
-🎯 INTRODUCTION (2-3 sentences)
-Start with "Class, today we are going to learn about [topic]." Give one real-life example students relate to.
+Teach this topic like a real classroom teacher talking directly to the student. Use this structure:
 
-📖 WHAT IS IT? — DEFINITION (2-3 sentences)
-Give the exact ${bf} textbook definition. Then explain it in simple words.
+🎯 INTRODUCTION
+Start with "Class, today we are going to learn about ${topic}." Give one real-life example students relate to. Then ask: "Have you heard of this before?"
 
-🔑 KEY CONCEPTS — POINT BY POINT (cover ALL important points from ${bf} syllabus)
-Explain each concept in 2-3 simple sentences. Use examples. Be thorough — cover the COMPLETE syllabus for this topic.
+📖 DEFINITION
+Give the exact ${bf} textbook definition in simple words.
 
-⭐ IMPORTANT FOR EXAM (3-4 points)
-List exactly what students must remember for board exams. Mark-worthy points.
+🔑 KEY CONCEPTS — cover ALL important points from ${bf} syllabus
+Explain each concept in 2-3 simple sentences. After every point, ask a small friendly question like "Does that make sense?" or "Can you tell me what happens next?"
+
+⭐ IMPORTANT FOR EXAM
+3-4 points students must remember for board exams.
 
 💡 MEMORY TIP
-One easy trick or mnemonic to remember this topic.
+One easy trick to remember this topic.
 
-📝 HOMEWORK — 3 QUESTIONS
-End with exactly 3 homework questions:
+📝 HOMEWORK
+Give exactly 3 questions:
 1. One definition question (1 mark)
-2. One short answer question (3 marks)  
-3. One problem/application question (5 marks)
-Say: "Complete these and show me tomorrow! I will correct them for you! 😊"
+2. One short answer (3 marks)
+3. One application question (5 marks)
+End with: "Complete these and show me tomorrow! I will correct them! 😊"
 
-RULES: Short sentences. Simple words. Talk directly to student — say "you", "we", "let us". Follow ${bf} syllabus EXACTLY. Do not skip any important concept.`;
+Keep sentences short. Talk directly to student using "you", "we", "let us". Follow ${bf} syllabus exactly.`;
 
     try{
-      const sys=`${LANG_SYS[lang]||LANG_SYS['en']} You are Miss BrightMind, expert ${bf} teacher for Class ${SYL.cls} ${SYL.subject}. Teach COMPLETE syllabus for "${SYL.topic}" from "${SYL.chapter}". Sentence by sentence. Warm, encouraging, clear. Give homework at end.`;
-      const msgs=document.getElementById('chat-msgs');
-      // Remove "preparing" message
-      if(msgs&&msgs.lastChild)msgs.removeChild(msgs.lastChild);
+      const sys=(LANG_SYS[lang]||LANG_SYS['en'])+` You are Miss BrightMind, expert ${bf} teacher for Class ${cls} ${subj}. Topic: "${topic}". Chapter: "${chapter}". Teach warmly, sentence by sentence. Give homework at end.`;
+      
       const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,system:sys,
           messages:[{role:'user',content:teachPrompt}]})});
       const d=await r.json();
       const reply=(d.content&&d.content[0]&&d.content[0].text)||'';
+      
+      // Remove loading message safely by ID
+      const loadEl=document.getElementById(loadId);
+      if(loadEl&&loadEl.closest('.msg'))loadEl.closest('.msg').remove();
+      
       if(reply){
         S.chatHist.push({role:'user',content:teachPrompt});
         S.chatHist.push({role:'assistant',content:reply});
@@ -2805,17 +2848,19 @@ RULES: Short sentences. Simple words. Talk directly to student — say "you", "w
         S.qToday=(S.qToday||0)+1;
         const sq=document.getElementById('stat-q');
         if(sq)sq.textContent=(parseInt(sq.textContent)||0)+1;
-        // After lesson, show homework reminder in bubble
         setTimeout(()=>{
-          if(bubble) bubble.textContent='📝 Homework given! Complete and send me a photo for correction! 😊';
+          if(bubble) bubble.textContent='📝 Homework given! Complete and show me tomorrow! 😊';
         },3000);
       }else{
         addMsg('ai',`Let us study ${SYL.topic} from ${SYL.chapter}! Ask me anything and I will teach you step by step.`);
       }
     }catch(e){
-      addMsg('ai',`Let us study ${SYL.topic} from ${SYL.chapter}! Type your first question and I will teach you step by step.`);
+      console.error('Lesson fetch error:',e);
+      const loadEl2=document.getElementById(loadId);
+      if(loadEl2&&loadEl2.closest('.msg'))loadEl2.closest('.msg').remove();
+      addMsg('ai','😊 Miss BrightMind is getting ready! Please type your first question below and I will start teaching you right away!');
     }
-  },1200);
+  },1500);
 }
 
 
@@ -3621,8 +3666,21 @@ REMEMBER: Short replies only — max 5-6 lines — then always end with a questi
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sys,messages:S.chatHist})});
     const d=await r.json();
-    const rep=d.content?.[0]?.text||(d.error?.message)||'Sorry, please try again!';
-    if(d.error){console.error('AI error:',d.error);}
+    if(d.error){
+      console.error('AI error:',d.error);
+      ty.classList.remove('show');
+      // Never show raw API errors to student
+      const errType=d.error?.type||'';
+      if(errType.includes('credit')||errType.includes('billing')||errType.includes('quota')||
+         (d.error?.message||'').toLowerCase().includes('credit')){
+        addMsg('ai','😊 Miss BrightMind is taking a short break! Please try again in a few minutes. If this continues, ask your parent to contact support.');
+      } else {
+        addMsg('ai','😊 I did not catch that! Could you please ask your question again?');
+      }
+      speakText('Miss BrightMind is taking a short break. Please try again in a moment!');
+      return;
+    }
+    const rep=d.content?.[0]?.text||'Sorry, I could not answer that. Please try asking again!';
     S.chatHist.push({role:'assistant',content:rep});
     ty.classList.remove('show');addMsg('ai',rep);
     const isMobile=/Android|iPhone|iPad/i.test(navigator.userAgent);
@@ -3789,15 +3847,31 @@ async function askFromGuide(){
     te:'తెలుగులో మాత్రమే సమాధానం ఇవ్వండి.'
   };
 
-  const sys=`You are Miss BrightMind, a warm expert teacher. The student has uploaded a photo of their guide/textbook page. 
-Read ALL content carefully — including any handwritten text, printed text, diagrams, and labels.
-Answer the student's question based EXACTLY on what is visible in the photo.
-${langInstr[lang]||langInstr['en']}
-Be clear, encouraging, and structured. Give the answer as it would appear in an ideal answer booklet.
-If the student asks to solve questions, solve them step by step exactly as per the content shown.
-If handwriting is unclear, make your best effort to read it and mention if any part was hard to read.`;
+  // Auto-detect use case from question
+  const qLower=(q||'').toLowerCase();
+  let useCaseInstr='Read everything in the photo carefully — printed or handwritten — and answer based on exactly what you see.';
+  let userMsgPrefix='Here is my question about this photo:';
+  if(qLower.includes('wrong')||qLower.includes('rough work')||qLower.includes('mistake')){
+    useCaseInstr='The student is showing their rough work or working steps. Identify exactly where they went wrong, explain the mistake kindly ("You were so close! Just one small mistake here..."), then show the correct method step by step.';
+    userMsgPrefix='Please check my rough work in this photo:';
+  } else if(qLower.includes('diagram')||qLower.includes('label')||qLower.includes('drawing')){
+    useCaseInstr='The student has drawn a diagram. Identify what it is, label all parts correctly with names and functions, and explain what each part does. If any part of the drawing is incorrect, gently correct it.';
+    userMsgPrefix='Please label and explain this diagram:';
+  } else if(qLower.includes('correct')||qLower.includes('marks')||qLower.includes('answer sheet')||qLower.includes('past paper')||qLower.includes('correct my')){
+    useCaseInstr='The student has submitted their written answers for correction. Act like a teacher marking papers. Go through each answer, give marks, write specific feedback (what was good, what was missing), and give an encouraging total score.';
+    userMsgPrefix='Please correct my answers and give marks:';
+  } else if(qLower.includes('notebook')||qLower.includes('notes')||qLower.includes('explain')){
+    useCaseInstr='The student is showing their class notes or notebook. Explain the topic clearly in simple words, add any important points they may have missed, and highlight what is most important for the board exam.';
+    userMsgPrefix='Please explain the topic on this page from my notebook:';
+  }
 
-  const userMsg=q?`Here is my question about this guide page: ${q}`:'Please explain everything on this guide page in simple words, and list all important points.';
+  const sys=`You are Miss BrightMind, a warm caring expert teacher for Indian school students.
+${useCaseInstr}
+You can read both printed AND handwritten text. If handwriting is unclear, do your best and note it.
+${langInstr[lang]||langInstr['en']}
+Be structured, clear, and always encouraging — react like a real teacher proud of the student for studying hard.`;
+
+  const userMsg=q?`${userMsgPrefix} ${q}`:'Please explain everything on this page in simple words and list all important points for the exam.';
 
   try{
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -3821,7 +3895,7 @@ If handwriting is unclear, make your best effort to read it and mention if any p
       ansText.textContent='Sorry, I could not read the guide clearly. Please try with a clearer photo.';
     }
   }catch(e){
-    ansText.textContent='Connection error. Please check your internet and try again.';
+    ansText.textContent='😊 Miss BrightMind is taking a short break! Please try again in a moment.';
   }
 }
 
