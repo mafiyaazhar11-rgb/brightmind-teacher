@@ -4395,8 +4395,23 @@ Make 10 questions with correct answers spread across A, B, C, D — never all th
     const arrMatch=raw.match(/\[\s*\{[\s\S]*\}\s*\]/);
     if(arrMatch)raw=arrMatch[0];
     S.examQs=JSON.parse(raw);
-    // Validate — ensure correct field matches option letter
-    // Validate and fix correct answers
+    // Shuffle options so correct answer is randomized
+    S.examQs=S.examQs.map(q=>{
+      const origCorrect=(q.correct||'A').toString().toUpperCase().charAt(0);
+      const opts=Array.isArray(q.options)?q.options:['A) -','B) -','C) -','D) -'];
+      const texts=opts.map(o=>o.length>2?o.substring(3):o);
+      const correctText=texts[['A','B','C','D'].indexOf(origCorrect)]||texts[0];
+      const shuffled=[...texts].sort(()=>Math.random()-0.5);
+      const newCorrectIdx=shuffled.indexOf(correctText);
+      const newCorrectLetter=['A','B','C','D'][newCorrectIdx]||'A';
+      return {
+        q:q.q||q.question,
+        options:shuffled.map((t,i)=>(['A','B','C','D'][i])+') '+t),
+        correct:newCorrectLetter,
+        explanation:q.explanation||''
+      };
+    });
+    // Validate correct answers
     S.examQs=S.examQs.map(q=>({
       ...q,
       correct:(q.correct||'A').toString().toUpperCase().charAt(0),
