@@ -4327,13 +4327,30 @@ async function startExam(){
       qbData=await qbRes.json();
     }
     if(qbData.ok && qbData.questions && qbData.questions.length>=5){
-      // Got questions from DB — zero AI tokens used!
-      S.examQs=qbData.questions.map(q=>({
-        ...q,
-        correct:(q.correct||'A').toString().toUpperCase().charAt(0),
-        options:Array.isArray(q.options)?q.options:['A) -','B) -','C) -','D) -']
-      }));
-      renderExam();
+      // Got questions from DB — shuffle options so correct answer is randomized
+      S.examQs=qbData.questions.map(q=>{
+        // Original options come as ["A) text","B) text","C) text","D) text"]
+        // correct is "A","B","C","D"
+        const origCorrect=(q.correct||'A').toString().toUpperCase().charAt(0);
+        const opts=Array.isArray(q.options)?q.options:['A) -','B) -','C) -','D) -'];
+        // Extract just the text from each option
+        const texts=opts.map(o=>o.substring(3)); // remove "A) ","B) " etc
+        const correctText=texts[['A','B','C','D'].indexOf(origCorrect)];
+        // Shuffle the texts
+        const shuffled=[...texts].sort(()=>Math.random()-0.5);
+        // Find where correct answer landed after shuffle
+        const newCorrectIdx=shuffled.indexOf(correctText);
+        const newCorrectLetter=['A','B','C','D'][newCorrectIdx];
+        // Rebuild options with new letters
+        const newOptions=shuffled.map((t,i)=>(['A','B','C','D'][i])+') '+t);
+        return {
+          q:q.q,
+          options:newOptions,
+          correct:newCorrectLetter,
+          explanation:q.explanation||''
+        };
+      });
+      startTimer();renderExamQ();
       return;
     }
   }catch(e){ console.log('QBank unavailable, using AI:', e.message); }
