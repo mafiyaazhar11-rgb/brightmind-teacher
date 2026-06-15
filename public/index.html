@@ -4328,12 +4328,15 @@ async function startExam(){
       qbData=await qbRes.json();
       console.log('TN fallback result:',qbData.ok, qbData.questions?.length);
     }
-    // Also try without class filter if still not found
+    // Try class 10 TN fallback
     if(!qbData.ok || !qbData.questions || qbData.questions.length<5){
-      console.log('Trying without class filter...');
       qbRes=await fetch(`${API_URL}/api/qbank/exam?board=TN&class=10&subject=${encodeURIComponent(subj)}&count=15`);
       qbData=await qbRes.json();
-      console.log('No-class result:',qbData.ok, qbData.questions?.length);
+    }
+    // Last resort — any board any class, just match subject name
+    if(!qbData.ok || !qbData.questions || qbData.questions.length<5){
+      qbRes=await fetch(`${API_URL}/api/qbank/exam?board=ANY&class=ANY&subject=${encodeURIComponent(subj)}&count=15`);
+      qbData=await qbRes.json();
     }
     if(qbData.ok && qbData.questions && qbData.questions.length>=5){
       // Got questions from DB — shuffle options so correct answer is randomized
