@@ -5677,6 +5677,274 @@ setTimeout(function(){
 },200);
 
 function save(){} // no-op — using API now
+
+// ══════════════════════════════════════
+// ADDED FEATURES
+// ══════════════════════════════════════
+
+// 1. SHUFFLE EXAM OPTIONS — fixes all answers being A
+function shuffleExamOptions(questions){
+  var letters=['A','B','C','D'];
+  return questions.map(function(q,qi){
+    var origCorrect=(q.correct||'A').toString().toUpperCase().charAt(0);
+    var origIdx=letters.indexOf(origCorrect);if(origIdx<0)origIdx=0;
+    var opts=Array.isArray(q.options)?q.options:['A) -','B) -','C) -','D) -'];
+    var texts=opts.map(function(o){return String(o).replace(/^[A-Da-d][).] */,'').trim();});
+    var correctText=texts[origIdx];
+    var indices=[0,1,2,3].sort(function(){return Math.random()-0.5;});
+    var newOpts=indices.map(function(idx,pos){return letters[pos]+') '+texts[idx];});
+    var newIdx=indices.indexOf(origIdx);
+    return {q:q.q||q.question||'Q'+(qi+1),options:newOpts,correct:letters[newIdx],explanation:q.explanation||''};
+  });
+}
+
+// 2. EXAM FROM DB — zero AI cost
+async function openInstantExam(subjectId,subjectName,icon){
+  if(!S.isPaid&&checkTrial(S.user)==='expired'){checkPaywall();return;}
+  IE={subject:subjectName,subjectId:subjectId,icon:icon,questions:[],answers:{},currentQ:0,timer:null,secs:900,startTime:Date.now()};
+  document.getElementById('ie-title').textContent=icon+' '+subjectName+' — Quick Exam';
+  document.getElementById('ie-subtitle').textContent='15 questions · AI corrects with red pen';
+  document.getElementById('ie-body').innerHTML='<div style="text-align:center;padding:40px 20px;"><div style="font-size:48px;margin-bottom:12px;">'+icon+'</div><div style="font-size:16px;font-weight:700;color:var(--blue-dark);margin-bottom:6px;">Loading '+subjectName+' Exam...</div><div style="font-size:13px;color:var(--gray-text);">Fetching from question bank...</div></div>';
+  document.getElementById('instant-exam-overlay').style.display='flex';
+  // Try DB first
+  var board=S.user&&S.user.board?S.user.board:'TN';
+  var cls=S.user&&S.user.class?String(S.user.class):'9';
+  try{
+    var url=API_URL+'/api/qbank/exam?board='+encodeURIComponent(board)+'&class='+encodeURIComponent(cls)+'&subject='+encodeURIComponent(subjectName)+'&count=15';
+    var qbRes=await fetch(url);
+    var qbData=await qbRes.json();
+    if(qbData.ok&&qbData.questions&&qbData.questions.length>=5){
+      IE.questions=shuffleExamOptions(qbData.questions);
+      IE.currentQ=0;ieStartTimer();ieRenderQuestion();return;
+    }
+    // Try TN fallback
+    var url2=API_URL+'/api/qbank/exam?board=TN&class='+encodeURIComponent(cls)+'&subject='+encodeURIComponent(subjectName)+'&count=15';
+    var qbRes2=await fetch(url2);
+    var qbData2=await qbRes2.json();
+    if(qbData2.ok&&qbData2.questions&&qbData2.questions.length>=5){
+      IE.questions=shuffleExamOptions(qbData2.questions);
+      IE.currentQ=0;ieStartTimer();ieRenderQuestion();return;
+    }
+    // Any board fallback
+    var url3=API_URL+'/api/qbank/exam?board=ANY&class=ANY&subject='+encodeURIComponent(subjectName)+'&count=15';
+    var qbRes3=await fetch(url3);
+    var qbData3=await qbRes3.json();
+    if(qbData3.ok&&qbData3.questions&&qbData3.questions.length>=5){
+      IE.questions=shuffleExamOptions(qbData3.questions);
+      IE.currentQ=0;ieStartTimer();ieRenderQuestion();return;
+    }
+  }catch(e){console.log('QBank error:',e.message);}
+  // AI fallback only if DB empty
+  document.getElementById('ie-body').innerHTML='<div style="text-align:center;padding:40px 20px;"><div style="font-size:48px;margin-bottom:12px;">'+icon+'</div><div style="font-size:16px;font-weight:700;color:var(--blue-dark);margin-bottom:6px;">Generating '+subjectName+' Exam...</div><div style="font-size:13px;color:var(--gray-text);">AI is creating questions...</div></div>';
+  try{
+    var boardFull={CBSE:'CBSE',TN:'Tamil Nadu Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board',MH:'Maharashtra Board'}[board]||'CBSE';
+    var r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:800,
+        messages:[{role:'user',content:'Generate exactly 15 MCQ questions for Class '+cls+' '+subjectName+' ('+boardFull+' board). Return ONLY a JSON array: [{"q":"question","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"B","explanation":"reason"}]. Mix correct answers between A,B,C,D randomly. No preamble.'}]})});
+    var rd=await r.json();
+    var raw=rd.content[0].text.trim();
+    var start=raw.indexOf('[');var end=raw.lastIndexOf(']')+1;
+    IE.questions=shuffleExamOptions(JSON.parse(raw.substring(start,end)));
+    IE.currentQ=0;ieStartTimer();ieRenderQuestion();
+  }catch(e){
+    IE.questions=shuffleExamOptions([
+      {q:'What is photosynthesis?',options:['A) Making food from sunlight','B) Breathing process','C) Blood circulation','D) Digestion'],correct:'A',explanation:'Plants make food using sunlight'},
+      {q:'What is Newton first law?',options:['A) F=ma','B) Every action has reaction','C) Object stays at rest unless force applied','D) Energy is conserved'],correct:'C',explanation:'Law of inertia'},
+      {q:'What is 2+2?',options:['A) 3','B) 4','C) 5','D) 6'],correct:'B',explanation:'Basic arithmetic'},
+      {q:'What is the capital of India?',options:['A) Mumbai','B) Chennai','C) New Delhi','D) Kolkata'],correct:'C',explanation:'New Delhi is the capital'},
+      {q:'What is H2O?',options:['A) Salt','B) Water','C) Oxygen','D) Hydrogen'],correct:'B',explanation:'H2O is the chemical formula for water'},
+    ]);
+    IE.currentQ=0;ieStartTimer();ieRenderQuestion();
+  }
+}
+
+// 3. ADMIN STUDENTS TAB
+function loadAdminStudents(){
+  var el=document.getElementById('adm-students');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:20px;color:var(--gray-text);">Loading...</div>';
+  fetch(API_URL+'/api/admin/students',{headers:{'x-admin-key':'azhar2026'}})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(!d||!d.ok){el.innerHTML='<div style="color:red;padding:10px;">Failed to load</div>';return;}
+    var st=d.students||[];
+    var paid=st.filter(function(x){return x.is_paid||x.isPaid;});
+    var el2=document.getElementById('adm-total');if(el2)el2.textContent=st.length;
+    var el3=document.getElementById('adm-paid');if(el3)el3.textContent=paid.length;
+    var el4=document.getElementById('adm-free');if(el4)el4.textContent=st.length-paid.length;
+    var sc={};st.forEach(function(x){if(x.state)sc[x.state]=(sc[x.state]||0)+1;});
+    var mx=Math.max.apply(null,Object.values(sc).concat([1]));
+    var statesEl=document.getElementById('adm-states');
+    if(statesEl)statesEl.innerHTML=Object.entries(sc).sort(function(a,b){return b[1]-a[1];}).map(function(e){return '<div class="st-row"><div class="st-name">'+e[0]+'</div><div class="st-bar-wrap"><div class="st-bar-fill" style="width:'+Math.round((e[1]/mx)*100)+'%"></div></div><div class="st-count">'+e[1]+'</div></div>';}).join('');
+    if(!st.length){el.innerHTML='<div style="text-align:center;padding:20px;">No students yet.</div>';return;}
+    el.innerHTML=st.map(function(u){
+      return '<div class="asr"><div class="asr-top"><div class="asr-av">'+(u.name||'?')[0].toUpperCase()+'</div><div class="asr-info"><div class="asr-name">'+(u.name||'Unknown')+'</div><div class="asr-meta">Class '+(u.class||'?')+' &middot; '+(u.state||'?')+' &middot; '+(u.reg_on?u.reg_on.substring(0,10):'')+'</div></div><div class="asr-plan '+(u.is_paid?'paid':'free')+'">'+(u.is_paid?'Paid':'Free')+'</div></div><div class="asr-stats"><div class="asr-stat"><div class="asr-stat-val">'+(u.total_questions||0)+'</div><div class="asr-stat-lbl">Questions</div></div><div class="asr-stat"><div class="asr-stat-val">'+(u.exams_taken||0)+'</div><div class="asr-stat-lbl">Exams</div></div><div class="asr-stat"><div class="asr-stat-val">'+(u.best_score?u.best_score+'%':'—')+'</div><div class="asr-stat-lbl">Best</div></div><div class="asr-stat"><div class="asr-stat-val">'+(u.hw_done||0)+'/'+(u.hw_total||0)+'</div><div class="asr-stat-lbl">HW Done</div></div></div><div class="asr-actions"><button onclick="adminResetPwd('+u.id+')" class="asr-btn yellow">Reset Password</button><button onclick="adminExtendAccess('+u.id+')" class="asr-btn blue">Extend Access</button><button onclick="adminGivePremium('+u.id+')" class="asr-btn green">Give Premium</button><button onclick="adminLoginAs('+u.id+')" class="asr-btn purple">View as Student</button></div></div>';
+    }).join('');
+  }).catch(function(e){el.innerHTML='<div style="color:red;padding:10px;">Error: '+e.message+'</div>';});
+}
+
+// 4. ADMIN ACTION BUTTONS
+function adminResetPwd(id){
+  var pwd=prompt('Enter new password for student:');
+  if(!pwd)return;
+  fetch(API_URL+'/api/admin/reset-password',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},body:JSON.stringify({studentId:id,newPassword:pwd})})
+  .then(function(r){return r.json();}).then(function(d){alert(d.ok?'Password reset!':'Error: '+d.msg);});
+}
+
+function adminExtendAccess(id){
+  var days=prompt('Extend access by how many days?','7');
+  if(!days)return;
+  fetch(API_URL+'/api/admin/extend-access',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},body:JSON.stringify({studentId:id,days:parseInt(days)})})
+  .then(function(r){return r.json();}).then(function(d){alert(d.ok?'Access extended!':'Error: '+d.msg);});
+}
+
+function adminGivePremium(id){
+  if(!confirm('Give 30 days premium to this student?'))return;
+  fetch(API_URL+'/api/admin/give-premium',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},body:JSON.stringify({studentId:id,days:30})})
+  .then(function(r){return r.json();}).then(function(d){alert(d.ok?'Premium activated!':'Error: '+d.msg);loadAdminStudents();});
+}
+
+function adminLoginAs(id){
+  fetch(API_URL+'/api/admin/student/'+id,{headers:{'x-admin-key':'azhar2026'}})
+  .then(function(r){return r.json();}).then(function(d){
+    if(d.ok&&d.student){loginUser(mapStudent(d.student));alert('Viewing as: '+d.student.name);}
+    else alert('Error: '+d.msg);
+  });
+}
+
+// 5. AUDIT LOG TAB
+function loadAdminAudit(){
+  var el=document.getElementById('adm-audit');
+  if(!el)return;
+  el.innerHTML='<div style="text-align:center;padding:20px;">Loading...</div>';
+  fetch(API_URL+'/api/admin/audit',{headers:{'x-admin-key':'azhar2026'}})
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){el.innerHTML='<div style="color:red;">Failed</div>';return;}
+    var logs=d.logs||[];
+    if(!logs.length){el.innerHTML='<div style="text-align:center;padding:20px;">No logs yet.</div>';return;}
+    el.innerHTML=logs.map(function(l){
+      return '<div style="padding:10px;border-bottom:1px solid var(--gray-light);display:flex;justify-content:space-between;font-size:13px;"><div><strong>'+l.student_name+'</strong> &mdash; '+l.action+'<br><small style="color:var(--gray-text);">'+(l.details||'')+'</small></div><div style="color:var(--gray-text);font-size:11px;white-space:nowrap;">'+new Date(l.created_at).toLocaleString('en-IN')+'</div></div>';
+    }).join('');
+  }).catch(function(e){el.innerHTML='<div style="color:red;">Error: '+e.message+'</div>';});
+}
+
+// 6. QUESTION BANK TAB
+function loadQBankStats(){
+  var el=document.getElementById('qbank-stats-content');
+  if(!el)return;
+  el.textContent='Loading...';
+  fetch(API_URL+'/api/admin/qbank/stats',{headers:{'x-admin-key':'azhar2026'}})
+  .then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok||!d.total){el.innerHTML='<span style="color:orange;">Bank empty! Generate below.</span>';return;}
+    el.innerHTML='<div style="font-size:22px;font-weight:900;color:var(--blue-dark);margin-bottom:10px;">Total: '+d.total+' questions</div>'+d.breakdown.map(function(b){return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--gray-light);font-size:12px;"><span>'+b.board+' &middot; Class '+b.class+' &middot; '+b.subject+'</span><span style="font-weight:700;color:var(--blue-mid);">'+b.count+' Q</span></div>';}).join('');
+  }).catch(function(e){el.textContent='Error: '+e.message;});
+}
+
+function autoBulkGenerate(board){
+  var statusEl=document.getElementById('bulk-status');
+  if(!confirm('Generate ALL questions for '+board+'? Runs in background 10-15 min.'))return;
+  if(statusEl)statusEl.innerHTML='Starting for '+board+'...';
+  fetch(API_URL+'/api/admin/qbank/auto-bulk',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},body:JSON.stringify({board:board})})
+  .then(function(r){return r.json();}).then(function(d){
+    if(statusEl)statusEl.innerHTML=d.ok?'Started! Refresh stats in 15 min.':'Error: '+d.msg;
+    if(d.ok)setTimeout(loadQBankStats,30000);
+  }).catch(function(e){if(statusEl)statusEl.innerHTML='Error: '+e.message;});
+}
+
+function checkBulkStatus(){loadQBankStats();}
+
+// 7. ADMIN TAB SWITCHING — make sure tabs call right functions
+function showAdminTab(tab){
+  document.querySelectorAll('.adm-tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.adm-panel').forEach(function(p){p.style.display='none';});
+  var tabEl=document.querySelector('[data-tab="'+tab+'"]');
+  var panelEl=document.getElementById('adm-panel-'+tab);
+  if(tabEl)tabEl.classList.add('active');
+  if(panelEl)panelEl.style.display='block';
+  if(tab==='students')loadAdminStudents();
+  if(tab==='audit')loadAdminAudit();
+  if(tab==='qbank')loadQBankStats();
+  if(tab==='revenue')loadAdminRevenue&&loadAdminRevenue();
+  if(tab==='sessions')loadAdminSessions&&loadAdminSessions();
+  if(tab==='support')loadAdminSupport&&loadAdminSupport();
+  if(tab==='usage')loadAdminUsage&&loadAdminUsage();
+}
+
+// 8. WHATSAPP SHARE — canvas image card
+function shareCorrectedPaper(){
+  var u=S.user;if(!u)return;
+  var tot=IE.questions.length;
+  var corr=Object.entries(IE.answers).filter(function(e){return IE.questions[parseInt(e[0])]&&IE.questions[parseInt(e[0])].correct===e[1];}).length;
+  var score=Math.round((corr/tot)*100);
+  var canvas=document.createElement('canvas');
+  canvas.width=600;canvas.height=380;
+  var ctx=canvas.getContext('2d');
+  var grad=ctx.createLinearGradient(0,0,600,380);
+  grad.addColorStop(0,'#0a0f2e');grad.addColorStop(1,'#1a237e');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,600,380);
+  ctx.fillStyle='#ffd600';ctx.fillRect(0,0,600,5);
+  ctx.fillStyle='#ffd600';ctx.font='bold 16px Arial';ctx.textAlign='left';
+  ctx.fillText('BrightMind Teacher',28,38);
+  ctx.fillStyle='rgba(255,255,255,0.45)';ctx.font='11px Arial';
+  ctx.fillText('brightmindteacher.com',28,55);
+  var scoreColor=score>=85?'#00e676':score>=60?'#ffd600':'#ff5252';
+  ctx.beginPath();ctx.arc(510,95,60,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fill();
+  ctx.strokeStyle=scoreColor;ctx.lineWidth=4;ctx.stroke();
+  ctx.fillStyle=scoreColor;ctx.font='bold 30px Arial';ctx.textAlign='center';
+  ctx.fillText(score+'%',510,102);
+  ctx.font='bold 11px Arial';ctx.fillText(score>=85?'PASSED':'TRY AGAIN',510,120);
+  ctx.fillStyle='#fff';ctx.font='bold 32px Arial';ctx.textAlign='left';
+  ctx.fillText(u.name||'Student',28,105);
+  ctx.fillStyle='rgba(255,255,255,0.65)';ctx.font='13px Arial';
+  ctx.fillText(IE.icon+' '+IE.subject+' Class '+(u.class||''),28,128);
+  ctx.strokeStyle='rgba(255,214,0,0.3)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(28,145);ctx.lineTo(572,145);ctx.stroke();
+  var stats=[{v:corr+'/'+tot,l:'Correct'},{v:(tot-corr)+'/'+tot,l:'Wrong'},{v:score+'%',l:'Score'},{v:score>=85?'PASS':'FAIL',l:'Result'}];
+  stats.forEach(function(s,i){
+    var x=28+(i*143);
+    ctx.fillStyle='rgba(255,255,255,0.07)';ctx.fillRect(x,160,133,60);
+    ctx.fillStyle=scoreColor;ctx.font='bold 20px Arial';ctx.textAlign='center';
+    ctx.fillText(s.v,x+66,188);
+    ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='10px Arial';
+    ctx.fillText(s.l,x+66,206);
+  });
+  ctx.fillStyle='rgba(255,214,0,0.12)';ctx.fillRect(28,235,544,50);
+  ctx.fillStyle='#ffd600';ctx.font='bold 13px Arial';ctx.textAlign='center';
+  ctx.fillText('Can you beat my '+score+'%? Try BrightMind Teacher!',300,258);
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='10px Arial';
+  ctx.fillText('brightmindteacher.com · AI Tutor in Tamil · Rs199/month',300,274);
+  canvas.toBlob(function(blob){
+    if(!blob)return showSharePopupSimple(score);
+    var file=new File([blob],'brightmind-result.png',{type:'image/png'});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:'My Exam Result',text:'I scored '+score+'% on BrightMind Teacher! Can you beat me?'}).catch(function(){showSharePopupSimple(score);});
+    }else{showSharePopupSimple(score);}
+  },'image/png');
+}
+
+function showSharePopupSimple(score){
+  var txt=encodeURIComponent('I scored '+score+'% on BrightMind Teacher! Can you beat me? brightmindteacher.com');
+  window.open('https://wa.me/?text='+txt,'_blank');
+}
+
+// 9. MOBILE KEYBOARD FIX
+function handleViewportResize(){
+  var overlay=document.getElementById('chat-overlay');
+  if(!overlay||overlay.style.display==='none')return;
+  if(window.visualViewport){
+    overlay.style.height=window.visualViewport.height+'px';
+    overlay.style.top=window.visualViewport.offsetTop+'px';
+    overlay.style.position='fixed';
+    var msgs=document.getElementById('chat-msgs');
+    if(msgs)setTimeout(function(){msgs.scrollTop=msgs.scrollHeight;},150);
+  }
+}
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',handleViewportResize);
+  window.visualViewport.addEventListener('scroll',handleViewportResize);
+}
+
 </script>
 
 <!-- ══ ONBOARDING OVERLAY — PREMIUM SLIDES ══ -->
