@@ -2564,11 +2564,24 @@ function fallbackShare(canvas,score,u){
       <div style="font-size:11px;color:rgba(255,255,255,.6);margin-bottom:10px;">Press & hold image to save, then share on WhatsApp</div>
       <div style="display:flex;gap:8px;">
         <a href="${img}" download="brightmind-rank.png" style="flex:1;background:#25d366;color:#fff;border:none;border-radius:10px;padding:10px;font-size:12px;font-weight:800;text-decoration:none;display:block;">💾 Save Image</a>
-        <button onclick="this.closest('div').closest('div').remove();const t='🏆 I scored ${score}% on BrightMind Teacher!\nClass ${(u.class||'')} · ${(u.board||'TN')}\n\nCan you beat me? 👊\nTry BrightMind Teacher — AI Tutor in Tamil!\nbright mindteacher.com\nOnly ₹199/month!';window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');" style="flex:1;background:#25d366;color:#fff;border:none;border-radius:10px;padding:10px;font-size:12px;font-weight:800;cursor:pointer;">📱 WhatsApp</button>
+        <button id="wa-share-btn" style="flex:1;background:#25d366;color:#fff;border:none;border-radius:10px;padding:10px;font-size:12px;font-weight:800;cursor:pointer;">📱 WhatsApp</button>
       </div>
       <button onclick="this.closest('div').closest('div').remove()" style="margin-top:8px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:12px;cursor:pointer;">Close</button>
     </div>`;
   document.body.appendChild(popup);
+  // Attach WhatsApp button safely
+  const waBtn = document.getElementById('wa-share-btn');
+  if(waBtn) waBtn.onclick = function(){
+    popup.remove();
+    const t = '🏆 I scored '+score+'% on BrightMind Teacher!
+Class '+(u.class||'')+' · '+(u.board||'TN')+'
+
+Can you beat me? 👊
+Try BrightMind Teacher!
+brightmindteacher.com
+Only ₹199/month!';
+    window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
+  };
 }
 
 // AUTH
@@ -5036,7 +5049,7 @@ async function loadAdminSupport(){
     </div>
     <div style="display:flex;gap:6px;">
       <button onclick="document.getElementById('reply-box-${i}').style.display=document.getElementById('reply-box-${i}').style.display==='none'?'block':'none'" style="flex:1;background:linear-gradient(135deg,var(--blue-mid),var(--blue-bright));color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;">💬 Reply to Student</button>
-      ${m.email?`<button onclick="window.open('mailto:${m.email}?subject=BrightMind Support - Re: ${encodeURIComponent(m.issue_type||'Your issue')}&body=Dear ${encodeURIComponent(m.student_name)},%0A%0A')" style="background:#34a853;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;">📧 Email</button>`:''}
+      ${m.email?`<button id="mailto-btn-" style="background:#34a853;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;">📧 Email</button>`:''}
     </div>
   </div>`).join('');
 }
