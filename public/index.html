@@ -4303,73 +4303,54 @@ function renderGuideHistory(){
 }
 
 
+function shuffleExamOptions(questions){
+  return questions.map(q=>{
+    const origCorrect=(q.correct||'A').toString().toUpperCase().charAt(0);
+    const opts=Array.isArray(q.options)?q.options:['A) -','B) -','C) -','D) -'];
+    const texts=opts.map(o=>o.length>2?o.replace(/^[A-D]\)\s*/,''):o);
+    const correctText=texts[['A','B','C','D'].indexOf(origCorrect)]||texts[0];
+    const shuffled=[...texts].sort(()=>Math.random()-0.5);
+    const newIdx=shuffled.indexOf(correctText);
+    return {
+      q:q.q||q.question||'',
+      options:shuffled.map((t,i)=>['A','B','C','D'][i]+') '+t),
+      correct:['A','B','C','D'][newIdx]||'A',
+      explanation:q.explanation||''
+    };
+  });
+}
+
 async function startExam(){
   if(!S.sub)return;
   S.examSub=S.sub;S.examAns={};S.examIdx=0;
   document.getElementById('result-overlay').classList.remove('open');
   document.getElementById('exam-overlay').classList.add('open');
   document.getElementById('exam-title').textContent=S.examSub.name+' — Chapter Exam';
-  document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">📦 Loading from question bank...<br><br>Please wait...</div>';
 
-  // ── STEP 1: Try question bank from DB (zero AI cost) ──
+  const board=S.user?.board||'TN';
+  const cls=String(S.user?.class||'9');
+  const subj=S.examSub?.name||'General';
+
+  document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:14px;color:var(--gray-text);">📦 Loading: '+board+' Class '+cls+' '+subj+'...</div>';
+
+  // ── Try question bank from DB ──
   try{
-    const board=S.user?.board||'TN';
-    const cls=(S.user?.class||'9').toString();
-    const subj=S.examSub?.name||SYL.subject||'General';
-    console.log('QBank lookup:',board, cls, subj, 'API:', API_URL);
-    document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:13px;color:var(--gray-text);">📦 Checking bank for: '+board+' Cl'+cls+' '+subj+'...<br><br>Please wait...</div>';
-    // Try exact board match first
-    let qbRes=await fetch(`${API_URL}/api/qbank/exam?board=${encodeURIComponent(board)}&class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(subj)}&count=15`);
-    let qbData=await qbRes.json();
-    console.log('QBank result:',qbData.ok, qbData.questions?.length);
-    // If not found, try TN board as fallback
-    if(!qbData.ok || !qbData.questions || qbData.questions.length<5){
-      console.log('Trying TN fallback...');
-      qbRes=await fetch(`${API_URL}/api/qbank/exam?board=TN&class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(subj)}&count=15`);
-      qbData=await qbRes.json();
-      console.log('TN fallback result:',qbData.ok, qbData.questions?.length);
-    }
-    // Try class 10 TN fallback
-    if(!qbData.ok || !qbData.questions || qbData.questions.length<5){
-      qbRes=await fetch(`${API_URL}/api/qbank/exam?board=TN&class=10&subject=${encodeURIComponent(subj)}&count=15`);
-      qbData=await qbRes.json();
-    }
-    // Last resort — any board any class, just match subject name
-    if(!qbData.ok || !qbData.questions || qbData.questions.length<5){
-      qbRes=await fetch(`${API_URL}/api/qbank/exam?board=ANY&class=ANY&subject=${encodeURIComponent(subj)}&count=15`);
-      qbData=await qbRes.json();
-    }
-    if(qbData.ok && qbData.questions && qbData.questions.length>=5){
-      // Got questions from DB — shuffle options so correct answer is randomized
-      S.examQs=qbData.questions.map(q=>{
-        // Original options come as ["A) text","B) text","C) text","D) text"]
-        // correct is "A","B","C","D"
-        const origCorrect=(q.correct||'A').toString().toUpperCase().charAt(0);
-        const opts=Array.isArray(q.options)?q.options:['A) -','B) -','C) -','D) -'];
-        // Extract just the text from each option
-        const texts=opts.map(o=>o.substring(3)); // remove "A) ","B) " etc
-        const correctText=texts[['A','B','C','D'].indexOf(origCorrect)];
-        // Shuffle the texts
-        const shuffled=[...texts].sort(()=>Math.random()-0.5);
-        // Find where correct answer landed after shuffle
-        const newCorrectIdx=shuffled.indexOf(correctText);
-        const newCorrectLetter=['A','B','C','D'][newCorrectIdx];
-        // Rebuild options with new letters
-        const newOptions=shuffled.map((t,i)=>(['A','B','C','D'][i])+') '+t);
-        return {
-          q:q.q,
-          options:newOptions,
-          correct:newCorrectLetter,
-          explanation:q.explanation||''
-        };
-      });
+    const url=API_URL+'/api/qbank/exam?board='+encodeURIComponent(board)+'&class='+encodeURIComponent(cls)+'&subject='+encodeURIComponent(subj)+'&count=15';
+    console.log('Fetching:', url);
+    const res=await fetch(url);
+    const data=await res.json();
+    console.log('QBank response:', JSON.stringify(data).substring(0,100));
+    if(data.ok && data.questions && data.questions.length>=5){
+      S.examQs=shuffleExamOptions(data.questions);
       startTimer();renderExamQ();
       return;
     }
-  }catch(e){ 
-    console.error('QBank error:', e.message);
-    document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:13px;color:red;">QBank error: '+e.message+'<br>Falling to AI...</div>';
-    await new Promise(r=>setTimeout(r,2000));
+    console.log('DB empty, trying AI...');
+
+  }catch(e){
+    console.error('QBank error:', e);
+    document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:20px;color:orange;font-size:12px;">DB error: '+e.message+'</div>';
+    await new Promise(r=>setTimeout(r,1500));
   }
 
   // ── STEP 2: AI fallback — only if question bank empty ──
