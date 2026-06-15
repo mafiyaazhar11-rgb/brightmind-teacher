@@ -501,6 +501,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 .ob-dot.active{background:var(--gold);width:24px;border-radius:4px;}
 .ob-slide{display:none;position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .ob-slide.active{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:16px 20px 8px;animation:obSlide .35s cubic-bezier(.34,1.1,.64,1);}
+@keyframes wv{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
 @keyframes obSlide{from{transform:translateX(40px);opacity:0;}to{transform:translateX(0);opacity:1;}}
 .ob-content{width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center;gap:10px;}
 .ob-icon-big{font-size:52px;animation:iconPop .5s cubic-bezier(.34,1.56,.64,1);}
@@ -5700,21 +5701,95 @@ function handleChallengeLink(){
   }
 }
 
+// ── INTERACTIVE BLACKBOARD (Slide 1) ──
+let OB_BB = { step: 0, timer: null };
+
+const OB_BB_STEPS = [
+  { miss: "Good morning dear! I am Miss BrightMind. Let me solve this step by step for you! 😊", ask: null },
+  { miss: "Step 1 clear! Now Step 2 — we need two numbers that multiply to 6 and add to 5. Think dear! 🤔", ask: "Is Step 1 clear? Shall we go to Step 2? ⬇️" },
+  { miss: "2 × 3 = 6 and 2 + 3 = 5 — perfect! Now we write the factored form. Watch carefully! 👀", ask: "Got the factors? Shall we go to Step 3? ⬇️" },
+  { miss: "Excellent dear! (x−2)(x−3) = 0 means x = 2 or x = 3. That is the final answer! 🎉", ask: "Understood? Shall we see the final answer? ⬇️" }
+];
+
+function obNextStep(){
+  OB_BB.step++;
+  if(OB_BB.step > 3) return;
+  // Show blackboard step
+  const bb = document.getElementById('ob-bb'+OB_BB.step);
+  if(bb){ setTimeout(()=>{ bb.style.opacity='1'; bb.style.transform='translateY(0)'; }, 50); }
+  // Update progress bars
+  for(let i=0;i<4;i++){
+    const sp=document.getElementById('ob-sp'+i);
+    if(sp) sp.style.background = i<=OB_BB.step ? '#ffd600' : 'rgba(255,255,255,.15)';
+  }
+  // Update Miss speech
+  obUpdateMiss(OB_BB_STEPS[OB_BB.step].miss);
+  // After 2 seconds show "shall we go next?"
+  if(OB_BB.step < 3){
+    setTimeout(()=>{ obUpdateMiss(OB_BB_STEPS[OB_BB.step].ask); }, 2000);
+  }
+  // Last step — change button to "Continue → next slide"
+  if(OB_BB.step >= 3){
+    const btn=document.getElementById('ob-next-step-btn');
+    if(btn){ btn.textContent='Continue →'; btn.onclick=function(){ obGoToSlide(1); }; }
+    setTimeout(()=>{ obUpdateMiss("Perfect dear! You understood all 4 steps! 🌟 Tap Continue to see more!"); }, 1500);
+    // Auto-continue after 4 seconds if student doesn't tap
+    setTimeout(()=>{ if(OB_BB.step>=3) obGoToSlide(1); }, 5000);
+  }
+}
+
+function obRepeatStep(){
+  const msgs = [
+    "Of course dear! Let me explain Step "+(OB_BB.step+1)+" again! 🔄",
+    "No problem! Take your time. Understanding matters more than speed! 😊",
+    "Sure dear! Ask me anything — I am always here for you! 📚"
+  ];
+  obUpdateMiss(msgs[OB_BB.step % msgs.length]);
+  setTimeout(()=>{ obUpdateMiss(OB_BB_STEPS[OB_BB.step].miss); }, 2500);
+}
+
+function obUpdateMiss(txt){
+  const el=document.getElementById('ob-miss-txt');
+  if(!el) return;
+  el.style.opacity='0';
+  setTimeout(()=>{ el.textContent=txt; el.style.opacity='1'; el.style.transition='opacity .3s'; }, 200);
+}
+
+function initObBlackboard(){
+  OB_BB.step=0;
+  // Reset all steps
+  for(let i=1;i<4;i++){
+    const bb=document.getElementById('ob-bb'+i);
+    if(bb){ bb.style.opacity='0'; bb.style.transform='translateY(6px)'; }
+  }
+  for(let i=0;i<4;i++){
+    const sp=document.getElementById('ob-sp'+i);
+    if(sp) sp.style.background = i===0 ? '#ffd600' : 'rgba(255,255,255,.15)';
+  }
+  const btn=document.getElementById('ob-next-step-btn');
+  if(btn){ btn.textContent='Next Step →'; btn.onclick=obNextStep; }
+  setTimeout(()=>{ obUpdateMiss("Good morning dear! I am Miss BrightMind. Let me solve this step by step! Click 'Next Step' when you are ready! 😊"); }, 500);
+}
+
 function showOnboarding(){
   OB.slide=0;
-  document.getElementById('onboarding-overlay').style.display='flex';
-  // Show skip button based on login count
+  const overlay=document.getElementById('onboarding-overlay');
+  if(!overlay)return;
+  overlay.style.display='flex';
+  // Show/hide skip button
   const skipBtn=document.getElementById('ob-skip-btn');
   const skipFast=document.getElementById('ob-skip-fast');
-  if(skipBtn){
-    if(OB.loginCount>=2){
-      skipBtn.style.display='block'; // Login 2+ can skip
-    } else {
-      skipBtn.style.display='none'; // Login 1 — no skip
-    }
-  }
+  if(skipBtn) skipBtn.style.display=(OB.loginCount>=2)?'block':'none';
   if(skipFast) skipFast.style.display='none';
-  obGoToSlide(0);
+  // Slide 0 is INTERACTIVE — no auto-advance, just init blackboard
+  document.querySelectorAll('.ob-slide').forEach((s,i)=>s.classList.toggle('active',i===0));
+  document.querySelectorAll('.ob-dot').forEach((d,i)=>d.classList.toggle('active',i===0));
+  const prog=document.getElementById('ob-prog');
+  if(prog)prog.style.width='16.6%';
+  const num=document.getElementById('ob-slide-num');
+  if(num)num.textContent='1 / 6';
+  // NO obGoToSlide(0) — that would start auto-advance timer!
+  setTimeout(initObBlackboard, 400);
 }
 
 function obGoToSlide(idx){
@@ -8380,19 +8455,47 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 
   <div style="flex:1;position:relative;overflow:hidden;cursor:pointer;" onclick="obTapSkip()">
 
-    <div class="ob-slide active" id="ob-slide-0" style="background:radial-gradient(ellipse at 50% 0%,#1a3a8f,#0a0f2e 70%);">
-      <div class="ob-inner">
-        <div class="ob-num">01 / 06</div>
-        <div class="ob-slide-icon">📚</div>
-        <div class="ob-slide-title">Welcome to <span class="ob-gold">BrightMind Teacher</span></div>
-        <div style="display:inline-block;background:rgba(255,214,0,.2);border:1px solid rgba(255,214,0,.5);color:#ffd600;font-size:11px;font-weight:800;padding:4px 12px;border-radius:8px;margin-bottom:8px;">📚 Class 9 · 10 · 11 · 12 — All Boards</div>
-        <div class="ob-slide-sub">South India's first AI tutor built for YOUR board and YOUR syllabus — not just a basic chatbot!</div>
-        <div class="ob-cards">
-          <div class="ob-card"><div class="ob-card-icon">🧠</div><div class="ob-card-lbl">AI Teacher</div><div class="ob-card-sub">Always available</div></div>
-          <div class="ob-card"><div class="ob-card-icon">📋</div><div class="ob-card-lbl">Your Syllabus</div><div class="ob-card-sub">CBSE · TN · Kerala</div></div>
-          <div class="ob-card"><div class="ob-card-icon">⚡</div><div class="ob-card-lbl">Instant Help</div><div class="ob-card-sub">24/7 · No waiting</div></div>
+    <div class="ob-slide active" id="ob-slide-0" style="background:linear-gradient(160deg,#0d1b4b,#1a237e);padding:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <span style="background:rgba(255,214,0,.2);border:1px solid rgba(255,214,0,.5);color:#ffd600;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;">📚 Class 9–12 · All Boards</span>
+        <span style="background:rgba(76,175,80,.2);border:1px solid #4caf50;color:#69f0ae;font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px;">🖊️ LIVE</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:8px;background:rgba(255,214,0,.08);border:1px solid rgba(255,214,0,.3);border-radius:10px;padding:9px;margin-bottom:8px;min-height:62px;">
+        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#ffd600,#ff8f00);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">👩‍🏫</div>
+        <div style="flex:1;">
+          <div style="font-size:9px;color:#ffd600;font-weight:800;margin-bottom:3px;">Miss BrightMind speaks:</div>
+          <div style="font-size:11px;color:#fff;line-height:1.5;" id="ob-miss-txt">Good morning dear! I am Miss BrightMind. Let me solve this step by step for you! 😊</div>
         </div>
       </div>
+      <div style="display:flex;gap:4px;margin-bottom:8px;">
+        <div style="flex:1;height:3px;border-radius:2px;background:#ffd600;" id="ob-sp0"></div>
+        <div style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.15);" id="ob-sp1"></div>
+        <div style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.15);" id="ob-sp2"></div>
+        <div style="flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.15);" id="ob-sp3"></div>
+      </div>
+      <div style="background:#0d2b0d;border:1px solid #2a4a2a;border-radius:10px;padding:10px;margin-bottom:8px;min-height:130px;">
+        <div id="ob-bb0">
+          <div style="font-size:9px;color:#ffd600;letter-spacing:.5px;font-family:monospace;margin-bottom:3px;">── STEP 1: THE PROBLEM ──</div>
+          <div style="font-size:12px;color:#e8ffe8;font-family:monospace;line-height:1.8;">Solve: x² − 5x + 6 = 0</div>
+        </div>
+        <div id="ob-bb1" style="opacity:0;transform:translateY(6px);transition:all .4s;margin-top:6px;">
+          <div style="font-size:9px;color:#ffd600;letter-spacing:.5px;font-family:monospace;margin-bottom:3px;">── STEP 2: FIND FACTORS ──</div>
+          <div style="font-size:12px;color:#e8ffe8;font-family:monospace;line-height:1.8;">Need: a×b=6  and  a+b=5<br>→ 2×3=6 ✓  and  2+3=5 ✓</div>
+        </div>
+        <div id="ob-bb2" style="opacity:0;transform:translateY(6px);transition:all .4s;margin-top:6px;">
+          <div style="font-size:9px;color:#ffd600;letter-spacing:.5px;font-family:monospace;margin-bottom:3px;">── STEP 3: FACTORISE ──</div>
+          <div style="font-size:12px;color:#e8ffe8;font-family:monospace;line-height:1.8;">(x − 2)(x − 3) = 0</div>
+        </div>
+        <div id="ob-bb3" style="opacity:0;transform:translateY(6px);transition:all .4s;margin-top:6px;">
+          <div style="font-size:9px;color:#ffd600;letter-spacing:.5px;font-family:monospace;margin-bottom:3px;">── STEP 4: ANSWER ──</div>
+          <div style="background:rgba(255,214,0,.15);border-radius:6px;padding:7px;"><div style="font-size:14px;color:#ffd600;font-weight:800;">✅ x = 2  or  x = 3</div></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:6px;">
+        <button onclick="obRepeatStep()" style="flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:8px;font-size:11px;font-weight:800;cursor:pointer;">🔄 Repeat</button>
+        <button id="ob-next-step-btn" onclick="obNextStep()" style="flex:1;background:#ffd600;color:#0a0f2e;border:none;border-radius:8px;padding:8px;font-size:11px;font-weight:800;cursor:pointer;">Next Step →</button>
+      </div>
+      <div style="background:rgba(255,214,0,.1);border:1px solid rgba(255,214,0,.3);border-radius:8px;padding:7px;font-size:10px;color:#ffd600;font-weight:600;text-align:center;">🎯 CBSE · TN Board · Kerala · Karnataka · 7 more boards!</div>
     </div>
 
     <div class="ob-slide" id="ob-slide-1" style="background:radial-gradient(ellipse at 50% 0%,#1a5e1a,#0a0f2e 70%);">
