@@ -641,30 +641,32 @@ app.get('/api/qbank/exam', async (req, res) => {
   try {
     const { board, class: cls, subject, count = 15 } = req.query;
     if (!board || !cls || !subject) return res.json({ ok: false, msg: 'Missing params' });
-    // Try exact class match first
-    let result = await pool.query(
-      `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks
-       FROM bmt_question_bank
-       WHERE board=$1 AND class=$2 AND LOWER(subject) LIKE LOWER($3)
-       ORDER BY RANDOM() LIMIT $4`,
-      [board, cls, `%${subject}%`, parseInt(count)]
-    );
-    // If not enough, try any class from same board
-    if (result.rows.length < 5) {
+    // Smart fallback — tries multiple combinations until questions found
+    let result = { rows: [] };
+
+    // Level 1: exact board + class + subject
+    if (board !== 'ANY') {
       result = await pool.query(
         `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks
-         FROM bmt_question_bank
-         WHERE board=$1 AND LOWER(subject) LIKE LOWER($2)
+         FROM bmt_question_bank WHERE board=$1 AND class=$2 AND LOWER(subject) LIKE LOWER($3)
+         ORDER BY RANDOM() LIMIT $4`,
+        [board, cls, `%${subject}%`, parseInt(count)]
+      );
+    }
+    // Level 2: any class same board
+    if (result.rows.length < 5 && board !== 'ANY') {
+      result = await pool.query(
+        `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks
+         FROM bmt_question_bank WHERE board=$1 AND LOWER(subject) LIKE LOWER($2)
          ORDER BY RANDOM() LIMIT $3`,
         [board, `%${subject}%`, parseInt(count)]
       );
     }
-    // If still not enough, try any board same subject
+    // Level 3: any board any class — just match subject
     if (result.rows.length < 5) {
       result = await pool.query(
         `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks
-         FROM bmt_question_bank
-         WHERE LOWER(subject) LIKE LOWER($1)
+         FROM bmt_question_bank WHERE LOWER(subject) LIKE LOWER($1)
          ORDER BY RANDOM() LIMIT $2`,
         [`%${subject}%`, parseInt(count)]
       );
