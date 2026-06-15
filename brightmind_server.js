@@ -853,35 +853,13 @@ app.post('/api/admin/qbank/auto-bulk', async (req, res) => {
           }
 
           const isRegionalLang = ['Tamil','Telugu','Kannada','Malayalam','Hindi','Marathi','Bengali','Gujarati'].includes(subject);
-          const isMath = ['Mathematics','Maths','Physics','Chemistry'].includes(subject);
-          
-          let prompt;
-          if (isRegionalLang) {
-            prompt = `Return ONLY a JSON array. No text before or after. Start with [
-Generate 25 MCQ questions for ${boardFull} Class ${cls} ${subject}.
-Write ALL fields in ${subject} language. Chapter name in English only.
-STRICT: max 50 chars per field. No long sentences. No line breaks in strings.
-Format: [{"q":"question","a":"opt1","b":"opt2","c":"opt3","d":"opt4","correct":"A","explanation":"reason","difficulty":"easy","chapter":"ChapterName"}]
-Output only the JSON array:`;
-          } else if (isMath) {
-            prompt = `Return ONLY a JSON array. No text before or after. Start with [
-Generate 25 MCQ questions for ${boardFull} Class ${cls} ${subject}.
-Use proper math symbols in questions and options (π, √, sin⁻¹, etc).
-STRICT RULES to avoid JSON errors:
-- "explanation" field: MAX 30 characters, very short reason only
-- "q" field: MAX 80 characters
-- "a","b","c","d" fields: MAX 40 characters each
-- NO line breaks inside any string value
-- "chapter" in English only
-Format: [{"q":"What is sin(30°)?","a":"1/2","b":"√3/2","c":"1","d":"0","correct":"A","explanation":"Standard value","difficulty":"easy","chapter":"Trigonometry"}]
-Output only the JSON array:`;
-          } else {
-            prompt = `Return ONLY a JSON array. No text before or after. Start with [
-Generate 25 MCQ questions for ${boardFull} Class ${cls} ${subject} (${boardFull} board).
-Max 100 chars per field. No line breaks in strings.
-Format: [{"q":"question","a":"opt1","b":"opt2","c":"opt3","d":"opt4","correct":"A","explanation":"reason","difficulty":"easy","chapter":"ChapterName"}]
-Output only the JSON array:`;
-          }
+
+          // Single clean prompt for all subjects — proven to work
+          const prompt = 'Generate 20 MCQ exam questions for ' + boardFull + ' Class ' + cls + ' ' + subject + '. '
+            + (isRegionalLang ? 'Write questions and options in ' + subject + ' language. Keep each answer option under 40 characters.' : 'Write in English.')
+            + ' Respond with ONLY a JSON array in this exact format, nothing else: '
+            + '[{"q":"question text","a":"option1","b":"option2","c":"option3","d":"option4","correct":"B","explanation":"short reason","difficulty":"medium","chapter":"Chapter Name"}]'
+            + ' Rules: correct must be A B C or D. explanation max 50 chars. No line breaks inside strings. Start your response with [ and end with ]';
 
                     const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
