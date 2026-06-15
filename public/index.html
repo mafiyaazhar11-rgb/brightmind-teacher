@@ -2409,8 +2409,165 @@ function downloadRankCard(){
 
 function shareRankCard(){
   const u=S.user;if(!u)return;
-  const text=`🧠 BrightMind Teacher\n\n👤 ${u.name}\n📚 Class ${u.class} · ${u.board||'CBSE'}\n\n🏆 GPA: ${computeGPA(u)}/10\n📍 ${u.state} Rank: #${computeStateRank(u)}\n🇮🇳 All India Rank: #${rank(u)}\n🔥 Streak: ${u.streak||0} days\n⭐ Stars: ${u.stars||0}\n\nJoin BrightMind Teacher — AI Tutor from ₹199/month!`;
-  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+  // Build beautiful canvas rank card
+  const canvas=document.createElement('canvas');
+  canvas.width=600;canvas.height=400;
+  const ctx=canvas.getContext('2d');
+  const gpa=computeGPA(u);
+  const stRank=computeStateRank(u);
+  const allRank=rank(u);
+  const stars=u.stars||0;
+  const streak=u.streak||0;
+  const score=u.examHist&&u.examHist.length?u.examHist[u.examHist.length-1].score:0;
+
+  // Background gradient — dark blue
+  const grad=ctx.createLinearGradient(0,0,600,400);
+  grad.addColorStop(0,'#0a0f2e');
+  grad.addColorStop(1,'#1a237e');
+  ctx.fillStyle=grad;
+  ctx.fillRect(0,0,600,400);
+
+  // Gold top accent bar
+  const topBar=ctx.createLinearGradient(0,0,600,0);
+  topBar.addColorStop(0,'#ffd600');
+  topBar.addColorStop(0.5,'#ff8f00');
+  topBar.addColorStop(1,'#ffd600');
+  ctx.fillStyle=topBar;
+  ctx.fillRect(0,0,600,6);
+
+  // BrightMind logo area
+  ctx.fillStyle='rgba(255,255,255,0.06)';
+  ctx.beginPath();ctx.arc(300,0,280,0,Math.PI*2);ctx.fill();
+
+  // App name
+  ctx.fillStyle='#ffd600';
+  ctx.font='bold 18px Arial';
+  ctx.textAlign='left';
+  ctx.fillText('🧠 BrightMind Teacher', 30, 45);
+  ctx.fillStyle='rgba(255,255,255,0.5)';
+  ctx.font='12px Arial';
+  ctx.fillText('AI Tutor · brightmindteacher.com', 30, 65);
+
+  // Score badge (big circle right side)
+  const scoreColor = score>=85?'#00e676':score>=60?'#ffd600':'#ff5252';
+  ctx.beginPath();
+  ctx.arc(510,100,65,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.05)';
+  ctx.fill();
+  ctx.strokeStyle=scoreColor;
+  ctx.lineWidth=4;
+  ctx.stroke();
+  ctx.fillStyle=scoreColor;
+  ctx.font='bold 32px Arial';
+  ctx.textAlign='center';
+  ctx.fillText(score+'%', 510, 108);
+  ctx.fillStyle='rgba(255,255,255,0.6)';
+  ctx.font='11px Arial';
+  ctx.fillText(score>=85?'PASSED ✓':'KEEP TRYING', 510, 128);
+
+  // Student name — big
+  ctx.fillStyle='#ffffff';
+  ctx.font='bold 34px Arial';
+  ctx.textAlign='left';
+  ctx.fillText(u.name||'Student', 30, 110);
+
+  // Class + Board + Subject
+  ctx.fillStyle='rgba(255,255,255,0.7)';
+  ctx.font='14px Arial';
+  const lastExam=u.examHist&&u.examHist.length?u.examHist[u.examHist.length-1]:null;
+  ctx.fillText('Class '+u.class+' · '+(u.board||'TN Board')+(lastExam?' · '+lastExam.subject:''), 30, 135);
+
+  // Divider line
+  ctx.strokeStyle='rgba(255,214,0,0.3)';
+  ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(30,155);ctx.lineTo(570,155);ctx.stroke();
+
+  // Stats row — 4 boxes
+  const stats=[
+    {val:'#'+allRank, lbl:'All India Rank', color:'#ffd600'},
+    {val:'#'+stRank, lbl:(u.state||'TN')+' Rank', color:'#69f0ae'},
+    {val:gpa+'/10', lbl:'GPA Score', color:'#40c4ff'},
+    {val:streak+'🔥', lbl:'Day Streak', color:'#ff8a65'},
+  ];
+  stats.forEach((s,i)=>{
+    const x=30+(i*140);const y=175;
+    ctx.fillStyle='rgba(255,255,255,0.06)';
+    ctx.beginPath();ctx.roundRect(x,y,125,70,8);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.1)';
+    ctx.lineWidth=1;
+    ctx.beginPath();ctx.roundRect(x,y,125,70,8);ctx.stroke();
+    ctx.fillStyle=s.color;
+    ctx.font='bold 22px Arial';
+    ctx.textAlign='center';
+    ctx.fillText(s.val,x+62,y+35);
+    ctx.fillStyle='rgba(255,255,255,0.55)';
+    ctx.font='10px Arial';
+    ctx.fillText(s.lbl,x+62,y+55);
+  });
+
+  // Stars row
+  ctx.textAlign='left';
+  ctx.font='22px Arial';
+  let starsStr='';
+  for(let i=0;i<5;i++) starsStr+=(i<stars?'⭐':'☆');
+  ctx.fillText(starsStr, 30, 285);
+
+  // Badges count
+  const badgeCount=(u.badges||[]).length;
+  ctx.fillStyle='rgba(255,255,255,0.6)';
+  ctx.font='13px Arial';
+  ctx.fillText('🏅 '+badgeCount+' Badges  ·  📚 '+(u.totalQ||0)+' Questions Asked  ·  📝 '+((u.examHist||[]).length)+' Exams', 30, 310);
+
+  // Challenge message — EGO trigger!
+  ctx.fillStyle='rgba(255,214,0,0.15)';
+  ctx.beginPath();ctx.roundRect(30,325,540,50,10);ctx.fill();
+  ctx.strokeStyle='rgba(255,214,0,0.4)';
+  ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect(30,325,540,50,10);ctx.stroke();
+  ctx.fillStyle='#ffd600';
+  ctx.font='bold 14px Arial';
+  ctx.textAlign='center';
+  ctx.fillText('🏆 Can you beat my score? Try BrightMind Teacher — ₹199/month!', 300, 348);
+  ctx.fillStyle='rgba(255,255,255,0.5)';
+  ctx.font='11px Arial';
+  ctx.fillText('brightmindteacher.com · AI Tutor in Tamil, English & 6 languages', 300, 366);
+
+  // Convert to image and share
+  canvas.toBlob(blob=>{
+    if(!blob)return;
+    // Try native share with image
+    if(navigator.share && navigator.canShare){
+      const file=new File([blob],'brightmind-rank.png',{type:'image/png'});
+      if(navigator.canShare({files:[file]})){
+        navigator.share({
+          files:[file],
+          title:'My BrightMind Rank Card',
+          text:'I scored '+score+'% on BrightMind Teacher! Can you beat me? 🏆 brightmindteacher.com'
+        }).catch(()=>fallbackShare(canvas,score,u));
+        return;
+      }
+    }
+    fallbackShare(canvas,score,u);
+  },'image/png');
+}
+
+function fallbackShare(canvas,score,u){
+  // Show image in popup with download + WhatsApp text share
+  const img=canvas.toDataURL('image/png');
+  const popup=document.createElement('div');
+  popup.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;';
+  popup.innerHTML=`
+    <div style="background:#0a0f2e;border-radius:16px;padding:16px;max-width:400px;width:100%;text-align:center;">
+      <div style="font-size:14px;font-weight:800;color:#ffd600;margin-bottom:10px;">📤 Share Your Rank Card!</div>
+      <img src="${img}" style="width:100%;border-radius:10px;margin-bottom:12px;"/>
+      <div style="font-size:11px;color:rgba(255,255,255,.6);margin-bottom:10px;">Press & hold image to save, then share on WhatsApp</div>
+      <div style="display:flex;gap:8px;">
+        <a href="${img}" download="brightmind-rank.png" style="flex:1;background:#25d366;color:#fff;border:none;border-radius:10px;padding:10px;font-size:12px;font-weight:800;text-decoration:none;display:block;">💾 Save Image</a>
+        <button onclick="this.closest('div').closest('div').remove();const t='🏆 I scored ${score}% on BrightMind Teacher!\nClass ${(u.class||'')} · ${(u.board||'TN')}\n\nCan you beat me? 👊\nTry BrightMind Teacher — AI Tutor in Tamil!\nbright mindteacher.com\nOnly ₹199/month!';window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');" style="flex:1;background:#25d366;color:#fff;border:none;border-radius:10px;padding:10px;font-size:12px;font-weight:800;cursor:pointer;">📱 WhatsApp</button>
+      </div>
+      <button onclick="this.closest('div').closest('div').remove()" style="margin-top:8px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:12px;cursor:pointer;">Close</button>
+    </div>`;
+  document.body.appendChild(popup);
 }
 
 // AUTH
@@ -2560,6 +2717,7 @@ function loginUser(u){
   updateStreak(u);checkBadges(u);saveUser();
   renderLimitBar();renderSubjects();renderTrialBanner(u);go('app');
   setTimeout(initAvatar,500);
+  setTimeout(handleChallengeLink,1000);
   // Smart onboarding:
   // Login 1 → full slides auto, no skip
   // Login 2 → full slides + skip button
@@ -5523,6 +5681,25 @@ const OB_VOICE = [
   "Everything in one app — teacher interaction, rapid exam, red pen correction, blackboard solutions, homework — all for just 199 rupees per month! Less than one tuition class. Start free today!"
 ];
 
+// Handle challenge link from WhatsApp
+function handleChallengeLink(){
+  const params=new URLSearchParams(window.location.search);
+  const subject=params.get('challenge');
+  const score=params.get('score');
+  const name=params.get('name');
+  if(subject && S.user){
+    // Show challenge banner
+    const banner=document.createElement('div');
+    banner.style.cssText='position:fixed;top:0;left:0;right:0;z-index:999;background:linear-gradient(135deg,#ffd600,#ff8f00);color:#0a0f2e;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;';
+    banner.innerHTML=`<span>🏆 ${name||'A friend'} scored ${score}% in ${subject}! Beat them? 👊</span>
+      <button onclick="this.parentElement.remove();openInstantExam('${subject.toLowerCase()}','${subject}','📚')" style="background:#0a0f2e;color:#ffd600;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:800;cursor:pointer;">⚡ Take Exam!</button>
+      <button onclick="this.parentElement.remove()" style="background:none;border:none;font-size:18px;cursor:pointer;">✕</button>`;
+    document.body.appendChild(banner);
+    // Clean URL
+    window.history.replaceState({},'',window.location.pathname);
+  }
+}
+
 function showOnboarding(){
   OB.slide=0;
   document.getElementById('onboarding-overlay').style.display='flex';
@@ -5887,25 +6064,146 @@ function closeCorrectedPaper(){
 }
 
 function shareCorrectedPaper(){
-  const u = S.user;
-  const tot = IE.questions.length;
-  const corr = Object.entries(IE.answers).filter(([i,a])=>IE.questions[i]?.correct===a).length;
-  const score = Math.round((corr/tot)*100);
-  const passed = score>=85;
+  const u=S.user;if(!u)return;
+  const tot=IE.questions.length;
+  const corr=Object.entries(IE.answers).filter(([i,a])=>IE.questions[i]?.correct===a).length;
+  const score=Math.round((corr/tot)*100);
+  const passed=score>=85;
 
-  const text = `📋 My ${IE.subject} Exam Result\n\n`+
-    `Student: ${u?.name}\n`+
-    `Class: ${u?.class} · ${u?.board||'CBSE'}\n`+
-    `Subject: ${IE.icon} ${IE.subject}\n\n`+
-    `Score: ${corr}/${tot} (${score}%)\n`+
-    `Result: ${passed?'✅ PASSED':'❌ Not Passed'}\n`+
-    `Correct: ${corr} · Wrong: ${tot-corr}\n\n`+
-    `📚 Practised on BrightMind Teacher\n`+
-    `🧠 AI Tutor in Tamil & English\n`+
-    `👉 brightmindteacher.com\n`+
-    `Only ₹199/month!`;
+  // Build beautiful canvas rank card for exam result
+  const canvas=document.createElement('canvas');
+  canvas.width=600;canvas.height=420;
+  const ctx=canvas.getContext('2d');
 
-  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+  // Background
+  const grad=ctx.createLinearGradient(0,0,600,420);
+  grad.addColorStop(0,'#0a0f2e');
+  grad.addColorStop(1,passed?'#1b5e20':'#b71c1c');
+  ctx.fillStyle=grad;
+  ctx.fillRect(0,0,600,420);
+
+  // Top accent bar
+  const topBar=ctx.createLinearGradient(0,0,600,0);
+  topBar.addColorStop(0,'#ffd600');
+  topBar.addColorStop(0.5,'#ff8f00');
+  topBar.addColorStop(1,'#ffd600');
+  ctx.fillStyle=topBar;
+  ctx.fillRect(0,0,600,6);
+
+  // Subtle circle bg
+  ctx.fillStyle='rgba(255,255,255,0.04)';
+  ctx.beginPath();ctx.arc(500,420,300,0,Math.PI*2);ctx.fill();
+
+  // App branding
+  ctx.fillStyle='#ffd600';
+  ctx.font='bold 16px Arial';
+  ctx.textAlign='left';
+  ctx.fillText('🧠 BrightMind Teacher', 28, 40);
+  ctx.fillStyle='rgba(255,255,255,0.45)';
+  ctx.font='11px Arial';
+  ctx.fillText('AI Tutor · brightmindteacher.com · ₹199/month', 28, 58);
+
+  // Big score circle
+  const scoreColor=score>=85?'#00e676':score>=60?'#ffd600':'#ff5252';
+  ctx.beginPath();ctx.arc(510,110,70,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fill();
+  ctx.strokeStyle=scoreColor;ctx.lineWidth=5;ctx.stroke();
+  ctx.fillStyle=scoreColor;
+  ctx.font='bold 36px Arial';ctx.textAlign='center';
+  ctx.fillText(score+'%',510,118);
+  ctx.font='bold 12px Arial';
+  ctx.fillText(passed?'✓ PASSED':'TRY AGAIN',510,138);
+
+  // Student name
+  ctx.fillStyle='#fff';
+  ctx.font='bold 36px Arial';ctx.textAlign='left';
+  const name=u.name||'Student';
+  ctx.fillText(name.length>16?name.substring(0,16)+'...':name,28,115);
+
+  // Subject + class
+  ctx.fillStyle='rgba(255,255,255,0.65)';
+  ctx.font='14px Arial';
+  ctx.fillText(IE.icon+' '+IE.subject+' · Class '+(u.class||'')+ ' · '+(u.board||'TN Board'),28,140);
+
+  // Divider
+  ctx.strokeStyle='rgba(255,214,0,0.3)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(28,160);ctx.lineTo(572,160);ctx.stroke();
+
+  // 4 stat boxes
+  const stats=[
+    {val:corr+'/'+tot,lbl:'Correct Answers',color:'#69f0ae'},
+    {val:(tot-corr)+'/'+tot,lbl:'Wrong Answers',color:'#ff5252'},
+    {val:score+'%',lbl:'Score',color:scoreColor},
+    {val:passed?'PASSED':'NOT PASSED',lbl:'Result',color:scoreColor},
+  ];
+  stats.forEach((s,i)=>{
+    const x=28+(i*143);const y=175;
+    ctx.fillStyle='rgba(255,255,255,0.06)';
+    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,133,65,7);else ctx.rect(x,y,133,65);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;
+    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,133,65,7);else ctx.rect(x,y,133,65);ctx.stroke();
+    ctx.fillStyle=s.color;ctx.font='bold 20px Arial';ctx.textAlign='center';
+    ctx.fillText(s.val,x+66,y+32);
+    ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='10px Arial';
+    ctx.fillText(s.lbl,x+66,y+50);
+  });
+
+  // Miss BrightMind remark
+  ctx.fillStyle='rgba(255,255,255,0.08)';
+  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(28,255,544,55,10);else ctx.rect(28,255,544,55);ctx.fill();
+  ctx.fillStyle='rgba(255,214,0,0.8)';ctx.font='bold 12px Arial';ctx.textAlign='left';
+  ctx.fillText('👩‍🏫 Miss BrightMind says:',38,275);
+  ctx.fillStyle='rgba(255,255,255,0.85)';ctx.font='italic 12px Arial';
+  const remark=score>=90?'"Excellent! You have mastered this chapter! Well done dear! 🌟"':score>=85?'"Great job! You passed! Review your mistakes to score higher! 💪"':'"Keep trying dear! Revise the chapter and attempt again! 📚"';
+  ctx.fillText(remark,38,296);
+
+  // Ego trigger box
+  ctx.fillStyle='rgba(255,214,0,0.12)';
+  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(28,323,544,55,10);else ctx.rect(28,323,544,55);ctx.fill();
+  ctx.strokeStyle='rgba(255,214,0,0.35)';ctx.lineWidth=1;
+  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(28,323,544,55,10);else ctx.rect(28,323,544,55);ctx.stroke();
+  ctx.fillStyle='#ffd600';ctx.font='bold 14px Arial';ctx.textAlign='center';
+  ctx.fillText('🏆 Can you beat my '+score+'%? Challenge accepted? 👊',300,344);
+  ctx.fillStyle='rgba(255,255,255,0.7)';ctx.font='bold 11px Arial';
+  ctx.fillText('👆 Click the link below to take the SAME exam!',300,360);
+  ctx.fillStyle='rgba(255,255,255,0.45)';ctx.font='10px Arial';
+  ctx.fillText('brightmindteacher.com · AI Tutor in Tamil · ₹199/month',300,374);
+
+  // Date
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='10px Arial';ctx.textAlign='right';
+  ctx.fillText(new Date().toLocaleDateString('en-IN'),572,408);
+
+  // Share the image
+  canvas.toBlob(blob=>{
+    if(!blob)return;
+    if(navigator.share&&navigator.canShare){
+      const file=new File([blob],'brightmind-exam-result.png',{type:'image/png'});
+      if(navigator.canShare({files:[file]})){
+        navigator.share({files:[file],title:'My Exam Result',text:'I scored '+score+'% in '+IE.subject+' on BrightMind Teacher! Can you beat me? 🏆 brightmindteacher.com'}).catch(()=>showSharePopup(canvas,score));
+        return;
+      }
+    }
+    showSharePopup(canvas,score);
+  },'image/png');
+}
+
+function showSharePopup(canvas,score){
+  const img=canvas.toDataURL('image/png');
+  const popup=document.createElement('div');
+  popup.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;';
+  const challengeLink='https://brightmindteacher.com?challenge='+encodeURIComponent(IE.subject)+'&score='+score+'&name='+encodeURIComponent(u.name||'');
+  const shareText=encodeURIComponent('🏆 I scored '+score+'% in '+IE.subject+' on BrightMind Teacher!\n\n👊 Can YOU beat my score?\n⚡ Click below to take the same exam NOW:\n'+decodeURIComponent(challengeLink)+'\n\n🧠 BrightMind — AI Tutor in Tamil · ₹199/month!');
+  popup.innerHTML=`<div style="background:#0a0f2e;border-radius:16px;padding:16px;max-width:420px;width:100%;">
+    <div style="font-size:14px;font-weight:800;color:#ffd600;margin-bottom:10px;text-align:center;">🏆 Share Your Result Card!</div>
+    <img src="${img}" style="width:100%;border-radius:10px;margin-bottom:10px;"/>
+    <div style="font-size:11px;color:rgba(255,255,255,.5);text-align:center;margin-bottom:10px;">Press & hold image to save → Share on WhatsApp</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <a href="${img}" download="brightmind-result.png" style="flex:1;background:#1565c0;color:#fff;border:none;border-radius:10px;padding:10px;font-size:12px;font-weight:800;text-decoration:none;display:block;text-align:center;">💾 Save Image</a>
+      <a href="https://wa.me/?text=${shareText}" target="_blank" style="flex:1;background:#25d366;color:#fff;border:none;border-radius:10px;padding:10px;font-size:12px;font-weight:800;text-decoration:none;display:block;text-align:center;">📱 WhatsApp</a>
+    </div>
+    <button onclick="this.closest('div').closest('div').remove()" style="width:100%;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;cursor:pointer;">Close ✕</button>
+  </div>`;
+  document.body.appendChild(popup);
 }
 
 function downloadCorrectedPaper(){
