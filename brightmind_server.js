@@ -641,14 +641,35 @@ app.get('/api/qbank/exam', async (req, res) => {
   try {
     const { board, class: cls, subject, count = 15 } = req.query;
     if (!board || !cls || !subject) return res.json({ ok: false, msg: 'Missing params' });
-    const result = await pool.query(
+    // Try exact class match first
+    let result = await pool.query(
       `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks
        FROM bmt_question_bank
        WHERE board=$1 AND class=$2 AND LOWER(subject) LIKE LOWER($3)
        ORDER BY RANDOM() LIMIT $4`,
       [board, cls, `%${subject}%`, parseInt(count)]
     );
-    if (result.rows.length < 8) return res.json({ ok: false, msg: 'no_questions' });
+    // If not enough, try any class from same board
+    if (result.rows.length < 5) {
+      result = await pool.query(
+        `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks
+         FROM bmt_question_bank
+         WHERE board=$1 AND LOWER(subject) LIKE LOWER($2)
+         ORDER BY RANDOM() LIMIT $3`,
+        [board, `%${subject}%`, parseInt(count)]
+      );
+    }
+    // If still not enough, try any board same subject
+    if (result.rows.length < 5) {
+      result = await pool.query(
+        `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks
+         FROM bmt_question_bank
+         WHERE LOWER(subject) LIKE LOWER($1)
+         ORDER BY RANDOM() LIMIT $2`,
+        [`%${subject}%`, parseInt(count)]
+      );
+    }
+    if (result.rows.length < 5) return res.json({ ok: false, msg: 'no_questions' });
     const questions = result.rows.map(q => ({
       q: q.question,
       options: ['A) '+q.option_a,'B) '+q.option_b,'C) '+q.option_c,'D) '+q.option_d],
@@ -826,7 +847,7 @@ app.post('/api/admin/qbank/auto-bulk', async (req, res) => {
             'SELECT COUNT(*) FROM bmt_question_bank WHERE board=$1 AND class=$2 AND LOWER(subject)=LOWER($3)',
             [board, cls, subject]
           );
-          if (parseInt(existing.rows[0].count) >= 50) {
+          if (parseInt(existing.rows[0].count) >= 25) {
             console.log(`⏭️ Skip ${board} Cl${cls} ${subject} — already has ${existing.rows[0].count} questions`);
             continue;
           }
@@ -837,14 +858,14 @@ app.post('/api/admin/qbank/auto-bulk', async (req, res) => {
           let prompt;
           if (isRegionalLang) {
             prompt = `Return ONLY a JSON array. No text before or after. Start with [
-Generate 50 MCQ questions for ${boardFull} Class ${cls} ${subject}.
+Generate 25 MCQ questions for ${boardFull} Class ${cls} ${subject}.
 Write ALL fields in ${subject} language. Chapter name in English only.
 STRICT: max 50 chars per field. No long sentences. No line breaks in strings.
 Format: [{"q":"question","a":"opt1","b":"opt2","c":"opt3","d":"opt4","correct":"A","explanation":"reason","difficulty":"easy","chapter":"ChapterName"}]
 Output only the JSON array:`;
           } else if (isMath) {
             prompt = `Return ONLY a JSON array. No text before or after. Start with [
-Generate 50 MCQ questions for ${boardFull} Class ${cls} ${subject}.
+Generate 25 MCQ questions for ${boardFull} Class ${cls} ${subject}.
 Use proper math symbols in questions and options (π, √, sin⁻¹, etc).
 STRICT RULES to avoid JSON errors:
 - "explanation" field: MAX 30 characters, very short reason only
@@ -856,7 +877,7 @@ Format: [{"q":"What is sin(30°)?","a":"1/2","b":"√3/2","c":"1","d":"0","corre
 Output only the JSON array:`;
           } else {
             prompt = `Return ONLY a JSON array. No text before or after. Start with [
-Generate 50 MCQ questions for ${boardFull} Class ${cls} ${subject} (${boardFull} board).
+Generate 25 MCQ questions for ${boardFull} Class ${cls} ${subject} (${boardFull} board).
 Max 100 chars per field. No line breaks in strings.
 Format: [{"q":"question","a":"opt1","b":"opt2","c":"opt3","d":"opt4","correct":"A","explanation":"reason","difficulty":"easy","chapter":"ChapterName"}]
 Output only the JSON array:`;
@@ -865,7 +886,7 @@ Output only the JSON array:`;
                     const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: { 'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01' },
-            body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:4000, messages:[{role:'user',content:prompt}] })
+            body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:6000, messages:[{role:'user',content:prompt}] })
           });
 
           const aiData = await aiRes.json();
