@@ -4304,17 +4304,35 @@ function renderGuideHistory(){
 
 
 function shuffleExamOptions(questions){
-  return questions.map(q=>{
+  const letters=['A','B','C','D'];
+  return questions.map((q,qi)=>{
+    // Get correct letter from DB
     const origCorrect=(q.correct||'A').toString().toUpperCase().charAt(0);
-    const opts=Array.isArray(q.options)?q.options:['A) -','B) -','C) -','D) -'];
-    const texts=opts.map(o=>o.length>2?o.replace(/^[A-D]\)\s*/,''):o);
-    const correctText=texts[['A','B','C','D'].indexOf(origCorrect)]||texts[0];
-    const shuffled=[...texts].sort(()=>Math.random()-0.5);
-    const newIdx=shuffled.indexOf(correctText);
+    const origIdx=letters.indexOf(origCorrect); // 0,1,2,3
+    
+    // Get options array — DB sends ["A) text","B) text","C) text","D) text"]
+    const opts=Array.isArray(q.options)?q.options:['A) opt1','B) opt2','C) opt3','D) opt4'];
+    
+    // Extract text only (remove "A) " prefix)
+    const texts=opts.map(o=>String(o).replace(/^[A-Da-d][).]\s*/,'').trim());
+    
+    // Get the correct answer text
+    const correctText=texts[origIdx>=0?origIdx:0];
+    
+    // Create shuffled indices [0,1,2,3] in random order
+    const indices=[0,1,2,3].sort(()=>Math.random()-0.5);
+    
+    // Build new options using shuffled indices
+    const newOpts=indices.map((idx,pos)=>letters[pos]+') '+texts[idx]);
+    
+    // Find where correct answer ended up
+    const newCorrectPos=indices.indexOf(origIdx>=0?origIdx:0);
+    const newCorrect=letters[newCorrectPos];
+    
     return {
-      q:q.q||q.question||'',
-      options:shuffled.map((t,i)=>['A','B','C','D'][i]+') '+t),
-      correct:['A','B','C','D'][newIdx]||'A',
+      q:q.q||q.question||'Question '+(qi+1),
+      options:newOpts,
+      correct:newCorrect,
       explanation:q.explanation||''
     };
   });
