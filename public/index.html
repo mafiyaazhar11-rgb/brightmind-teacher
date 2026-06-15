@@ -6412,6 +6412,24 @@ function showCreateDemo(){
   if(overlay)overlay.style.display='flex';
 }
 
+
+function saveUser(){
+  if(!S.user)return;
+  try{
+    localStorage.setItem('bmt_user_'+S.user.id, JSON.stringify(S.user));
+    localStorage.setItem('bmt_last_uid', S.user.id);
+  }catch(e){}
+}
+
+function loadUser(){
+  try{
+    const uid=localStorage.getItem('bmt_last_uid');
+    if(!uid)return null;
+    const data=localStorage.getItem('bmt_user_'+uid);
+    return data?JSON.parse(data):null;
+  }catch(e){return null;}
+}
+
 </script>
 </div>\n</body></html>\`;
   const w=window.open('','_blank');
