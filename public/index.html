@@ -4313,11 +4313,10 @@ async function startExam(){
 
   // ── STEP 1: Try question bank from DB (zero AI cost) ──
   try{
-    const board=S.user?.board||'CBSE';
-    const cls=S.user?.class||'9';
+    const board=S.user?.board||'TN';
+    const cls=(S.user?.class||'9').toString();
     const subj=S.examSub?.name||SYL.subject||'General';
-    console.log('QBank lookup:',board, cls, subj);
-    // Force show what we're looking up
+    console.log('QBank lookup:',board, cls, subj, 'API:', API_URL);
     document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:13px;color:var(--gray-text);">📦 Checking bank for: '+board+' Cl'+cls+' '+subj+'...<br><br>Please wait...</div>';
     // Try exact board match first
     let qbRes=await fetch(`${API_URL}/api/qbank/exam?board=${encodeURIComponent(board)}&class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(subj)}&count=15`);
@@ -4367,7 +4366,11 @@ async function startExam(){
       startTimer();renderExamQ();
       return;
     }
-  }catch(e){ console.log('QBank unavailable, using AI:', e.message); }
+  }catch(e){ 
+    console.error('QBank error:', e.message);
+    document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:13px;color:red;">QBank error: '+e.message+'<br>Falling to AI...</div>';
+    await new Promise(r=>setTimeout(r,2000));
+  }
 
   // ── STEP 2: AI fallback — only if question bank empty ──
   document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">🤖 AI is creating questions...<br><small style="opacity:.6">Bank empty for this subject — generating from AI</small></div>';
@@ -4442,7 +4445,12 @@ Make 10 questions with correct answers spread across A, B, C, D — never all th
         return {...q,correct:newCorrect,options:relabeled};
       });
     }
-  }catch(e){S.examQs=fallbackQs();}
+  }catch(e){
+    console.error('Exam AI error:', e.message);
+    document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:20px;color:red;font-size:12px;">Error: '+e.message+'<br>Using fallback questions</div>';
+    await new Promise(r=>setTimeout(r,3000));
+    S.examQs=fallbackQs();
+  }
   startTimer();renderExamQ();
 }
 function fallbackQs(){
