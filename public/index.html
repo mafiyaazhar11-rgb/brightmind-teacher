@@ -6374,6 +6374,44 @@ ${IE.questions.map((q,i)=>{
   if(w){w.document.write(html);w.document.close();}
 }
 
+
+async function createDemoAccount(){
+  const name=document.getElementById('demo-name')?.value?.trim();
+  const email=document.getElementById('demo-email')?.value?.trim();
+  const pass=document.getElementById('demo-pass')?.value?.trim();
+  const board=document.getElementById('demo-board')?.value||'TN';
+  const cls=document.getElementById('demo-class')?.value||'10';
+  const state=document.getElementById('demo-state')?.value||'Tamil Nadu';
+  const days=parseInt(document.getElementById('demo-duration')?.value||'7');
+  if(!name||!email||!pass){alert('Please fill name, email and password!');return;}
+  const btn=document.querySelector('#demo-overlay .btn-main');
+  if(btn){btn.textContent='Creating...';btn.disabled=true;}
+  try{
+    const res=await fetch(API_URL+'/api/admin/create-demo',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},
+      body:JSON.stringify({name,email,password:pass,board,class:cls,state,days})
+    });
+    const d=await res.json();
+    if(btn){btn.textContent='Create Demo Account';btn.disabled=false;}
+    if(d.ok){
+      alert('Demo account created! Email: '+email+' | Password: '+pass);
+      document.getElementById('demo-overlay').style.display='none';
+      renderAdmin();
+    } else {
+      alert('Error: '+(d.msg||'Failed to create'));
+    }
+  }catch(e){
+    if(btn){btn.textContent='Create Demo Account';btn.disabled=false;}
+    alert('Error: '+e.message);
+  }
+}
+
+function showCreateDemo(){
+  const overlay=document.getElementById('demo-overlay');
+  if(overlay)overlay.style.display='flex';
+}
+
 </script>
 </div>\n</body></html>\`;
   const w=window.open('','_blank');
