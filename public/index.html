@@ -3543,7 +3543,7 @@ async function handleBBPhotoUpload(event){
 {"step":N,"title":"FINAL ANSWER","content":"complete answer","speak":"..."}]
 Return ONLY JSON array.`;
       const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,system:sys,
+        body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:800,system:sys,
           messages:[{role:'user',content:[
             {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
             {type:'text',text:'Please solve this question from my photo step by step on the blackboard.'}
@@ -4317,6 +4317,8 @@ async function startExam(){
     const cls=S.user?.class||'9';
     const subj=S.examSub?.name||SYL.subject||'General';
     console.log('QBank lookup:',board, cls, subj);
+    // Force show what we're looking up
+    document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:13px;color:var(--gray-text);">📦 Checking bank for: '+board+' Cl'+cls+' '+subj+'...<br><br>Please wait...</div>';
     // Try exact board match first
     let qbRes=await fetch(`${API_URL}/api/qbank/exam?board=${encodeURIComponent(board)}&class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(subj)}&count=15`);
     let qbData=await qbRes.json();
