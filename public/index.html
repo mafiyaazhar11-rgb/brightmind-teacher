@@ -1313,6 +1313,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
       <button onclick="showAdminTab('sessions',this)" id="tab-sessions" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">⏱ Sessions</button>
       <button onclick="showAdminTab('audit',this)" id="tab-audit" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📋 Audit Log</button>
       <button onclick="showAdminTab('support',this)" id="tab-support" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">💬 Support</button>
+      <button onclick="showAdminTab('qbank',this)" id="tab-qbank" style="background:var(--gray-light);color:var(--blue-dark);border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📝 Question Bank</button>
     </div>
     <div id="adm-tab-students">
       <div class="sec-title">👥 All Students</div>
@@ -1333,6 +1334,30 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     <div id="adm-tab-support" style="display:none;">
       <div class="sec-title">💬 Student Support Messages</div>
       <div id="adm-support-list"></div>
+    </div>
+    <div id="adm-tab-qbank" style="display:none;">
+      <div class="sec-title">📝 Question Bank Generator</div>
+      <div style="font-size:12px;color:var(--gray-text);margin-bottom:12px;">Generate questions ONCE → serve forever. Zero AI cost per exam!</div>
+      <div style="background:#fff;border-radius:12px;padding:12px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);">
+        <div style="font-size:12px;font-weight:700;color:var(--blue-dark);margin-bottom:6px;">CURRENT BANK SIZE</div>
+        <div id="qbank-stats-content">Loading...</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#0d1b4b,#1a237e);border-radius:14px;padding:16px;margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:800;color:#ffd600;margin-bottom:4px;">🚀 AUTO BULK GENERATE — One Click!</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.7);margin-bottom:12px;">Generates ALL subjects for all classes automatically. Runs in background.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button onclick="autoBulkGenerate('TN')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer;">🎯 Tamil Nadu</button>
+          <button onclick="autoBulkGenerate('CBSE')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer;">🎯 CBSE</button>
+          <button onclick="autoBulkGenerate('KL')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer;">🎯 Kerala</button>
+          <button onclick="autoBulkGenerate('KA')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer;">🎯 Karnataka</button>
+          <button onclick="autoBulkGenerate('AP')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer;">🎯 Andhra Pradesh</button>
+          <button onclick="autoBulkGenerate('TS')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer;">🎯 Telangana</button>
+          <button onclick="autoBulkGenerate('MH')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer;">🎯 Maharashtra</button>
+          <button onclick="autoBulkGenerate('UP')" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:10px;font-size:11px;font-weight:700;cursor:pointer;">🎯 Uttar Pradesh</button>
+        </div>
+        <div id="bulk-status" style="margin-top:10px;font-size:12px;color:rgba(255,255,255,.7);"></div>
+        <button onclick="checkBulkStatus()" style="margin-top:8px;width:100%;background:#ffd600;color:#0a0f2e;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:800;cursor:pointer;">🔄 Refresh Stats</button>
+      </div>
     </div>
   </div>
 </div>
@@ -5814,7 +5839,7 @@ function adminLoginAs(id){
 
 // 5. AUDIT LOG TAB
 function loadAdminAudit(){
-  var el=document.getElementById('adm-audit');
+  var el=document.getElementById('adm-audit-list');
   if(!el)return;
   el.innerHTML='<div style="text-align:center;padding:20px;">Loading...</div>';
   fetch(API_URL+'/api/admin/audit',{headers:{'x-admin-key':'azhar2026'}})
@@ -5855,11 +5880,15 @@ function checkBulkStatus(){loadQBankStats();}
 
 // 7. ADMIN TAB SWITCHING — make sure tabs call right functions
 function showAdminTab(tab){
-  document.querySelectorAll('.adm-tab').forEach(function(t){t.classList.remove('active');});
-  document.querySelectorAll('.adm-panel').forEach(function(p){p.style.display='none';});
-  var tabEl=document.querySelector('[data-tab="'+tab+'"]');
-  var panelEl=document.getElementById('adm-panel-'+tab);
-  if(tabEl)tabEl.classList.add('active');
+  ['students','revenue','sessions','audit','support','qbank'].forEach(function(t){
+    var btn=document.getElementById('tab-'+t);
+    var panel=document.getElementById('adm-tab-'+t);
+    if(btn){btn.style.background='var(--gray-light)';btn.style.color='var(--blue-dark)';}
+    if(panel)panel.style.display='none';
+  });
+  var tabEl=document.getElementById('tab-'+tab);
+  var panelEl=document.getElementById('adm-tab-'+tab);
+  if(tabEl){tabEl.style.background='var(--blue-mid)';tabEl.style.color='#fff';}
   if(panelEl)panelEl.style.display='block';
   if(tab==='students')loadAdminStudents();
   if(tab==='audit')loadAdminAudit();
