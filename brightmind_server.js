@@ -168,7 +168,8 @@ function sanitize(s) {
     subjects: s.subjects || {},
     homework: s.homework || [],
     exam_hist: s.exam_hist || [],
-    badges: s.badges || []
+    badges: s.badges || [],
+    credit_balance: s.credit_balance || 0
   };
 }
 
@@ -271,13 +272,15 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/save', async (req, res) => {
   try {
     const { id, subjects, homework, exam_hist, badges, xp, streak, stars,
-            total_questions, questions_today, last_study_day, is_paid, plan, parent_pin } = req.body;
+            total_questions, questions_today, last_study_day, is_paid, plan, parent_pin,
+            credit_balance } = req.body;
     await pool.query(
       `UPDATE bmt_students SET
         subjects=$1, homework=$2, exam_hist=$3, badges=$4,
         xp=$5, streak=$6, stars=$7, total_questions=$8,
         questions_today=$9, last_study_day=$10,
-        is_paid=$11, plan=$12, parent_pin=$13
+        is_paid=$11, plan=$12, parent_pin=$13,
+        credit_balance=COALESCE($15, credit_balance, 0)
        WHERE id=$14`,
       [
         JSON.stringify(subjects || {}),
@@ -287,7 +290,8 @@ app.post('/api/save', async (req, res) => {
         xp || 0, streak || 0, stars || 0,
         total_questions || 0, questions_today || 0,
         last_study_day || null, is_paid || false,
-        plan || 'free', parent_pin || '1234', id
+        plan || 'free', parent_pin || '1234', id,
+        (credit_balance !== undefined ? credit_balance : null)
       ]
     );
 
@@ -647,7 +651,14 @@ app.get('/api/qbank/stats', async (req, res) => {
       `SELECT board, class, subject, COUNT(*) as count FROM bmt_question_bank GROUP BY board, class, subject ORDER BY board, class, subject`
     );
     const total = await pool.query('SELECT COUNT(*) FROM bmt_question_bank');
-    res.json({ ok: true, breakdown: result.rows, total: parseInt(total.rows[0].count) });
+    // Build stats object grouped by board>subject for frontend
+    const stats = {};
+    result.rows.forEach(r => {
+      const key = r.board + ' Class ' + r.class;
+      if (!stats[key]) stats[key] = {};
+      stats[key][r.subject] = parseInt(r.count);
+    });
+    res.json({ ok: true, stats, breakdown: result.rows, total: parseInt(total.rows[0].count) });
   } catch(e) { res.json({ ok: false, msg: e.message }); }
 });
 
@@ -685,7 +696,7 @@ app.post('/api/qbank/generate', async (req, res) => {
       );
       inserted++;
     }
-    res.json({ ok: true, inserted, board, class: cls, subject });
+    res.json({ ok: true, added: inserted, inserted, board, class: cls, subject });
   } catch(e) { res.json({ ok: false, msg: e.message }); }
 });
 
