@@ -3379,11 +3379,13 @@ async function startExam(){
       startTimer();renderExamQ();
     } else {
       document.getElementById('exam-overlay').classList.remove('open');
-      alert('No questions available yet for '+S.examSub.name+' ('+( S.user?.board||'CBSE')+' Class '+(S.user?.class||9)+').\n\nAdmin please generate questions for this subject in the Q-Bank tab.');
+      alert('No questions found for: '+S.examSub.name+'\nBoard: '+(S.user?.board||'CBSE')+' | Class: '+(S.user?.class||9)+'\n\nAdmin: go to Q-Bank tab and generate questions.');
     }
   }catch(e){
     document.getElementById('exam-overlay').classList.remove('open');
-    alert('Could not load questions. Please check your connection and try again.');
+    alert('Exam load error: '+e.message+'
+
+Please screenshot this and report to admin.');
   }
 }
 function fallbackQs(){return Array(10).fill(null).map((_,i)=>({q:`Question ${i+1}: Which of the following best describes a core concept in this chapter?`,options:['A) Correct answer','B) Wrong option','C) Wrong option','D) Wrong option'],correct:'A',explanation:'This is the correct fundamental concept.'}));}
@@ -4322,11 +4324,13 @@ async function openInstantExam(subjectId, subjectName, icon){
       IE.currentQ=0; ieStartTimer(); ieRenderQ();
     } else {
       document.getElementById('instant-exam-overlay').style.display='none';
-      alert('No questions available yet for '+subjectName+' ('+( S.user?.board||'CBSE')+' Class '+(S.user?.class||9)+').\n\nAdmin please generate questions for this subject in the Q-Bank tab.');
+      alert('No questions found for: '+subjectName+'\nBoard: '+(S.user?.board||'CBSE')+' | Class: '+(S.user?.class||9)+'\n\nAdmin: go to Q-Bank tab and generate questions for this subject.');
     }
   }catch(e){
     document.getElementById('instant-exam-overlay').style.display='none';
-    alert('Could not load questions. Please check your connection and try again.');
+    alert('Exam load error: '+e.message+'
+
+Please screenshot this and report to admin.');
   }
 }
 function closeInstantExam(){
