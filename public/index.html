@@ -2162,6 +2162,9 @@ function mapStudent(s){
     examHist:typeof s.exam_hist==='string'?JSON.parse(s.exam_hist):s.exam_hist||[],
     badges:typeof s.badges==='string'?JSON.parse(s.badges):s.badges||[],
     regOn:s.reg_on||new Date().toISOString(),
+    creditBalance:parseInt(s.credit_balance||0),
+    dailyQLimit:s.daily_q_limit||10,
+    dailyPhotoLimit:s.daily_photo_limit||1,
     photoGallery:[]  // stored locally per device
   };
 }
@@ -3702,21 +3705,31 @@ function renderParentView(u){
 async function loadQBankStats(){
   const el=document.getElementById('adm-qbank-stats');
   if(!el)return;
+  el.innerHTML='<span style="color:rgba(255,255,255,0.5);">Loading...</span>';
   try{
     const r=await fetch(API_URL+'/api/qbank/stats',{headers:{'x-admin-key':'azhar2026'}});
     const d=await r.json();
-    if(d.ok&&d.stats){
-      let html='';
-      Object.entries(d.stats).forEach(([board,subjects])=>{
-        html+=`<div style="margin-bottom:10px;"><div style="font-weight:800;color:#ffd600;margin-bottom:4px;">${board}</div>`;
+    if(d.ok&&d.stats&&Object.keys(d.stats).length>0){
+      let html=`<div style="font-size:13px;color:#ffd600;font-weight:900;margin-bottom:10px;">📚 Total: ${d.total||0} Questions in Bank</div>`;
+      Object.entries(d.stats).forEach(([boardClass,subjects])=>{
+        html+=`<div style="margin-bottom:10px;background:rgba(255,255,255,0.04);border-radius:8px;padding:8px 10px;">`;
+        html+=`<div style="font-weight:800;color:#ffd600;margin-bottom:6px;font-size:12px;">📌 ${boardClass}</div>`;
         Object.entries(subjects).forEach(([sub,count])=>{
-          html+=`<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span>${sub}</span><span style="color:#00e676;font-weight:700;">${count} Qs</span></div>`;
+          const pct=Math.min(100,Math.round(count/50*100));
+          html+=`<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+            <span>${sub}</span>
+            <span style="color:${count>=20?'#00e676':count>=10?'#ffd600':'#ff7043'};font-weight:700;">${count} Qs</span>
+          </div>`;
         });
         html+='</div>';
       });
-      el.innerHTML=html||'<span>No questions yet.</span>';
-    }else{el.textContent='No data.';}
-  }catch(e){el.textContent='Error: '+e.message;}
+      el.innerHTML=html;
+    }else if(d.ok&&d.total===0){
+      el.innerHTML='<div style="color:#ff7043;padding:10px;">⚠️ Question bank is EMPTY. Your 5000 questions are NOT linked yet.<br><br>Check: Are they in the <b>bmt_question_bank</b> table in PostgreSQL?</div>';
+    }else{
+      el.innerHTML='<div style="color:#ff7043;">Error loading stats. Server said: '+(d.msg||'unknown error')+'</div>';
+    }
+  }catch(e){el.innerHTML='<div style="color:#ff7043;">Network error: '+e.message+'</div>';}
 }
 
 async function autoBulkGenerate(board){
@@ -5362,7 +5375,8 @@ function saveUser(){
     xp:S.user.xp||0, streak:S.user.streak||0, stars:S.user.stars||0,
     total_questions:S.user.totalQ||0, questions_today:S.user.qToday||0,
     last_study_day:S.user.lastStudyDay||null, is_paid:S.user.isPaid||false,
-    plan:S.user.plan||'free', parent_pin:S.user.parentPin||'1234'
+    plan:S.user.plan||'free', parent_pin:S.user.parentPin||'1234',
+    credit_balance:parseInt(S.user.creditBalance||0)
   }).catch(()=>{});
 }
 // ── MOBILE HARDWARE BACK BUTTON ──────────────────
