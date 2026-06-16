@@ -3367,17 +3367,35 @@ async function startExam(){
   document.getElementById('result-overlay').classList.remove('open');
   document.getElementById('exam-overlay').classList.add('open');
   document.getElementById('exam-title').textContent=S.examSub.name+' — Chapter Exam';
-  document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">🧠 Generating exam questions...<br><br>Please wait...</div>';
+  document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">🧠 Loading exam questions...<br><br>Please wait...</div>';
+
+  // ── Try Question Bank (server) first ──
+  let usedQBank=false;
   try{
-    const topics=S.chatHist.filter(m=>m.role==='user').map(m=>m.content).join(', ').substring(0,300);
-    const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,
-        messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name}. Topics: ${topics||'general chapter concepts'}. Make questions TOUGH — test deep understanding. Return ONLY a JSON array, no other text:
-[{"q":"question","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"brief explanation"}]`}]})});
-    const d=await r.json();let raw=d.content?.[0]?.text||'[]';
-    raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
-    S.examQs=JSON.parse(raw);
-  }catch(e){S.examQs=fallbackQs();}
+    const dbRes=await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(S.examSub.name)+'&count=10');
+    const dbData=await dbRes.json();
+    if(dbData.ok&&dbData.questions&&dbData.questions.length>=5){
+      S.examQs=dbData.questions.map(q=>({
+        q:q.question,options:q.options,correct:q.correct,
+        explanation:q.explanation||''
+      }));
+      usedQBank=true;
+    }
+  }catch(dbErr){console.log('QBank fetch failed, using AI',dbErr);}
+
+  // ── AI fallback if QBank had no results ──
+  if(!usedQBank){
+    try{
+      const topics=S.chatHist.filter(m=>m.role==='user').map(m=>m.content).join(', ').substring(0,300);
+      const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,
+          messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name}. Topics: ${topics||'general chapter concepts'}. Make questions TOUGH — test deep understanding. Return ONLY a JSON array, no other text:\n[{"q":"question","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"brief explanation"}]`}]})});
+      const d=await r.json();let raw=d.content?.[0]?.text||'[]';
+      raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
+      S.examQs=JSON.parse(raw);
+    }catch(e){S.examQs=fallbackQs();}
+  }
+
   startTimer();renderExamQ();
 }
 function fallbackQs(){return Array(10).fill(null).map((_,i)=>({q:`Question ${i+1}: Which of the following best describes a core concept in this chapter?`,options:['A) Correct answer','B) Wrong option','C) Wrong option','D) Wrong option'],correct:'A',explanation:'This is the correct fundamental concept.'}));}
@@ -3980,7 +3998,7 @@ async function checkRenewalReminder(user){
     const res=await apiGet('/api/subscription/'+user.id);
     if(!res.ok)return;
     const daysLeft=res.days_left;
-    if(daysLeft!==null&&daysLeft<=3&&daysLeft>=0){
+    if(daysLeft!==null&&daysLeft>=0){
       showRenewalReminder(user, daysLeft, res);
     }
   }catch(e){}
@@ -3990,20 +4008,24 @@ function showRenewalReminder(user, daysLeft, sub){
   const wrap=document.getElementById('trial-banner-wrap');
   if(!wrap)return;
   const urgency=daysLeft===0?'TODAY!':daysLeft===1?'Tomorrow!':daysLeft+' days!';
-  const color=daysLeft<=1?'#c62828':'#e65100';
-  wrap.innerHTML=`<div style="position:relative;background:linear-gradient(135deg,${color},${daysLeft<=1?'#e53935':'#ff6f00'});border-radius:14px;padding:13px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);" onclick="showModal('sub-modal')">
+  // Green if >7 days, yellow if 4-7, red if <=3
+  const color=daysLeft<=1?'#c62828':daysLeft<=3?'#e65100':daysLeft<=7?'#f57f17':'#1b5e20';
+  const gradEnd=daysLeft<=1?'#e53935':daysLeft<=3?'#ff6f00':daysLeft<=7?'#ff8f00':'#2e7d32';
+  const badgeColor=daysLeft<=3?'#ffd600':'rgba(255,255,255,0.2)';
+  const badgeText=daysLeft<=3?'#0a0f2e':'#fff';
+  wrap.innerHTML=`<div style="position:relative;background:linear-gradient(135deg,${color},${gradEnd});border-radius:14px;padding:13px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);" onclick="showModal('sub-modal')">
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-size:14px;font-weight:800;color:#fff;">⏰ Subscription Due ${urgency}</div>
+        <div style="font-size:14px;font-weight:800;color:#fff;">${daysLeft<=3?'⏰':'✅'} Subscription ${daysLeft<=0?'Due Today':daysLeft<=3?'Due Soon':'Active'}</div>
         <div style="font-size:11px;color:rgba(255,255,255,.9);margin-top:2px;">${sub.plan==='all'?'All Subjects':'Single Subject'} · ${sub.subscription_type||'Monthly'} plan</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:2px;">Tap to renew and keep learning! 📚</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:2px;">${daysLeft<=3?'Tap to renew and keep learning! 📚':'Tap to manage your plan 📚'}</div>
       </div>
-      <div style="background:rgba(0,0,0,.2);border-radius:10px;padding:8px 12px;text-align:center;">
-        <div style="font-size:20px;font-weight:900;color:#fff;">${daysLeft===0?'Due!':daysLeft+'d'}</div>
-        <div style="font-size:9px;color:rgba(255,255,255,.8);">left</div>
+      <div style="background:${badgeColor};border-radius:10px;padding:8px 12px;text-align:center;">
+        <div style="font-size:20px;font-weight:900;color:${badgeText};">${daysLeft===0?'Due!':daysLeft+'d'}</div>
+        <div style="font-size:9px;color:${badgeText==='#fff'?'rgba(255,255,255,0.8)':badgeText};">left</div>
       </div>
     </div>
-    <button onclick="document.getElementById('trial-banner-wrap').innerHTML=''" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.3);border:none;color:rgba(255,255,255,0.8);width:22px;height:22px;border-radius:50%;font-size:12px;cursor:pointer;line-height:22px;padding:0;text-align:center;">✕</button>
+    ${daysLeft<=3?`<button onclick="document.getElementById('trial-banner-wrap').innerHTML=''" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.3);border:none;color:rgba(255,255,255,0.8);width:22px;height:22px;border-radius:50%;font-size:12px;cursor:pointer;line-height:22px;padding:0;text-align:center;">✕</button>`:''}
   </div>`;
 }
 
@@ -5468,30 +5490,81 @@ function selectTopUpPack(el,amount,credits){
   if(btn){btn.style.display='block';btn.textContent='Pay Rs'+amount+' for '+credits+' Questions';}
 }
 
-function payTopUp(){
+async function payTopUp(){
   if(!selectedTopUpAmount){alert('Please select a pack first!');return;}
-  if(!window.Razorpay){alert('Payment loading... please try again in a moment.');return;}
-  var options={
-    key:'rzp_live_T0ELMmLSIlgcLq',
-    amount:selectedTopUpAmount*100,
-    currency:'INR',
-    name:'BrightMind Teacher',
-    description:selectedTopUpCredits+' Question Credits',
-    handler:function(response){
-      var u=S.user;
-      if(!u)return;
-      var currentBal=parseInt((u.creditBalance||0));
-      u.creditBalance=(currentBal+selectedTopUpAmount);
-      saveUser();
-      updateCreditBalance();
-      closeTopUp();
-      alert('Payment successful! Rs'+selectedTopUpAmount+' credits added. You now have '+selectedTopUpCredits+' extra questions!');
-    },
-    prefill:{name:S.user?S.user.name:'',email:S.user?S.user.email:''},
-    theme:{color:'#ffd600'}
-  };
-  var rzp=new window.Razorpay(options);
-  rzp.open();
+  const btn=document.getElementById('topup-pay-btn');
+  if(btn){btn.disabled=true;btn.textContent='Opening payment...';}
+  try{
+    const loaded=await loadRazorpay();
+    if(!loaded||!window.Razorpay){
+      if(btn){btn.disabled=false;btn.textContent='Pay Rs'+selectedTopUpAmount+' for '+selectedTopUpCredits+' Questions';}
+      if(confirm('Opening payment page...\n\nTap OK to continue.')){
+        window.open('https://pages.razorpay.com/brightmindteacher','_blank');
+      }
+      return;
+    }
+    // Create order on server for security
+    let orderId=null;
+    try{
+      const orderRes=await apiPost('/api/payment/create-order',{
+        amount:selectedTopUpAmount,
+        plan:'topup',
+        subscription_type:'topup',
+        userId:S.user?.id
+      });
+      if(orderRes&&orderRes.order_id)orderId=orderRes.order_id;
+    }catch(e){console.log('Order create failed, proceeding without order_id',e);}
+    const options={
+      key:'rzp_live_T0ELMmLSIlgcLq',
+      amount:selectedTopUpAmount*100,
+      currency:'INR',
+      name:'BrightMind Teacher',
+      description:selectedTopUpCredits+' Question Credits',
+      order_id:orderId||undefined,
+      handler:async function(response){
+        if(btn){btn.disabled=true;btn.textContent='Verifying...';}
+        try{
+          // Verify on server
+          await apiPost('/api/payment/verify',{
+            razorpay_order_id:response.razorpay_order_id,
+            razorpay_payment_id:response.razorpay_payment_id,
+            razorpay_signature:response.razorpay_signature,
+            userId:S.user?.id,
+            plan:'topup',
+            subscription_type:'topup',
+            amount:selectedTopUpAmount,
+            topupCredits:selectedTopUpCredits,
+            razorpay_id:response.razorpay_payment_id
+          });
+        }catch(e){console.log('Verify error',e);}
+        // Always update locally — payment was received
+        var u=S.user;
+        if(u){
+          u.creditBalance=(parseInt(u.creditBalance||0)+selectedTopUpAmount);
+          saveUser();
+          updateCreditBalance();
+        }
+        closeTopUp();
+        if(btn){btn.disabled=false;btn.textContent='Pay Rs'+selectedTopUpAmount+' for '+selectedTopUpCredits+' Questions';}
+        alert('✅ Payment successful! ₹'+selectedTopUpAmount+' credits added.\nYou now have '+selectedTopUpCredits+' extra questions!');
+      },
+      prefill:{name:S.user?S.user.name:'',email:S.user?S.user.email:''},
+      theme:{color:'#ffd600'},
+      modal:{ondismiss:function(){
+        if(btn){btn.disabled=false;btn.textContent='Pay Rs'+selectedTopUpAmount+' for '+selectedTopUpCredits+' Questions';}
+      }}
+    };
+    var rzp=new window.Razorpay(options);
+    rzp.on('payment.failed',function(resp){
+      if(btn){btn.disabled=false;btn.textContent='Pay Rs'+selectedTopUpAmount+' for '+selectedTopUpCredits+' Questions';}
+      alert('Payment failed: '+(resp.error?.description||'Please try again.'));
+    });
+    rzp.open();
+  }catch(err){
+    console.error('TopUp error:',err);
+    if(btn){btn.disabled=false;btn.textContent='Pay Rs'+selectedTopUpAmount+' for '+selectedTopUpCredits+' Questions';}
+    alert('Could not open payment. Please refresh and try again.');
+  }
 }
 
 function updateCreditBalance(){
