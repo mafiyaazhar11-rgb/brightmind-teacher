@@ -3367,36 +3367,21 @@ async function startExam(){
   document.getElementById('result-overlay').classList.remove('open');
   document.getElementById('exam-overlay').classList.add('open');
   document.getElementById('exam-title').textContent=S.examSub.name+' — Chapter Exam';
-  document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">🧠 Loading exam questions...<br><br>Please wait...</div>';
-
-  // ── Try Question Bank (server) first ──
-  let usedQBank=false;
+  document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">📚 Loading questions from question bank...<br><br>Please wait...</div>';
   try{
     const dbRes=await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(S.examSub.name)+'&count=10');
     const dbData=await dbRes.json();
     if(dbData.ok&&dbData.questions&&dbData.questions.length>=5){
-      S.examQs=dbData.questions.map(q=>({
-        q:q.question,options:q.options,correct:q.correct,
-        explanation:q.explanation||''
-      }));
-      usedQBank=true;
+      S.examQs=dbData.questions.map(q=>({q:q.question,options:q.options,correct:q.correct,explanation:q.explanation||''}));
+      startTimer();renderExamQ();
+    } else {
+      document.getElementById('exam-overlay').classList.remove('open');
+      alert('No questions available yet for '+S.examSub.name+' ('+( S.user?.board||'CBSE')+' Class '+(S.user?.class||9)+').\n\nAdmin please generate questions for this subject in the Q-Bank tab.');
     }
-  }catch(dbErr){console.log('QBank fetch failed, using AI',dbErr);}
-
-  // ── AI fallback if QBank had no results ──
-  if(!usedQBank){
-    try{
-      const topics=S.chatHist.filter(m=>m.role==='user').map(m=>m.content).join(', ').substring(0,300);
-      const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,
-          messages:[{role:'user',content:`Create exactly 10 multiple choice questions for Class ${S.user?.class} student on ${S.examSub.name}. Topics: ${topics||'general chapter concepts'}. Make questions TOUGH — test deep understanding. Return ONLY a JSON array, no other text:\n[{"q":"question","options":["A) opt1","B) opt2","C) opt3","D) opt4"],"correct":"A","explanation":"brief explanation"}]`}]})});
-      const d=await r.json();let raw=d.content?.[0]?.text||'[]';
-      raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
-      S.examQs=JSON.parse(raw);
-    }catch(e){S.examQs=fallbackQs();}
+  }catch(e){
+    document.getElementById('exam-overlay').classList.remove('open');
+    alert('Could not load questions. Please check your connection and try again.');
   }
-
-  startTimer();renderExamQ();
 }
 function fallbackQs(){return Array(10).fill(null).map((_,i)=>({q:`Question ${i+1}: Which of the following best describes a core concept in this chapter?`,options:['A) Correct answer','B) Wrong option','C) Wrong option','D) Wrong option'],correct:'A',explanation:'This is the correct fundamental concept.'}));}
 function startTimer(){
@@ -4303,12 +4288,12 @@ async function openInstantExam(subjectId, subjectName, icon){
   if(!S.isPaid && checkTrial(S.user)==='expired'){checkPaywall();return;}
   IE = {subject:subjectName, subjectId, icon, questions:[], answers:{}, currentQ:0, timer:null, secs:900, startTime:Date.now()};
   document.getElementById('ie-title').textContent = icon+' '+subjectName+' — Quick Exam';
-  document.getElementById('ie-subtitle').textContent = '10 questions · AI corrects with red pen';
+  document.getElementById('ie-subtitle').textContent = '10 questions · Board syllabus · Shuffled answers';
   document.getElementById('ie-body').innerHTML = `
     <div style="text-align:center;padding:40px 20px;">
       <div style="font-size:48px;margin-bottom:12px;">${icon}</div>
-      <div style="font-size:16px;font-weight:700;color:var(--blue-dark);margin-bottom:6px;">Generating ${subjectName} Exam...</div>
-      <div style="font-size:13px;color:var(--gray-text);">AI is creating your personalised questions</div>
+      <div style="font-size:16px;font-weight:700;color:var(--blue-dark);margin-bottom:6px;">Loading ${subjectName} Exam...</div>
+      <div style="font-size:13px;color:var(--gray-text);">Fetching from question bank</div>
       <div style="display:flex;gap:6px;justify-content:center;margin-top:16px;">
         <div style="width:10px;height:10px;background:#e53935;border-radius:50%;animation:tdot 1.2s infinite;"></div>
         <div style="width:10px;height:10px;background:#e53935;border-radius:50%;animation:tdot 1.2s .2s infinite;"></div>
@@ -4316,72 +4301,21 @@ async function openInstantExam(subjectId, subjectName, icon){
       </div>
     </div>`;
   document.getElementById('instant-exam-overlay').style.display='flex';
-
-  // ── Try DB first ──
   try{
     const dbRes = await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(subjectName)+'&count=10');
     const dbData = await dbRes.json();
     if(dbData.ok && dbData.questions && dbData.questions.length >= 5){
-      IE.questions = dbData.questions.map(q=>({
-        q: q.question, options: q.options, correct: q.correct,
-        explanation: q.explanation||'', marks:1
-      }));
-      IE.currentQ=0; ieStartTimer(); ieRenderQ(); return;
+      IE.questions = dbData.questions.map(q=>({q:q.question,options:q.options,correct:q.correct,explanation:q.explanation||'',marks:1}));
+      IE.currentQ=0; ieStartTimer(); ieRenderQ();
+    } else {
+      document.getElementById('instant-exam-overlay').style.display='none';
+      alert('No questions available yet for '+subjectName+' ('+( S.user?.board||'CBSE')+' Class '+(S.user?.class||9)+').\n\nAdmin please generate questions for this subject in the Q-Bank tab.');
     }
-  }catch(dbErr){console.log('DB exam fetch failed, using AI',dbErr);}
-
-  // ── AI fallback ──
-  try{
-    const board = {CBSE:'CBSE',TN:'Tamil Nadu Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board'}[S.user?.board]||'CBSE';
-    const r = await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,
-        messages:[{role:'user',content:`You are an exam question generator for Indian school students.
-Generate EXACTLY 10 real multiple choice questions for Class ${S.user?.class||11} ${subjectName} (${board} board).
-Each question must have REAL content - actual facts, formulas, definitions from the syllabus.
-IMPORTANT: Every option must be a real meaningful answer, NOT "Option 1" or "opt1".
-
-Return ONLY valid JSON array, no markdown, no explanation outside JSON:
-[{"q":"What is Newton's first law of motion?","options":["A) An object at rest stays at rest unless acted upon by a force","B) Force equals mass times acceleration","C) Every action has an equal and opposite reaction","D) Energy cannot be created or destroyed"],"correct":"A","explanation":"Newton's first law states that an object remains at rest or in uniform motion unless acted upon by an external force.","marks":1}]
-
-Generate 10 such questions now for ${subjectName}:`}]})});
-    const d = await r.json();
-    let raw = d.content?.[0]?.text||'[]';
-    raw = raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
-    IE.questions = JSON.parse(raw);
   }catch(e){
-    // Fallback with subject-specific real questions
-    const fbQs={
-      'Mathematics':[
-        {q:'What is the value of π (pi) approximately?',options:['A) 3.14159','B) 2.71828','C) 1.41421','D) 1.73205'],correct:'A',explanation:'π ≈ 3.14159, ratio of circumference to diameter of a circle.'},
-        {q:'What is the quadratic formula?',options:['A) x = (-b ± √(b²-4ac)) / 2a','B) x = -b/2a','C) x = b² - 4ac','D) x = (a+b)²'],correct:'A',explanation:'The quadratic formula solves ax²+bx+c=0.'},
-        {q:'What is the area of a circle with radius r?',options:['A) πr²','B) 2πr','C) πd','D) r²'],correct:'A',explanation:'Area of circle = πr².'},
-        {q:'What is the Pythagorean theorem?',options:['A) a² + b² = c²','B) a + b = c','C) a² - b² = c','D) (a+b)² = c²'],correct:'A',explanation:'In a right triangle, the square of the hypotenuse equals the sum of squares of the other two sides.'},
-        {q:'What is the sum of angles in a triangle?',options:['A) 180°','B) 360°','C) 90°','D) 270°'],correct:'A',explanation:'The sum of interior angles of any triangle is always 180°.'},
-      ],
-      'Science':[
-        {q:'What is the chemical formula for water?',options:['A) H₂O','B) CO₂','C) NaCl','D) H₂SO₄'],correct:'A',explanation:'Water consists of 2 hydrogen atoms and 1 oxygen atom.'},
-        {q:'What is Newton\'s Second Law of Motion?',options:['A) F = ma','B) F = mv','C) F = m/a','D) F = ma²'],correct:'A',explanation:'Force equals mass times acceleration.'},
-        {q:'What is the speed of light?',options:['A) 3 × 10⁸ m/s','B) 3 × 10⁶ m/s','C) 3 × 10¹⁰ m/s','D) 3 × 10⁴ m/s'],correct:'A',explanation:'Speed of light in vacuum = 3 × 10⁸ m/s.'},
-        {q:'Which gas do plants absorb during photosynthesis?',options:['A) Carbon dioxide (CO₂)','B) Oxygen (O₂)','C) Nitrogen (N₂)','D) Hydrogen (H₂)'],correct:'A',explanation:'Plants absorb CO₂ and release O₂ during photosynthesis.'},
-        {q:'What is the unit of electric current?',options:['A) Ampere (A)','B) Volt (V)','C) Watt (W)','D) Ohm (Ω)'],correct:'A',explanation:'Electric current is measured in Amperes.'},
-      ],
-    };
-    const defaultQs=[
-      {q:`What is the most important concept in ${subjectName}?`,options:['A) Understanding core principles','B) Memorising without understanding','C) Skipping difficult topics','D) Avoiding practice'],correct:'A',explanation:'Deep understanding of core principles is fundamental to mastering any subject.'},
-      {q:`Which approach helps most in ${subjectName} exams?`,options:['A) Regular practice and revision','B) Last minute studying only','C) Ignoring previous papers','D) Avoiding difficult topics'],correct:'A',explanation:'Consistent practice and revision leads to the best exam performance.'},
-    ];
-    const subjectQs = fbQs[subjectName]||defaultQs;
-    IE.questions = Array(10).fill(null).map((_,i)=>{
-      const q = subjectQs[i%subjectQs.length];
-      return {...q, marks:1};
-    });
+    document.getElementById('instant-exam-overlay').style.display='none';
+    alert('Could not load questions. Please check your connection and try again.');
   }
-
-  IE.currentQ = 0;
-  ieStartTimer();
-  ieRenderQuestion();
 }
-
 function closeInstantExam(){
   if(IE.timer) clearInterval(IE.timer);
   document.getElementById('instant-exam-overlay').style.display='none';
