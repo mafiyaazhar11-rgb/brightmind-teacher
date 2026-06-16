@@ -5510,7 +5510,8 @@ async function payTopUp(){
         amount:selectedTopUpAmount,
         plan:'topup',
         subscription_type:'topup',
-        userId:S.user?.id
+        student_id:S.user?.id,
+        student_name:S.user?.name
       });
       if(orderRes&&orderRes.order_id)orderId=orderRes.order_id;
     }catch(e){console.log('Order create failed, proceeding without order_id',e);}
@@ -5525,15 +5526,11 @@ async function payTopUp(){
         if(btn){btn.disabled=true;btn.textContent='Verifying...';}
         try{
           // Verify on server
-          await apiPost('/api/payment/verify',{
-            razorpay_order_id:response.razorpay_order_id,
-            razorpay_payment_id:response.razorpay_payment_id,
-            razorpay_signature:response.razorpay_signature,
-            userId:S.user?.id,
-            plan:'topup',
-            subscription_type:'topup',
+          await apiPost('/api/payment/topup',{
+            student_id:S.user?.id,
+            student_name:S.user?.name,
             amount:selectedTopUpAmount,
-            topupCredits:selectedTopUpCredits,
+            credits:selectedTopUpCredits,
             razorpay_id:response.razorpay_payment_id
           });
         }catch(e){console.log('Verify error',e);}
