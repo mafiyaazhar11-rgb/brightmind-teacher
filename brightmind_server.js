@@ -763,25 +763,30 @@ app.get('/api/qbank/exam', async (req, res) => {
     // Shuffle options so correct answer is NOT always A
     const LETTERS = ['A','B','C','D'];
     const questions = result.rows.map(q => {
-      // Build array of {letter, text} from DB
+      // Null-safe option values
+      const a = q.option_a || 'Option A';
+      const b = q.option_b || 'Option B';
+      const c = q.option_c || 'Option C';
+      const d = q.option_d || 'Option D';
       const opts = [
-        { letter: 'A', text: q.option_a },
-        { letter: 'B', text: q.option_b },
-        { letter: 'C', text: q.option_c },
-        { letter: 'D', text: q.option_d },
+        { letter: 'A', text: a },
+        { letter: 'B', text: b },
+        { letter: 'C', text: c },
+        { letter: 'D', text: d },
       ];
       // Find which letter is originally correct
-      const correctText = opts.find(o => o.letter === (q.correct_answer||'A').toUpperCase())?.text || q.option_a;
+      const correctLetter = (q.correct_answer || 'A').toUpperCase().charAt(0);
+      const correctText = opts.find(o => o.letter === correctLetter)?.text || a;
       // Fisher-Yates shuffle
       for (let i = opts.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [opts[i], opts[j]] = [opts[j], opts[i]];
       }
       // Reassign letters A-D after shuffle
-      const shuffled = opts.map((o, i) => ({ newLetter: LETTERS[i], text: o.text, wasCorrect: o.text === correctText }));
+      const shuffled = opts.map((o, idx) => ({ newLetter: LETTERS[idx], text: o.text, wasCorrect: o.text === correctText }));
       const newCorrect = shuffled.find(o => o.wasCorrect)?.newLetter || 'A';
       return {
-        question: q.question,
+        question: q.question || 'Question unavailable',
         options: shuffled.map(o => o.newLetter + ') ' + o.text),
         correct: newCorrect,
         explanation: q.explanation || '',
@@ -789,7 +794,10 @@ app.get('/api/qbank/exam', async (req, res) => {
       };
     });
     res.json({ ok: true, questions });
-  } catch(e) { res.json({ ok: false, msg: e.message }); }
+  } catch(e) { 
+    console.error('qbank/exam error:', e.message, e.stack);
+    res.json({ ok: false, msg: e.message }); 
+  }
 });
 
 // GET question bank stats (admin)
