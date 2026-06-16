@@ -59,6 +59,9 @@ async function initDB() {
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS next_due_date TIMESTAMP;
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS reminder_sent BOOLEAN DEFAULT FALSE;
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS stream VARCHAR(20) DEFAULT 'science';
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS credit_balance INTEGER DEFAULT 0;
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS daily_q_limit INTEGER DEFAULT 10;
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS daily_photo_limit INTEGER DEFAULT 1;
     CREATE UNIQUE INDEX IF NOT EXISTS bmt_students_email_unique ON bmt_students(email) WHERE email IS NOT NULL;
 
     CREATE TABLE IF NOT EXISTS bmt_support (
@@ -637,6 +640,79 @@ app.get('/api/subscription/:id', async (req, res) => {
 // ══════════════════════════════════════
 
 // GET random questions for student exam from bank
+// ── ALIAS: frontend calls /api/qbank/stats (without /admin/) ──
+app.get('/api/qbank/stats', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT board, class, subject, COUNT(*) as count FROM bmt_question_bank GROUP BY board, class, subject ORDER BY board, class, subject`
+    );
+    const total = await pool.query('SELECT COUNT(*) FROM bmt_question_bank');
+    res.json({ ok: true, breakdown: result.rows, total: parseInt(total.rows[0].count) });
+  } catch(e) { res.json({ ok: false, msg: e.message }); }
+});
+
+// ── ALIAS: frontend calls /api/qbank/generate (without /admin/) ──
+app.post('/api/qbank/generate', async (req, res) => {
+  try {
+    const { board, class: cls, subject, count = 20 } = req.body;
+    if (!board || !cls || !subject) return res.json({ ok: false, msg: 'Missing params' });
+    const existing = await pool.query(
+      'SELECT COUNT(*) FROM bmt_question_bank WHERE board=$1 AND class=$2 AND LOWER(subject)=LOWER($3)',
+      [board, cls, subject]
+    );
+    if (parseInt(existing.rows[0].count) >= 50) {
+      return res.json({ ok: false, msg: `Already have ${existing.rows[0].count} questions for ${board} Class ${cls} ${subject}` });
+    }
+    const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
+    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6', max_tokens: 4000,
+        messages: [{ role: 'user', content: `Generate ${count} multiple choice questions for ${board} board Class ${cls} ${subject}. Return ONLY a JSON array:\n[{"question":"...","option_a":"...","option_b":"...","option_c":"...","option_d":"...","correct_answer":"A","explanation":"...","difficulty":"medium"}]` }]
+      })
+    });
+    const aiData = await aiRes.json();
+    let raw = aiData.content?.[0]?.text || '[]';
+    raw = raw.replace(/```json|```/g, '').trim();
+    const qs = JSON.parse(raw);
+    let inserted = 0;
+    for (const q of qs) {
+      await pool.query(
+        `INSERT INTO bmt_question_bank (board,class,subject,question,option_a,option_b,option_c,option_d,correct_answer,explanation,difficulty)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+        [board, cls, subject, q.question, q.option_a, q.option_b, q.option_c, q.option_d, q.correct_answer, q.explanation || '', q.difficulty || 'medium']
+      );
+      inserted++;
+    }
+    res.json({ ok: true, inserted, board, class: cls, subject });
+  } catch(e) { res.json({ ok: false, msg: e.message }); }
+});
+
+// ── TOPUP PAYMENT: add credits to student account ──
+app.post('/api/payment/topup', async (req, res) => {
+  try {
+    const { student_id, student_name, amount, credits, razorpay_id } = req.body;
+    if (!student_id || !amount) return res.json({ ok: false, msg: 'Missing params' });
+    // Record payment
+    await pool.query(
+      `INSERT INTO bmt_payments (student_id,student_name,amount,plan,razorpay_id,status) VALUES ($1,$2,$3,'topup',$4,'success')`,
+      [student_id, student_name || '', amount, razorpay_id || '']
+    );
+    // Add credit balance to student
+    await pool.query(
+      `UPDATE bmt_students SET credit_balance = COALESCE(credit_balance,0) + $1 WHERE id=$2`,
+      [amount, student_id]
+    );
+    await pool.query(
+      `INSERT INTO bmt_audit_log (student_id,student_name,action,details) VALUES ($1,$2,'TOPUP',$3)`,
+      [student_id, student_name || '', JSON.stringify({ amount, credits, razorpay_id })]
+    ).catch(() => {});
+    console.log(`💰 TOPUP: student ${student_id} | ₹${amount} | ${credits} questions`);
+    res.json({ ok: true, amount_added: amount, credits_added: credits });
+  } catch(e) { console.error(e); res.json({ ok: false, msg: e.message }); }
+});
+
 app.get('/api/qbank/exam', async (req, res) => {
   try {
     const { board, class: cls, subject, count = 15 } = req.query;
@@ -672,13 +748,35 @@ app.get('/api/qbank/exam', async (req, res) => {
       );
     }
     if (result.rows.length < 5) return res.json({ ok: false, msg: 'no_questions' });
-    const questions = result.rows.map(q => ({
-      q: q.question,
-      options: ['A) '+q.option_a,'B) '+q.option_b,'C) '+q.option_c,'D) '+q.option_d],
-      correct: q.correct_answer,
-      explanation: q.explanation || '',
-      marks: q.marks || 1
-    }));
+
+    // Shuffle options so correct answer is NOT always A
+    const LETTERS = ['A','B','C','D'];
+    const questions = result.rows.map(q => {
+      // Build array of {letter, text} from DB
+      const opts = [
+        { letter: 'A', text: q.option_a },
+        { letter: 'B', text: q.option_b },
+        { letter: 'C', text: q.option_c },
+        { letter: 'D', text: q.option_d },
+      ];
+      // Find which letter is originally correct
+      const correctText = opts.find(o => o.letter === (q.correct_answer||'A').toUpperCase())?.text || q.option_a;
+      // Fisher-Yates shuffle
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]];
+      }
+      // Reassign letters A-D after shuffle
+      const shuffled = opts.map((o, i) => ({ newLetter: LETTERS[i], text: o.text, wasCorrect: o.text === correctText }));
+      const newCorrect = shuffled.find(o => o.wasCorrect)?.newLetter || 'A';
+      return {
+        question: q.question,
+        options: shuffled.map(o => o.newLetter + ') ' + o.text),
+        correct: newCorrect,
+        explanation: q.explanation || '',
+        marks: q.marks || 1
+      };
+    });
     res.json({ ok: true, questions });
   } catch(e) { res.json({ ok: false, msg: e.message }); }
 });
