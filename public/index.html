@@ -396,7 +396,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 .syl-item .txt .t{font-size:14px;font-weight:600;color:var(--blue-dark);}
 .syl-item .txt .s{font-size:11px;color:var(--gray-text);margin-top:2px;}
 .syl-item .arrow{font-size:16px;color:var(--gray-text);}
-.syl-footer{background:#fff;padding:12px 16px;border-top:1px solid var(--gray-mid);flex-shrink:0;}
+.syl-footer{background:#fff;padding:12px 16px 24px;border-top:1px solid var(--gray-mid);flex-shrink:0;position:sticky;bottom:0;}
 .syl-crumbs{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;background:#fff;flex-shrink:0;border-bottom:1px solid var(--gray-mid);}
 .crumb{background:var(--gold-light);border:1px solid var(--gold);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--blue-dark);}
 .crumb.active{background:var(--blue-mid);border-color:var(--blue-mid);color:#fff;}
@@ -1131,7 +1131,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     <div class="syl-step" id="step-4"></div>
   </div>
   <div class="syl-crumbs" id="syl-crumbs"></div>
-  <div class="syl-body" id="syl-body"></div>
+  <div class="syl-body" id="syl-body" style="flex:1;overflow-y:auto;"></div>
   <div class="syl-footer">
     <button class="btn-main" id="syl-start-btn" onclick="startSyllabusChat()" style="display:none;">Start Learning 🚀</button>
   </div>
