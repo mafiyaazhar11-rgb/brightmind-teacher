@@ -280,7 +280,7 @@ app.post('/api/save', async (req, res) => {
         xp=$5, streak=$6, stars=$7, total_questions=$8,
         questions_today=$9, last_study_day=$10,
         is_paid=$11, plan=$12, parent_pin=$13,
-        credit_balance=COALESCE($15, credit_balance, 0)
+        credit_balance=CASE WHEN $15::integer IS NOT NULL THEN $15::integer ELSE credit_balance END
        WHERE id=$14`,
       [
         JSON.stringify(subjects || {}),
@@ -291,7 +291,7 @@ app.post('/api/save', async (req, res) => {
         total_questions || 0, questions_today || 0,
         last_study_day || null, is_paid || false,
         plan || 'free', parent_pin || '1234', id,
-        (credit_balance !== undefined ? credit_balance : null)
+        (credit_balance !== undefined && credit_balance !== null ? parseInt(credit_balance) : null)
       ]
     );
 
@@ -722,6 +722,17 @@ app.post('/api/payment/topup', async (req, res) => {
     console.log(`💰 TOPUP: student ${student_id} | ₹${amount} | ${credits} questions`);
     res.json({ ok: true, amount_added: amount, credits_added: credits });
   } catch(e) { console.error(e); res.json({ ok: false, msg: e.message }); }
+});
+
+// ── DIAGNOSTIC: open this in browser to test DB connection and qbank
+app.get('/api/qbank/test', async (req, res) => {
+  try {
+    const total = await pool.query('SELECT COUNT(*) as n FROM bmt_question_bank');
+    const sample = await pool.query('SELECT board, class, subject, COUNT(*) as n FROM bmt_question_bank GROUP BY board, class, subject ORDER BY n DESC LIMIT 10');
+    res.json({ ok: true, total: parseInt(total.rows[0].n), top10: sample.rows });
+  } catch(e) {
+    res.json({ ok: false, error: e.message });
+  }
 });
 
 app.get('/api/qbank/exam', async (req, res) => {
