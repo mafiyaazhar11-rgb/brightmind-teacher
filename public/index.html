@@ -3383,9 +3383,7 @@ async function startExam(){
     }
   }catch(e){
     document.getElementById('exam-overlay').classList.remove('open');
-    alert('Exam load error: '+e.message+'
-
-Please screenshot this and report to admin.');
+    alert('Exam load error: '+e.message+'\n\nPlease screenshot this and report to admin.');
   }
 }
 function fallbackQs(){return Array(10).fill(null).map((_,i)=>({q:`Question ${i+1}: Which of the following best describes a core concept in this chapter?`,options:['A) Correct answer','B) Wrong option','C) Wrong option','D) Wrong option'],correct:'A',explanation:'This is the correct fundamental concept.'}));}
@@ -4005,29 +4003,42 @@ async function checkRenewalReminder(user){
 }
 
 function showRenewalReminder(user, daysLeft, sub){
-  const wrap=document.getElementById('trial-banner-wrap');
+  var wrap=document.getElementById('trial-banner-wrap');
   if(!wrap)return;
-  const urgency=daysLeft===0?'TODAY!':daysLeft===1?'Tomorrow!':daysLeft+' days!';
-  // Green if >7 days, yellow if 4-7, red if <=3
-  const color=daysLeft<=1?'#c62828':daysLeft<=3?'#e65100':daysLeft<=7?'#f57f17':'#1b5e20';
-  const gradEnd=daysLeft<=1?'#e53935':daysLeft<=3?'#ff6f00':daysLeft<=7?'#ff8f00':'#2e7d32';
-  const badgeColor=daysLeft<=3?'#ffd600':'rgba(255,255,255,0.2)';
-  const badgeText=daysLeft<=3?'#0a0f2e':'#fff';
-  wrap.innerHTML=`<div style="position:relative;background:linear-gradient(135deg,${color},${gradEnd});border-radius:14px;padding:13px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);" onclick="showModal('sub-modal')">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <div style="font-size:14px;font-weight:800;color:#fff;">${daysLeft<=3?'⏰':'✅'} Subscription ${daysLeft<=0?'Due Today':daysLeft<=3?'Due Soon':'Active'}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.9);margin-top:2px;">${sub.plan==='all'?'All Subjects':'Single Subject'} · ${sub.subscription_type||'Monthly'} plan</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:2px;">${daysLeft<=3?'Tap to renew and keep learning! 📚':'Tap to manage your plan 📚'}</div>
-      </div>
-      <div style="background:${badgeColor};border-radius:10px;padding:8px 12px;text-align:center;">
-        <div style="font-size:20px;font-weight:900;color:${badgeText};">${daysLeft===0?'Due!':daysLeft+'d'}</div>
-        <div style="font-size:9px;color:${badgeText==='#fff'?'rgba(255,255,255,0.8)':badgeText};">left</div>
-      </div>
-    </div>
-    ${daysLeft<=3?`<button onclick="document.getElementById('trial-banner-wrap').innerHTML=''" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.3);border:none;color:rgba(255,255,255,0.8);width:22px;height:22px;border-radius:50%;font-size:12px;cursor:pointer;line-height:22px;padding:0;text-align:center;">✕</button>`:''}
-  </div>`;
+  var color=daysLeft<=1?'#c62828':daysLeft<=3?'#e65100':daysLeft<=7?'#f57f17':'#1b5e20';
+  var gradEnd=daysLeft<=1?'#e53935':daysLeft<=3?'#ff6f00':daysLeft<=7?'#ff8f00':'#2e7d32';
+  var badgeColor=daysLeft<=3?'#ffd600':'rgba(255,255,255,0.2)';
+  var badgeText=daysLeft<=3?'#0a0f2e':'#fff';
+  var icon=daysLeft<=3?'⏰':'✅';
+  var statusText=daysLeft<=0?'Due Today':daysLeft<=3?'Due Soon':'Active';
+  var planLabel=sub.plan==='all'?'All Subjects':'Single Subject';
+  var tipText=daysLeft<=3?'Tap to renew 📚':'Tap to manage 📚';
+  var badgeNum=daysLeft===0?'Due!':daysLeft+'d';
+  var div=document.createElement('div');
+  div.style.cssText='position:relative;background:linear-gradient(135deg,'+color+','+gradEnd+');border-radius:14px;padding:13px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);';
+  div.onclick=function(){showModal('sub-modal');};
+  div.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;">'
+    +'<div>'
+    +'<div style="font-size:14px;font-weight:800;color:#fff;">'+icon+' Subscription '+statusText+'</div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,.9);margin-top:2px;">'+planLabel+' · '+(sub.subscription_type||'Monthly')+' plan</div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:2px;">'+tipText+'</div>'
+    +'</div>'
+    +'<div style="background:'+badgeColor+';border-radius:10px;padding:8px 12px;text-align:center;">'
+    +'<div style="font-size:20px;font-weight:900;color:'+badgeText+';">'+badgeNum+'</div>'
+    +'<div style="font-size:9px;color:'+badgeText+';">left</div>'
+    +'</div>'
+    +'</div>';
+  if(daysLeft<=3){
+    var btn=document.createElement('button');
+    btn.style.cssText='position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.3);border:none;color:rgba(255,255,255,0.8);width:22px;height:22px;border-radius:50%;font-size:12px;cursor:pointer;';
+    btn.textContent='x';
+    btn.onclick=function(e){e.stopPropagation();wrap.innerHTML='';};
+    div.appendChild(btn);
+  }
+  wrap.innerHTML='';
+  wrap.appendChild(div);
 }
+
 
 // ══════════════════════════════════════
 // UTILS
@@ -4328,9 +4339,7 @@ async function openInstantExam(subjectId, subjectName, icon){
     }
   }catch(e){
     document.getElementById('instant-exam-overlay').style.display='none';
-    alert('Exam load error: '+e.message+'
-
-Please screenshot this and report to admin.');
+    alert('Exam load error: '+e.message+'\n\nPlease screenshot this and report to admin.');
   }
 }
 function closeInstantExam(){
