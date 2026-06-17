@@ -2313,10 +2313,21 @@ function renderSubjects(){
 function renderLimitBar(){
   var _lim2=S.isPaid?(S.user&&S.user.plan==='premium'?70:45):S.freeLimit;
   const used=S.qToday,left=Math.max(0,_lim2-used);
-  document.getElementById('lb-count').textContent=S.isPaid?'∞ Unlimited':left+' left';
-  const d=document.getElementById('lb-dots');
-  if(S.isPaid){d.innerHTML='<span style="font-size:12px;color:var(--green);font-weight:700;">✓ Premium</span>';return;}
-  d.innerHTML=Array.from({length:S.freeLimit},(_,i)=>`<div class="lb-dot${i<used?' used':''}"></div>`).join('');
+  var countEl=document.getElementById('lb-count');
+  var labelEl=document.getElementById('limit-label');
+  var d=document.getElementById('lb-dots');
+  if(!countEl||!d)return;
+  if(S.isPaid){
+    countEl.textContent=left+' left today';
+    countEl.style.color=left>10?'#00e676':left>5?'#ffd600':'#ff7043';
+    if(labelEl)labelEl.textContent='📚 Daily Limit: '+_lim2+' Qs';
+    d.innerHTML='<span style="font-size:11px;color:var(--green);font-weight:700;">✓ '+used+'/'+_lim2+' used</span>';
+  }else{
+    countEl.textContent=left+' left';
+    countEl.style.color=left>2?'var(--blue-mid)':'#ff7043';
+    if(labelEl)labelEl.textContent='🎁 Free Demo';
+    d.innerHTML=Array.from({length:S.freeLimit},function(_,i){return '<div class="lb-dot'+(i<used?' used':'')+'"></div>';}).join('');
+  }
 }
 
 // ══════════════════════════════════════
@@ -4332,7 +4343,7 @@ async function openInstantExam(subjectId, subjectName, icon){
     const dbData = await dbRes.json();
     if(dbData.ok && dbData.questions && dbData.questions.length >= 5){
       IE.questions = dbData.questions.map(q=>({q:q.question,options:q.options,correct:q.correct,explanation:q.explanation||'',marks:1}));
-      IE.currentQ=0; ieStartTimer(); ieRenderQ();
+      IE.currentQ=0; ieStartTimer(); ieRenderQuestion();
     } else {
       document.getElementById('instant-exam-overlay').style.display='none';
       alert('No questions found for: '+subjectName+'\nBoard: '+(S.user?.board||'CBSE')+' | Class: '+(S.user?.class||9)+'\n\nAdmin: go to Q-Bank tab and generate questions for this subject.');
@@ -5520,6 +5531,7 @@ function updateCreditBalance(){
   if(el)el.textContent='Rs'+bal;
   var el2=document.getElementById('topup-balance-show');
   if(el2)el2.textContent='Rs'+bal;
+  renderLimitBar();
 }
 
 
