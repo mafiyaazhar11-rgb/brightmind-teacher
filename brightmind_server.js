@@ -62,6 +62,8 @@ async function initDB() {
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS credit_balance INTEGER DEFAULT 0;
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS daily_q_limit INTEGER DEFAULT 10;
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS daily_photo_limit INTEGER DEFAULT 1;
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS demo_exam_limit INTEGER DEFAULT 999;
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS demo_exam_used INTEGER DEFAULT 0;
     CREATE UNIQUE INDEX IF NOT EXISTS bmt_students_email_unique ON bmt_students(email) WHERE email IS NOT NULL;
 
     CREATE TABLE IF NOT EXISTS bmt_support (
@@ -156,8 +158,10 @@ function sanitize(s) {
     subscription_type: s.subscription_type || 'monthly',
     sub_expiry: s.subscription_end || null,
     expiry: s.subscription_end || null,
-    daily_q_limit: s.plan === 'premium' ? 75 : s.plan === 'all' ? 45 : s.daily_q_limit || 3,
-    daily_photo_limit: s.plan === 'premium' ? 5 : s.plan === 'all' ? 2 : 0,
+    daily_q_limit: s.plan === 'premium' ? 75 : s.plan === 'all' ? 45 : (s.daily_q_limit ?? 5),
+    daily_photo_limit: s.plan === 'premium' ? 5 : s.plan === 'all' ? 2 : (s.daily_photo_limit ?? 0),
+    demo_exam_limit: s.demo_exam_limit ?? (s.plan === 'premium' || s.plan === 'all' ? 999 : 2),
+    demo_exam_used: s.demo_exam_used || 0,
     questions_today_photo: s.questions_today_photo || 0,
     xp: s.xp || 0, streak: s.streak || 0, stars: s.stars || 0,
     total_questions: s.total_questions || 0,
@@ -183,6 +187,12 @@ app.post('/api/register', async (req, res) => {
     const { name, password, board, class: cls, state, mobile, email, stream } = req.body;
     if (!name || !password || !cls || !state) return res.json({ ok: false, msg: 'Please fill all fields!' });
 
+    // Enforce Class 9-12 only — BrightMind Teacher targets senior school students
+    const clsNum = parseInt(cls);
+    if (!clsNum || clsNum < 9 || clsNum > 12) {
+      return res.json({ ok: false, msg: 'BrightMind Teacher is currently available for Class 9 to 12 students only. We will expand to other classes soon!' });
+    }
+
     // Check name taken
     const exists = await pool.query('SELECT id FROM bmt_students WHERE LOWER(name)=LOWER($1)', [name]);
     if (exists.rows.length > 0) return res.json({ ok: false, msg: 'Name already taken! Try a different name.' });
@@ -195,9 +205,10 @@ app.post('/api/register', async (req, res) => {
       }
     }
 
+    // FREE TIER LIMITS: 5 questions/day, 0 photo uploads, max 2 quick exams lifetime
     await pool.query(
-      `INSERT INTO bmt_students (name, password, board, class, state, email, mobile, stream, reg_on)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW())`,
+      `INSERT INTO bmt_students (name, password, board, class, state, email, mobile, stream, reg_on, daily_q_limit, daily_photo_limit, demo_exam_limit, demo_exam_used)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW(),5,0,2,0)`,
       [name, password, board || 'CBSE', cls, state, email || null, mobile || null, stream || 'science']
     );
 
@@ -737,8 +748,27 @@ app.get('/api/qbank/test', async (req, res) => {
 
 app.get('/api/qbank/exam', async (req, res) => {
   try {
-    const { board, class: cls, subject, count = 15 } = req.query;
+    const { board, class: cls, subject, count = 15, student_id } = req.query;
     if (!board || !cls || !subject) return res.json({ ok: false, msg: 'Missing params' });
+
+    // Enforce free-tier exam cap server-side (cannot be bypassed from frontend)
+    if (student_id) {
+      const stu = await pool.query('SELECT is_paid, plan, demo_exam_limit, demo_exam_used FROM bmt_students WHERE id=$1', [student_id]);
+      if (stu.rows.length) {
+        const s = stu.rows[0];
+        const isPremiumPlan = s.is_paid && (s.plan === 'premium' || s.plan === 'all');
+        if (!isPremiumPlan) {
+          const limit = s.demo_exam_limit ?? 2;
+          const used = s.demo_exam_used || 0;
+          if (used >= limit) {
+            return res.json({ ok: false, msg: 'exam_limit_reached', limit, used });
+          }
+          // Increment usage now — counts as one exam attempt
+          await pool.query('UPDATE bmt_students SET demo_exam_used = COALESCE(demo_exam_used,0) + 1 WHERE id=$1', [student_id]);
+        }
+      }
+    }
+
     // Smart fallback — tries multiple combinations until questions found
     let result = { rows: [] };
 
@@ -1107,6 +1137,36 @@ app.post('/api/ai', async (req, res) => {
     if (!process.env.ANTHROPIC_API_KEY) {
       return res.status(500).json({ error: { message: 'API key not configured' } });
     }
+
+    // SERVER-SIDE DAILY LIMIT ENFORCEMENT — frontend checks can be bypassed, this cannot
+    const studentId = req.body.student_id || req.query.student_id;
+    if (studentId) {
+      const stu = await pool.query(
+        'SELECT is_paid, plan, daily_q_limit, questions_today, last_study_day FROM bmt_students WHERE id=$1',
+        [studentId]
+      );
+      if (stu.rows.length) {
+        const s = stu.rows[0];
+        const today = new Date().toISOString().slice(0,10);
+        const lastDay = s.last_study_day ? new Date(s.last_study_day).toISOString().slice(0,10) : null;
+        let qToday = s.questions_today || 0;
+        // Reset count if it's a new day
+        if (lastDay !== today) qToday = 0;
+
+        const limit = s.is_paid ? (s.plan === 'premium' ? 75 : s.plan === 'all' ? 45 : (s.daily_q_limit ?? 5)) : (s.daily_q_limit ?? 5);
+
+        if (qToday >= limit) {
+          return res.json({ content: [{ type: 'text', text: 'LIMIT_REACHED' }], limit_reached: true, daily_limit: limit, questions_today: qToday });
+        }
+
+        // Increment usage now
+        await pool.query(
+          `UPDATE bmt_students SET questions_today = $1, last_study_day = NOW() WHERE id=$2`,
+          [qToday + 1, studentId]
+        );
+      }
+    }
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -1128,8 +1188,8 @@ app.post('/api/ai', async (req, res) => {
         console.error('🚨 BILLING ALERT: Anthropic credits low or exhausted! Top up at console.anthropic.com');
         return res.json({ content: [{ type: 'text', text: 'Miss BrightMind is taking a short break! Please try again in a few minutes. 😊' }] });
       }
-      // Other errors — still friendly
-      return res.json({ content: [{ type: 'text', text: 'I could not answer that right now. Please ask your question again! 😊' }] });
+      // Other errors — still friendly, and actionable
+      return res.json({ content: [{ type: 'text', text: "Hmm, let's try that differently! 😊 Tell me — which subject and chapter are we studying today? Type it like: 'Science, Chapter 3' and I'll start teaching right away!" }] });
     }
     res.json(data);
   } catch (e) {
@@ -1400,23 +1460,28 @@ app.post('/api/admin/create-demo', async (req, res) => {
     if (key !== process.env.ADMIN_KEY) return res.status(401).json({ ok: false });
     const { name, email, password, board, class: cls, state, days } = req.body;
     if (!name || !password || !cls || !state) return res.json({ ok: false, msg: 'Fill all fields!' });
+    // Enforce Class 9-12 only
+    const clsNum = parseInt(cls);
+    if (!clsNum || clsNum < 9 || clsNum > 12) return res.json({ ok: false, msg: 'BrightMind Teacher is only for Class 9-12 students!' });
     // Check name exists
     const exists = await pool.query('SELECT id FROM bmt_students WHERE LOWER(name)=LOWER($1)', [name]);
     if (exists.rows.length) return res.json({ ok: false, msg: 'Name already taken!' });
     const expiry = new Date();
     expiry.setDate(expiry.getDate() + parseInt(days || 1));
+    // FREE DEMO LIMITS: 5 questions/day, 0 photos, max 2 quick exams lifetime
     const result = await pool.query(
       `INSERT INTO bmt_students 
-       (name, password, board, class, state, email, is_paid, plan, subscription_type, subscription_start, subscription_end, next_due_date, reg_on)
-       VALUES ($1,$2,$3,$4,$5,$6,true,'all','demo_trial',NOW(),$7,$7,NOW()) RETURNING id`,
+       (name, password, board, class, state, email, is_paid, plan, subscription_type, subscription_start, subscription_end, next_due_date, reg_on,
+        daily_q_limit, daily_photo_limit, demo_exam_limit, demo_exam_used)
+       VALUES ($1,$2,$3,$4,$5,$6,true,'free_demo','demo_trial',NOW(),$7,$7,NOW(),5,0,2,0) RETURNING id`,
       [name, password, board || 'CBSE', cls, state, email || null, expiry]
     );
     await pool.query(
       `INSERT INTO bmt_audit_log (student_id, student_name, action, details)
        VALUES ($1,$2,'ADMIN_CREATE_DEMO',$3)`,
-      [result.rows[0].id, name, JSON.stringify({days, expiry, email})]
+      [result.rows[0].id, name, JSON.stringify({days, expiry, email, q_limit:5, exam_limit:2})]
     ).catch(()=>{});
-    console.log(`🎭 DEMO CREATED: ${name} | ${days} days | expires ${expiry}`);
+    console.log(`🎭 DEMO CREATED (LIMITED): ${name} | ${days} days | 5q/day, 2 exams max | expires ${expiry}`);
     res.json({ ok: true, expiry, student_id: result.rows[0].id });
   } catch (e) {
     console.error(e);
