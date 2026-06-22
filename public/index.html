@@ -1509,6 +1509,52 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
   </div>
 </div>
 
+<!-- ══ EDIT STUDENT MODAL (Board/Class/State) ══ -->
+<div id="edit-student-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(13,27,75,.8);align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:20px;padding:28px 24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:90vh;overflow-y:auto;">
+    <div style="font-size:20px;font-weight:800;color:var(--blue-dark);margin-bottom:4px;">✏️ Edit Student</div>
+    <div style="font-size:13px;color:var(--gray-text);margin-bottom:20px;" id="edit-student-name-label">Update board, class, or state</div>
+    <input type="hidden" id="edit-student-id"/>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:13px;font-weight:600;color:var(--blue-dark);">Board</label>
+        <select id="edit-student-board" style="padding:13px 16px;border:1px solid var(--gray-mid);border-radius:12px;font-size:15px;font-family:'Poppins',sans-serif;outline:none;background:#f5f6fa;color:var(--blue-dark);">
+          <option value="CBSE">CBSE</option>
+          <option value="ICSE">ICSE</option>
+          <option value="TN">Tamil Nadu Board</option>
+          <option value="KL">Kerala Board</option>
+          <option value="KA">Karnataka Board</option>
+          <option value="AP">AP Board</option>
+          <option value="TS">Telangana Board</option>
+          <option value="MH">Maharashtra Board</option>
+          <option value="UP">UP Board</option>
+          <option value="WB">WB Board</option>
+          <option value="GJ">Gujarat Board</option>
+          <option value="RJ">Rajasthan Board</option>
+          <option value="OTHER">Other</option>
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:13px;font-weight:600;color:var(--blue-dark);">Class</label>
+        <select id="edit-student-class" style="padding:13px 16px;border:1px solid var(--gray-mid);border-radius:12px;font-size:15px;font-family:'Poppins',sans-serif;outline:none;background:#f5f6fa;color:var(--blue-dark);">
+          <option value="9">Class 9</option>
+          <option value="10">Class 10</option>
+          <option value="11">Class 11</option>
+          <option value="12">Class 12</option>
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:13px;font-weight:600;color:var(--blue-dark);">State</label>
+        <select id="edit-student-state" style="padding:13px 16px;border:1px solid var(--gray-mid);border-radius:12px;font-size:15px;font-family:'Poppins',sans-serif;outline:none;background:#f5f6fa;color:var(--blue-dark);">
+          <option>Tamil Nadu</option><option>Kerala</option><option>Karnataka</option><option>Andhra Pradesh</option>
+          <option>Telangana</option><option>Maharashtra</option><option>Uttar Pradesh</option><option>West Bengal</option>
+          <option>Gujarat</option><option>Rajasthan</option><option>Delhi</option><option>Punjab</option>
+          <option>Haryana</option><option>Bihar</option><option>Madhya Pradesh</option><option>Other</option>
+        </select>
+      </div>
+      <button onclick="submitEditStudent()" class="btn-main">Save Changes</button>
+      <button onclick="closeEditStudentOverlay()" style="background:none;border:none;color:var(--gray-text);font-size:13px;cursor:pointer;padding:8px;">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ ADMIN SUPPORT MESSAGES ══ -->
 
 <!-- ══ PAYWALL ══ -->
@@ -5508,28 +5554,41 @@ async function adminGivePremium(studentId, studentName){
   }
 }
 
-async function adminEditStudent(studentId, studentName, currentBoard, currentClass, currentState){
-  const boardOptions='CBSE, ICSE, TN, KL, KA, AP, TS, MH, UP, WB, GJ, RJ, OTHER';
-  const newBoard = prompt(`Edit Board for ${studentName}\n\nCurrent: ${currentBoard}\n\nValid options: ${boardOptions}\n\nEnter new board code (or leave blank to keep current):`, currentBoard);
-  if(newBoard===null) return; // cancelled
-  const newClass = prompt(`Edit Class for ${studentName}\n\nCurrent: ${currentClass}\n\nEnter new class 9-12 (or leave blank to keep current):`, currentClass);
-  if(newClass===null) return;
-  const newState = prompt(`Edit State for ${studentName}\n\nCurrent: ${currentState}\n\nEnter new state (or leave blank to keep current):`, currentState);
-  if(newState===null) return;
+function adminEditStudent(studentId, studentName, currentBoard, currentClass, currentState){
+  document.getElementById('edit-student-id').value = studentId;
+  document.getElementById('edit-student-name-label').textContent = 'Editing: '+studentName;
+  // Normalize currentBoard in case it was previously saved as a dirty combined value (e.g. "CBSE,TN")
+  const cleanBoard = (currentBoard||'CBSE').split(',')[0].trim();
+  const boardSel = document.getElementById('edit-student-board');
+  if(boardSel) boardSel.value = [...boardSel.options].some(o=>o.value===cleanBoard) ? cleanBoard : 'CBSE';
+  const classSel = document.getElementById('edit-student-class');
+  if(classSel) classSel.value = String(currentClass||'9');
+  const stateSel = document.getElementById('edit-student-state');
+  if(stateSel){
+    const cleanState=(currentState||'Tamil Nadu').trim();
+    stateSel.value = [...stateSel.options].some(o=>o.value===cleanState) ? cleanState : 'Tamil Nadu';
+  }
+  document.getElementById('edit-student-overlay').style.display='flex';
+}
 
+function closeEditStudentOverlay(){
+  document.getElementById('edit-student-overlay').style.display='none';
+}
+
+async function submitEditStudent(){
+  const id = document.getElementById('edit-student-id').value;
+  const board = document.getElementById('edit-student-board').value;
+  const cls = document.getElementById('edit-student-class').value;
+  const state = document.getElementById('edit-student-state').value;
   const res = await fetch(API_URL+'/api/admin/edit-student', {
     method:'POST',
     headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},
-    body: JSON.stringify({
-      id: studentId,
-      board: newBoard?.trim() || null,
-      class: newClass?.trim() || null,
-      state: newState?.trim() || null
-    })
+    body: JSON.stringify({ id, board, class: cls, state })
   });
   const d = await res.json();
   if(d.ok){
-    alert(`✅ ${studentName}'s profile updated!\nBoard: ${newBoard||currentBoard} | Class: ${newClass||currentClass} | State: ${newState||currentState}\n\nThey may need to log out and log back in to see the change.`);
+    closeEditStudentOverlay();
+    alert(`✅ Profile updated!\nBoard: ${board} | Class: ${cls} | State: ${state}\n\nThey may need to log out and log back in to see the change.`);
     renderAdmin();
   } else {
     alert('Failed: '+(d.msg||'Try again'));
