@@ -64,6 +64,8 @@ async function initDB() {
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS daily_photo_limit INTEGER DEFAULT 1;
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS demo_exam_limit INTEGER DEFAULT 999;
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS demo_exam_used INTEGER DEFAULT 0;
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS blackboard_today INTEGER DEFAULT 0;
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS last_blackboard_day TIMESTAMP;
     CREATE UNIQUE INDEX IF NOT EXISTS bmt_students_email_unique ON bmt_students(email) WHERE email IS NOT NULL;
 
     CREATE TABLE IF NOT EXISTS bmt_support (
@@ -1172,20 +1174,40 @@ app.post('/api/ai', async (req, res) => {
 
     // SERVER-SIDE DAILY LIMIT ENFORCEMENT — frontend checks can be bypassed, this cannot
     const studentId = req.body.student_id || req.query.student_id;
+    const requestType = req.body.request_type || 'chat';
     if (studentId) {
       const stu = await pool.query(
-        'SELECT is_paid, plan, daily_q_limit, questions_today, last_study_day FROM bmt_students WHERE id=$1',
+        'SELECT is_paid, plan, daily_q_limit, questions_today, last_study_day, blackboard_today, last_blackboard_day FROM bmt_students WHERE id=$1',
         [studentId]
       );
       if (stu.rows.length) {
         const s = stu.rows[0];
         const today = new Date().toISOString().slice(0,10);
+
+        // ── BLACKBOARD-SPECIFIC CAP — separate from chat, applies to EVERY user (free or paid) ──
+        // Blackboard solves cost more in tokens than chat messages, so they get their own ceiling
+        // even for paid users, to keep AI spend predictable at scale.
+        if (requestType === 'blackboard') {
+          const lastBBDay = s.last_blackboard_day ? new Date(s.last_blackboard_day).toISOString().slice(0,10) : null;
+          let bbToday = s.blackboard_today || 0;
+          if (lastBBDay !== today) bbToday = 0;
+
+          const BLACKBOARD_DAILY_CAP = s.is_paid ? 3 : 1; // paid: 3/day, free: covered separately by lifetime cap on frontend
+          if (bbToday >= BLACKBOARD_DAILY_CAP) {
+            return res.json({ bb_limit_reached: true, daily_limit: BLACKBOARD_DAILY_CAP, blackboard_today: bbToday });
+          }
+          await pool.query(
+            `UPDATE bmt_students SET blackboard_today = $1, last_blackboard_day = NOW() WHERE id=$2`,
+            [bbToday + 1, studentId]
+          );
+        }
+
         const lastDay = s.last_study_day ? new Date(s.last_study_day).toISOString().slice(0,10) : null;
         let qToday = s.questions_today || 0;
         // Reset count if it's a new day
         if (lastDay !== today) qToday = 0;
 
-        const limit = s.is_paid ? (s.plan === 'premium' ? 75 : s.plan === 'all' ? 45 : (s.daily_q_limit ?? 5)) : (s.daily_q_limit ?? 5);
+        const limit = s.is_paid ? (s.plan === 'premium' ? 18 : s.plan === 'all' ? 12 : (s.daily_q_limit ?? 5)) : (s.daily_q_limit ?? 5);
 
         if (qToday >= limit) {
           return res.json({ content: [{ type: 'text', text: 'LIMIT_REACHED' }], limit_reached: true, daily_limit: limit, questions_today: qToday });
