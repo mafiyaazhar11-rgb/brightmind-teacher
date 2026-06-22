@@ -1226,10 +1226,6 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     <div class="exam-row"><span id="exam-qnum">Q 1 of 10</span><span id="exam-live">Score: 0</span></div>
   </div>
   <div class="exam-body" id="exam-body"></div>
-  <div class="exam-footer">
-    <button class="btn-main" onclick="nextQ()" style="flex:1;">Next →</button>
-    <button onclick="submitExam()" style="flex:1;background:var(--gold);color:var(--blue-dark);font-size:15px;font-weight:700;padding:14px;border-radius:12px;border:none;cursor:pointer;">Submit ✓</button>
-  </div>
 </div>
 
 <!-- ══ RESULT OVERLAY ══ -->
@@ -3421,6 +3417,10 @@ function renderExamQ(){
         return `<button class="${cls}" onclick="pickOpt('${opt[0]}')">${opt}</button>`;
       }).join('')}</div>
       ${saved?`<div class="exam-explain">${saved===q.correct?'✅':'💡'} <strong>Explanation:</strong> ${q.explanation}</div>`:''}
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button class="btn-main" onclick="nextQ()" style="flex:1;">Next →</button>
+      <button onclick="submitExam()" style="flex:1;background:var(--gold);color:var(--blue-dark);font-size:15px;font-weight:700;padding:14px;border-radius:12px;border:none;cursor:pointer;">Submit ✓</button>
     </div>`;
 }
 function pickOpt(letter){if(S.examAns[S.examIdx])return;S.examAns[S.examIdx]=letter;renderExamQ();}
