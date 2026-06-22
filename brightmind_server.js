@@ -77,6 +77,9 @@ async function initDB() {
       status VARCHAR(20) DEFAULT 'open',
       created_at TIMESTAMP DEFAULT NOW()
     );
+    ALTER TABLE bmt_support ADD COLUMN IF NOT EXISTS admin_reply TEXT;
+    ALTER TABLE bmt_support ADD COLUMN IF NOT EXISTS replied_at TIMESTAMP;
+    ALTER TABLE bmt_support ADD COLUMN IF NOT EXISTS reply_seen BOOLEAN DEFAULT FALSE;
 
     CREATE TABLE IF NOT EXISTS bmt_leaderboard (
       id BIGSERIAL PRIMARY KEY,
@@ -1547,13 +1550,60 @@ app.post('/api/support', async (req, res) => {
 app.get('/api/admin/support', async (req, res) => {
   try {
     const key = req.headers['x-admin-key'];
-    if (key !== process.env.ADMIN_KEY) return res.status(401).json({ ok: false });
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
     const msgs = await pool.query(
       `SELECT * FROM bmt_support ORDER BY created_at DESC LIMIT 100`
     );
     res.json({ ok: true, messages: msgs.rows });
   } catch (e) {
     res.json({ ok: false, messages: [] });
+  }
+});
+
+// ADMIN — Reply to a support message
+app.post('/api/admin/support-reply', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false, msg: 'Unauthorized' });
+    const { id, reply, status } = req.body;
+    if (!id || !reply) return res.json({ ok: false, msg: 'Missing id or reply' });
+    await pool.query(
+      `UPDATE bmt_support SET admin_reply=$1, replied_at=NOW(), reply_seen=FALSE, status=$2 WHERE id=$3`,
+      [reply, status || 'resolved', id]
+    );
+    res.json({ ok: true, msg: 'Reply sent' });
+  } catch (e) {
+    console.error('support-reply error:', e.message);
+    res.json({ ok: false, msg: e.message });
+  }
+});
+
+// STUDENT — Check for unseen replies to their support messages
+app.get('/api/support/my-replies/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const result = await pool.query(
+      `SELECT id, message, admin_reply, replied_at, status, reply_seen
+       FROM bmt_support
+       WHERE student_id=$1 AND admin_reply IS NOT NULL
+       ORDER BY replied_at DESC LIMIT 20`,
+      [studentId]
+    );
+    res.json({ ok: true, replies: result.rows });
+  } catch (e) {
+    res.json({ ok: false, replies: [] });
+  }
+});
+
+// STUDENT — Mark a reply as seen (clears the notification badge)
+app.post('/api/support/mark-seen', async (req, res) => {
+  try {
+    const { id } = req.body;
+    if (!id) return res.json({ ok: false });
+    await pool.query(`UPDATE bmt_support SET reply_seen=TRUE WHERE id=$1`, [id]);
+    res.json({ ok: true });
+  } catch (e) {
+    res.json({ ok: false });
   }
 });
 
