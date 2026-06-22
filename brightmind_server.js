@@ -186,6 +186,9 @@ app.post('/api/register', async (req, res) => {
   try {
     const { name, password, board, class: cls, state, mobile, email, stream } = req.body;
     if (!name || !password || !cls || !state) return res.json({ ok: false, msg: 'Please fill all fields!' });
+    // Defensive cleanup: board/state must be single clean values, never comma-joined
+    const cleanBoard = board ? board.split(',')[0].trim() : 'CBSE';
+    const cleanState = state.split(',')[0].trim();
 
     // Enforce Class 9-12 only — BrightMind Teacher targets senior school students
     const clsNum = parseInt(cls);
@@ -209,7 +212,7 @@ app.post('/api/register', async (req, res) => {
     await pool.query(
       `INSERT INTO bmt_students (name, password, board, class, state, email, mobile, stream, reg_on, daily_q_limit, daily_photo_limit, demo_exam_limit, demo_exam_used)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW(),5,0,2,0)`,
-      [name, password, board || 'CBSE', cls, state, email || null, mobile || null, stream || 'science']
+      [name, password, cleanBoard, cls, cleanState, email || null, mobile || null, stream || 'science']
     );
 
     // Audit log
@@ -416,6 +419,9 @@ app.post('/api/admin/edit-student', async (req, res) => {
     if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false, msg: 'Unauthorized' });
     const { id, board, class: cls, state, name } = req.body;
     if (!id) return res.json({ ok: false, msg: 'Missing student id' });
+    // Defensive cleanup: board/state must be single clean values, never comma-joined
+    const cleanBoard = board ? board.split(',')[0].trim() : null;
+    const cleanState = state ? state.split(',')[0].trim() : null;
     await pool.query(
       `UPDATE bmt_students SET
         board = COALESCE($1, board),
@@ -423,7 +429,7 @@ app.post('/api/admin/edit-student', async (req, res) => {
         state = COALESCE($3, state),
         name = COALESCE($4, name)
        WHERE id = $5`,
-      [board || null, cls || null, state || null, name || null, id]
+      [cleanBoard, cls || null, cleanState, name || null, id]
     );
     res.json({ ok: true, msg: 'Student updated successfully' });
   } catch (e) {
@@ -1190,6 +1196,9 @@ app.post('/api/ai', async (req, res) => {
       }
     }
 
+    // Strip our own bookkeeping fields — Anthropic's API rejects unrecognized top-level fields
+    const { student_id, ...anthropicPayload } = req.body;
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -1197,11 +1206,11 @@ app.post('/api/ai', async (req, res) => {
         'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify(anthropicPayload)
     });
     const data = await response.json();
     if (data.error) {
-      console.error('Anthropic error:', data.error.type, data.error.message);
+      console.error('Anthropic error:', JSON.stringify(data.error));
       // Never forward raw billing/credit errors to students
       const errType = (data.error.type || '').toLowerCase();
       const errMsg = (data.error.message || '').toLowerCase();
