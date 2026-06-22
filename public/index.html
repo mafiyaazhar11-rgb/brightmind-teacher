@@ -2382,7 +2382,7 @@ function renderSubjects(){
 }
 
 function renderLimitBar(){
-  var _lim2=S.isPaid?(S.user&&S.user.plan==='premium'?70:45):S.freeLimit;
+  var _lim2=S.isPaid?(S.user&&S.user.plan==='premium'?18:12):S.freeLimit;
   const used=S.qToday,left=Math.max(0,_lim2-used);
   var countEl=document.getElementById('lb-count');
   var labelEl=document.getElementById('limit-label');
@@ -2503,7 +2503,7 @@ const CHAPTER_TOPICS={
 let SYL={board:'',cls:'',subject:'',chapter:'',topic:'',step:1};
 
 function openSubject(id){
-  var _dailyLim=S.isPaid?(S.user&&S.user.plan==='premium'?70:45):S.freeLimit;
+  var _dailyLim=S.isPaid?(S.user&&S.user.plan==='premium'?18:12):S.freeLimit;
   if(!S.isPaid&&S.qToday>=_dailyLim){
     var _credits=S.user?parseInt(S.user.creditBalance||0):0;
     if(!_credits){showModal('sub-modal');return;}
@@ -2857,12 +2857,22 @@ Return ONLY JSON array.`
     if(imgB64) prompt += '\n\n(A photo of the question is attached — please read it to identify the exact question.)';
 
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:2000,system:sys,
+      body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,request_type:'blackboard',max_tokens:2000,system:sys,
         messages:[{role:'user',content: imgB64 ? [
           {type:'image',source:{type:'base64',media_type:imgType,data:imgB64}},
           {type:'text',text:prompt}
         ] : prompt}]})});
     const d=await r.json();
+
+    // Daily blackboard limit reached — friendly message, not a dead end
+    if(d.bb_limit_reached){
+      bbWriting=false;
+      const loadEl0=document.getElementById('bb-loading');
+      if(loadEl0)loadEl0.remove();
+      canvas.innerHTML+=`<div class="bb-chalk-line" style="color:#ffd600;">🌟 Great job studying today! You've used your ${d.daily_limit} step-by-step Blackboard solves for today. Your chat questions still work — come back tomorrow for more Blackboard time, or upgrade to Premium for a higher daily limit! 💪</div>`;
+      return;
+    }
+
     let raw=d.content?.[0]?.text||'[]';
     raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
 
@@ -3434,7 +3444,7 @@ async function sendMsg(){
   const inp=document.getElementById('chat-inp'),txt=inp.value.trim();if(!txt)return;
   if(checkPaywall())return;
   // Check daily limit — credits are backup for when limit is reached
-  var dailyLim=S.isPaid?(S.user&&S.user.plan==='premium'?70:45):S.freeLimit;
+  var dailyLim=S.isPaid?(S.user&&S.user.plan==='premium'?18:12):S.freeLimit;
   if(S.qToday>=dailyLim){
     var credits=S.user?parseInt(S.user.creditBalance||0):0;
     if(credits>0){
