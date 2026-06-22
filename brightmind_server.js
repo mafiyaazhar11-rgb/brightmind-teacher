@@ -1187,12 +1187,14 @@ app.post('/api/ai', async (req, res) => {
         // ── BLACKBOARD-SPECIFIC CAP — separate from chat, applies to EVERY user (free or paid) ──
         // Blackboard solves cost more in tokens than chat messages, so they get their own ceiling
         // even for paid users, to keep AI spend predictable at scale.
+        // IMPORTANT: a blackboard solve only counts against the blackboard cap — it does NOT
+        // also consume a chat message slot. Each cap tracks its own feature independently.
         if (requestType === 'blackboard') {
           const lastBBDay = s.last_blackboard_day ? new Date(s.last_blackboard_day).toISOString().slice(0,10) : null;
           let bbToday = s.blackboard_today || 0;
           if (lastBBDay !== today) bbToday = 0;
 
-          const BLACKBOARD_DAILY_CAP = s.is_paid ? 3 : 1; // paid: 3/day, free: covered separately by lifetime cap on frontend
+          const BLACKBOARD_DAILY_CAP = s.is_paid ? 3 : 1; // paid: 3 full solves/day, free: covered separately by lifetime cap on frontend
           if (bbToday >= BLACKBOARD_DAILY_CAP) {
             return res.json({ bb_limit_reached: true, daily_limit: BLACKBOARD_DAILY_CAP, blackboard_today: bbToday });
           }
@@ -1200,24 +1202,25 @@ app.post('/api/ai', async (req, res) => {
             `UPDATE bmt_students SET blackboard_today = $1, last_blackboard_day = NOW() WHERE id=$2`,
             [bbToday + 1, studentId]
           );
+          // Blackboard call is fully counted — skip the chat counter below entirely
+        } else {
+          const lastDay = s.last_study_day ? new Date(s.last_study_day).toISOString().slice(0,10) : null;
+          let qToday = s.questions_today || 0;
+          // Reset count if it's a new day
+          if (lastDay !== today) qToday = 0;
+
+          const limit = s.is_paid ? (s.plan === 'premium' ? 18 : s.plan === 'all' ? 12 : (s.daily_q_limit ?? 5)) : (s.daily_q_limit ?? 5);
+
+          if (qToday >= limit) {
+            return res.json({ content: [{ type: 'text', text: 'LIMIT_REACHED' }], limit_reached: true, daily_limit: limit, questions_today: qToday });
+          }
+
+          // Increment usage now
+          await pool.query(
+            `UPDATE bmt_students SET questions_today = $1, last_study_day = NOW() WHERE id=$2`,
+            [qToday + 1, studentId]
+          );
         }
-
-        const lastDay = s.last_study_day ? new Date(s.last_study_day).toISOString().slice(0,10) : null;
-        let qToday = s.questions_today || 0;
-        // Reset count if it's a new day
-        if (lastDay !== today) qToday = 0;
-
-        const limit = s.is_paid ? (s.plan === 'premium' ? 18 : s.plan === 'all' ? 12 : (s.daily_q_limit ?? 5)) : (s.daily_q_limit ?? 5);
-
-        if (qToday >= limit) {
-          return res.json({ content: [{ type: 'text', text: 'LIMIT_REACHED' }], limit_reached: true, daily_limit: limit, questions_today: qToday });
-        }
-
-        // Increment usage now
-        await pool.query(
-          `UPDATE bmt_students SET questions_today = $1, last_study_day = NOW() WHERE id=$2`,
-          [qToday + 1, studentId]
-        );
       }
     }
 
