@@ -2712,6 +2712,14 @@ async function sendToBlackboard(){
   const inp=document.getElementById('bb-inp');
   const q=inp.value.trim();
   if(!q)return;
+  inp.value='';
+  await solveOnBlackboard(q, null, null);
+}
+
+// Shared blackboard solver — used for typed questions AND photo questions.
+// imgB64/imgType are optional; when provided, the AI also receives the photo.
+async function solveOnBlackboard(q, imgB64, imgType){
+  if(bbWriting)return;
 
   // FREE TIER LIMIT: max 4 blackboard uses lifetime, then must pay
   if(S.user && !S.user.isPaid){
@@ -2725,7 +2733,7 @@ async function sendToBlackboard(){
     localStorage.setItem(bbUsedKey, String(bbUsed+1));
   }
 
-  inp.value='';
+  document.getElementById('blackboard-overlay').classList.add('open');
   bbWriting=true;
   bbAllSteps=[];
   bbCurrentStep=0;
@@ -2743,6 +2751,7 @@ async function sendToBlackboard(){
     </div>
     <div style="border-top:1px solid #2a4a2a;margin:10px 0 14px;"></div>
     <div style="font-family:'Courier New',monospace;font-size:18px;color:#ffd600;margin-bottom:16px;text-shadow:0 0 8px rgba(255,214,0,.4);">❓ ${q}</div>
+    ${imgB64?`<div style="margin-bottom:16px;"><img src="data:${imgType};base64,${imgB64}" style="max-width:200px;border-radius:8px;border:2px solid rgba(255,214,0,.4);"/></div>`:''}
     <div class="bb-writing" id="bb-loading">
       <div>✏️ Writing on board</div>
       <div class="bb-chalk-dots"><span></span><span></span><span></span></div>
@@ -2753,11 +2762,12 @@ async function sendToBlackboard(){
     solve:`Break this problem into clear numbered steps. Write EXACTLY like a teacher at a blackboard.
 Format your response as JSON array:
 [
-  {"step": 1, "title": "UNDERSTAND THE PROBLEM", "content": "What we are given and what we need to find", "speak": "First let us understand what we need to solve"},
-  {"step": 2, "title": "STEP NAME", "content": "The working for this step", "speak": "What teacher says out loud for this step"},
+  {"step": 1, "title": "UNDERSTAND THE PROBLEM", "content": "What we are given and what we need to find", "rough": "", "speak": "First let us understand what we need to solve"},
+  {"step": 2, "title": "STEP NAME", "content": "The working for this step", "rough": "Side calculation shown here, e.g. 12 x 3 = 36, or a quick substitution — leave empty string if this step has no separate side-calculation", "speak": "What teacher says out loud for this step"},
   ...
-  {"step": N, "title": "FINAL ANSWER ✓", "content": "The complete answer clearly stated", "speak": "The final answer is..."}
+  {"step": N, "title": "FINAL ANSWER ✓", "content": "The complete answer clearly stated", "rough": "", "speak": "The final answer is..."}
 ]
+The "rough" field is like a teacher's side working on the corner of the blackboard — short calculations, substitutions, or arithmetic that supports the main step but isn't the main explanation. Use it whenever a step involves a calculation. Leave it as empty string "" for steps that are purely conceptual with no maths.
 Return ONLY the JSON array. No other text.`,
     explain:`Explain this concept step by step like a teacher at a blackboard for Class ${S.user?.class||11}.
 Format as JSON array:
@@ -2775,10 +2785,11 @@ Return ONLY the JSON array.`,
 Return ONLY JSON array.`,
     example:`Show a worked example for Class ${S.user?.class||11} as JSON:
 [
-  {"step": 1, "title": "GIVEN", "content": "What is given in the problem", "speak": "..."},
+  {"step": 1, "title": "GIVEN", "content": "What is given in the problem", "rough": "", "speak": "..."},
   ...
-  {"step": N, "title": "ANSWER ✓", "content": "Final answer", "speak": "..."}
+  {"step": N, "title": "ANSWER ✓", "content": "Final answer", "rough": "", "speak": "..."}
 ]
+Include a short "rough" side-calculation string for any step that involves arithmetic. Leave it "" otherwise.
 Return ONLY JSON array.`,
     diagram:`Explain with ASCII diagram for Class ${S.user?.class||11} as JSON:
 [
@@ -2790,12 +2801,16 @@ Return ONLY JSON array.`
   };
 
   try{
-    const sys=`You are Miss BrightMind, an expert Indian teacher writing on a blackboard for Class ${S.user?.class||11} ${S.sub?.name||''} student. Board: ${S.user?.board||'CBSE'}. State: ${S.user?.state||'India'}. Be encouraging, clear and step by step. Use simple language. Always return ONLY valid JSON array as instructed.`;
-    const prompt=modePrompts[bbCurrentMode]+'\n\nQuestion/Topic: '+q;
+    const sys=`You are Miss BrightMind, an expert Indian teacher writing on a blackboard for Class ${S.user?.class||11} ${S.sub?.name||''} student. Board: ${S.user?.board||'CBSE'}. State: ${S.user?.state||'India'}. Be encouraging, clear and step by step. Use simple language. ${imgB64?'The student has sent a photo of their question — read it carefully and identify exactly what is being asked.':''} Always return ONLY valid JSON array as instructed.`;
+    let prompt=modePrompts[bbCurrentMode]+'\n\nQuestion/Topic: '+q;
+    if(imgB64) prompt += '\n\n(A photo of the question is attached — please read it to identify the exact question.)';
 
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:2000,system:sys,
-        messages:[{role:'user',content:prompt}]})});
+        messages:[{role:'user',content: imgB64 ? [
+          {type:'image',source:{type:'base64',media_type:imgType,data:imgB64}},
+          {type:'text',text:prompt}
+        ] : prompt}]})});
     const d=await r.json();
     let raw=d.content?.[0]?.text||'[]';
     raw=raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
@@ -2856,7 +2871,11 @@ function showNextBBStep(){
 
   // Step header
   card.innerHTML=`<div style="font-family:'Courier New',monospace;font-size:12px;color:#ffd600;letter-spacing:1px;margin-bottom:8px;">── STEP ${step.step}/${bbAllSteps.length}: ${step.title} ──</div>
-    <div id="bb-content-${bbCurrentStep}" style="font-family:'Courier New',monospace;font-size:17px;color:#e8ffe8;line-height:1.8;"></div>`;
+    <div id="bb-content-${bbCurrentStep}" style="font-family:'Courier New',monospace;font-size:17px;color:#e8ffe8;line-height:1.8;"></div>
+    ${step.rough?`<div class="bb-rough-box" style="display:none;margin-top:10px;background:rgba(255,214,0,0.08);border:1px dashed rgba(255,214,0,0.4);border-radius:8px;padding:10px 12px;">
+      <div style="font-family:'Courier New',monospace;font-size:11px;color:#ffd600;letter-spacing:0.5px;margin-bottom:4px;">✏️ ROUGH WORK (side calculation)</div>
+      <div style="font-family:'Courier New',monospace;font-size:15px;color:#c8e6c9;white-space:pre-wrap;">${step.rough}</div>
+    </div>`:''}`;
   container.appendChild(card);
 
   // Scroll to new step
@@ -2865,6 +2884,14 @@ function showNextBBStep(){
 
   // Chalk writing animation — type one character at a time
   typeChalkText('bb-content-'+bbCurrentStep, step.content, ()=>{
+    // Reveal rough-work box (if present) right after main text finishes
+    const roughBox=card.querySelector('.bb-rough-box');
+    if(roughBox){
+      roughBox.style.display='block';
+      roughBox.style.opacity='0';
+      roughBox.style.transition='opacity .5s ease';
+      setTimeout(()=>{roughBox.style.opacity='1';},50);
+    }
     // After writing — show buttons
     const btnDiv=document.createElement('div');
     btnDiv.style.display='flex';
@@ -3103,60 +3130,16 @@ async function sendPhotoQuestion(){
   closePhotoOverlay();
 
   const mediaType=document.getElementById('photo-preview-img').dataset.mediaType||'image/jpeg';
+  const photoData=bbPhotoBase64;
+  addToPhotoGallery('data:'+mediaType+';base64,'+photoData, 'Photo question');
+  bbPhotoBase64=null;
 
-  // Show photo in chat
-  addMsg('user','📷 [Photo Question]');
-  addToPhotoGallery('data:'+mediaType+';base64,'+bbPhotoBase64, 'Photo question');
-  const msgs=document.getElementById('chat-msgs');
-  msgs.innerHTML+=`<div class="msg user"><div class="msg-av" style="background:var(--gold);font-size:12px;font-weight:700;color:var(--blue-dark);">${S.user?.name?.[0]||'S'}</div><div><img src="data:${mediaType};base64,${bbPhotoBase64}" class="photo-preview"/></div></div>`;
-  msgs.scrollTop=msgs.scrollHeight;
+  // Solve the photo question on the Blackboard — same step-by-step, rough-work renderer
+  // used for typed questions, so photo answers are just as clear.
+  bbCurrentMode='solve';
+  await solveOnBlackboard('📷 Question from your photo', photoData, mediaType);
 
-  // Show typing
-  const ty=document.getElementById('typing');ty.classList.add('show');
-  const bubble=document.getElementById('speech-bubble');
-  if(bubble)bubble.textContent='📷 Reading your photo...';
-
-  try{
-    const sys=`You are Miss BrightMind, an expert Indian teacher for Class ${S.user?.class||11} ${S.sub?.name||''} student. Board: ${S.user?.board||'CBSE'}. A student has sent you a photo of their question or problem.
-
-Identify the question in the image and solve/explain it fully. Format your answer EXACTLY like this:
-
-**The Question:** (1 short line restating what you see)
-
-**Step 1:** (one clear action, 1-2 sentences)
-**Step 2:** (one clear action, 1-2 sentences)
-**Step 3:** (continue numbering for each step)
-
-**Final Answer:** (the result, clearly stated)
-
-Rules: Each step must be SHORT — maximum 2 sentences. Use simple words. Put each step on its own line starting with "**Step N:**". For maths, show the calculation clearly. Be warm and encouraging, like a real teacher, not a textbook.`;
-
-    const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:1500,system:sys,
-        messages:[{role:'user',content:[
-          {type:'image',source:{type:'base64',media_type:mediaType,data:bbPhotoBase64}},
-          {type:'text',text:'Please solve or explain this question from my photo. Show step by step working.'}
-        ]}]})});
-    const d=await r.json();
-    const reply=d.content?.[0]?.text||'Sorry, I could not read the photo clearly. Please try again with better lighting!';
-
-    ty.classList.remove('show');
-    addMsg('ai',reply);
-    speakText(reply.substring(0,300));
-
-    // Also offer blackboard
-    setTimeout(()=>{
-      addMsg('ai','💡 Want me to show the full solution on the **Blackboard**? Tap the 🖊️ Blackboard button below!');
-    },1000);
-
-    // Update XP
-    if(S.user){S.user.xp=(S.user.xp||0)+15;saveUser();}
-    bbPhotoBase64=null;
-
-  }catch(e){
-    ty.classList.remove('show');
-    addMsg('ai','⚠️ Could not read the photo. Please try again with clear lighting!');
-  }
+  if(S.user){S.user.xp=(S.user.xp||0)+15;saveUser();}
 }
 
 function closePhotoOverlay(){
