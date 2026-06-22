@@ -1435,10 +1435,10 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
   </div>
 
   <!-- CORRECTED PAPER CONTENT -->
-  <div style="flex:1;overflow-y:auto;padding:14px;" id="corrected-paper-body"></div>
+  <div style="flex:1;overflow-y:auto;padding:14px 14px 90px;min-height:0;" id="corrected-paper-body"></div>
 
-  <!-- SHARE FOOTER -->
-  <div style="background:#fff;padding:12px 14px;border-top:1px solid var(--gray-mid);display:flex;gap:8px;flex-shrink:0;">
+  <!-- SHARE FOOTER — fixed to viewport bottom, cannot be hidden -->
+  <div style="position:fixed;bottom:0;left:0;right:0;background:#fff;padding:12px 14px;border-top:1px solid var(--gray-mid);display:flex;gap:8px;z-index:9999;box-shadow:0 -4px 20px rgba(0,0,0,0.15);">
     <button onclick="shareCorrectedPaper()" style="flex:1;background:#25D366;color:#fff;font-size:14px;font-weight:700;padding:13px;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.645 17.46c-.795.795-1.77 1.338-2.84 1.57-.516.112-1.048.166-1.58.16a9.9 9.9 0 01-5.095-1.41l-3.572.937.955-3.498a9.9 9.9 0 01-1.398-5.128C3.915 6.97 7.595 3.29 12.185 3.29c2.215 0 4.298.862 5.863 2.427a8.24 8.24 0 012.42 5.858c-.002 4.57-3.677 8.25-8.823 8.885z"/></svg>
       Share on WhatsApp
