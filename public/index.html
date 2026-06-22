@@ -1232,7 +1232,16 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 <!-- ══ RESULT OVERLAY ══ -->
 <div id="result-overlay">
   <div class="result-card">
-    <div id="result-share-capture">
+    <div style="background:linear-gradient(135deg,#1a1a2e,#2d2d4a,#1a1a2e);padding:14px;border-radius:24px;margin-bottom:14px;">
+    <div style="background:linear-gradient(135deg,#f9e8a0,#d4af37,#fff3c4,#b8860b,#f5d76e);padding:5px;border-radius:20px;">
+    <div style="background:linear-gradient(180deg,#fdfbf5,#f8f6ee);border-radius:16px;padding:6px;">
+    <div id="result-share-capture" style="padding:18px 14px;">
+      <!-- BRAND CREST -->
+      <div style="text-align:center;margin-bottom:14px;">
+        <div style="display:inline-block;background:linear-gradient(135deg,#fff8dc,#ffd700,#d4af37);padding:8px 22px;border-radius:30px;box-shadow:0 4px 14px rgba(212,175,55,0.4);">
+          <span style="font-family:Georgia,serif;font-size:14px;font-weight:900;color:#1a1a2e;letter-spacing:1px;">🧠 BRIGHTMIND TEACHER</span>
+        </div>
+      </div>
     <div class="result-trophy" id="res-trophy">🏆</div>
     <div class="result-score" id="res-score">85</div>
     <div class="result-total">out of 100</div>
@@ -1241,12 +1250,17 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     <div class="result-msg" id="res-msg">Outstanding!</div>
     <div class="result-breakdown" id="res-breakdown"></div>
     <div class="result-rank-badge"><div class="rt">🇮🇳 Your India Rank</div><div class="rv" id="res-rank">#42</div></div>
-    <div style="background:linear-gradient(135deg,#fff8e1,#fff3cd);border:2px solid #d4af37;border-radius:16px;padding:14px;text-align:center;margin-top:12px;">
-      <div style="font-family:Georgia,serif;font-size:15px;font-weight:bold;color:#1a1a2e;">🏆 Are you ready to beat my score? 🔥</div>
-      <div style="font-family:Arial,sans-serif;font-size:12px;color:#b8860b;font-weight:700;margin-top:5px;">brightmindteacher.com</div>
+      <div style="background:linear-gradient(135deg,#fff8dc,#ffd700,#f5d76e);border-radius:16px;padding:16px;text-align:center;box-shadow:0 4px 16px rgba(212,175,55,0.4);">
+        <div style="font-family:Georgia,serif;font-size:16px;font-weight:900;color:#1a1a2e;">🏆 Are you ready to beat my score? 🔥</div>
+        <div style="display:inline-block;background:#1a1a2e;padding:7px 18px;border-radius:18px;margin-top:8px;">
+          <span style="font-family:Arial,sans-serif;font-size:12px;color:#ffd700;font-weight:800;">brightmindteacher.com</span>
+        </div>
+      </div>
     </div>
     </div>
-    <button onclick="shareExamResult()" style="width:100%;background:#25D366;color:#fff;font-size:14px;font-weight:700;padding:13px;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;margin-top:14px;">
+    </div>
+    </div>
+    <button onclick="shareExamResult()" style="width:100%;background:#25D366;color:#fff;font-size:14px;font-weight:700;padding:13px;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.645 17.46c-.795.795-1.77 1.338-2.84 1.57-.516.112-1.048.166-1.58.16a9.9 9.9 0 01-5.095-1.41l-3.572.937.955-3.498a9.9 9.9 0 01-1.398-5.128C3.915 6.97 7.595 3.29 12.185 3.29c2.215 0 4.298.862 5.863 2.427a8.24 8.24 0 012.42 5.858c-.002 4.57-3.677 8.25-8.823 8.885z"/></svg>
       Share Result on WhatsApp
     </button>
@@ -4500,65 +4514,84 @@ function showCorrectedPaper(score, corr, tot, timeTaken){
 
   // Build corrected paper HTML
   let paperHTML = `
-    <div id="share-capture-area" style="background:#f0f2f8;padding:4px;">
-    <!-- PAPER HEADER -->
-    <div style="background:#fff;border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:0 2px 12px rgba(13,27,75,.08);">
-      <div style="text-align:center;border-bottom:3px double #000;padding-bottom:12px;margin-bottom:12px;font-family:'Times New Roman',serif;">
-        <div style="font-size:11px;letter-spacing:2px;color:#555;margin-bottom:3px;">BRIGHTMIND TEACHER — AI EDUCATION</div>
-        <div style="font-size:16px;font-weight:bold;text-transform:uppercase;">${board}</div>
-        <div style="font-size:13px;font-weight:bold;margin:4px 0;">QUICK CHAPTER TEST</div>
-        <div style="font-size:12px;">${IE.icon} ${IE.subject} — Class ${u?.class||11}</div>
-        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;">
-          <span>Date: ${date}</span>
-          <span>Time Taken: ${timeTaken} mins</span>
-          <span>Max Marks: ${tot}</span>
+    <div style="background:linear-gradient(135deg,#1a1a2e,#2d2d4a,#1a1a2e);padding:16px;border-radius:24px;margin-bottom:14px;">
+    <div style="background:linear-gradient(135deg,#f9e8a0,#d4af37,#fff3c4,#b8860b,#f5d76e);padding:5px;border-radius:20px;">
+    <div style="background:linear-gradient(180deg,#fdfbf5,#f8f6ee);border-radius:16px;padding:6px;">
+    <div id="share-capture-area" style="padding:14px;">
+
+      <!-- BRAND CREST -->
+      <div style="text-align:center;margin-bottom:6px;">
+        <div style="display:inline-block;background:linear-gradient(135deg,#fff8dc,#ffd700,#d4af37);padding:8px 22px;border-radius:30px;box-shadow:0 4px 14px rgba(212,175,55,0.4);">
+          <span style="font-family:Georgia,serif;font-size:15px;font-weight:900;color:#1a1a2e;letter-spacing:1px;">🧠 BRIGHTMIND TEACHER</span>
+        </div>
+        <div style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;color:#b8860b;margin-top:6px;font-weight:700;">AI EDUCATION PLATFORM</div>
+      </div>
+
+      <!-- PAPER HEADER -->
+      <div style="background:#fff;border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:0 2px 12px rgba(13,27,75,.08);border:1px solid #f0e2b0;">
+        <div style="text-align:center;border-bottom:2px solid #d4af37;padding-bottom:10px;margin-bottom:10px;font-family:'Times New Roman',serif;">
+          <div style="font-size:15px;font-weight:bold;text-transform:uppercase;color:#1a1a2e;">${board}</div>
+          <div style="font-size:12px;font-weight:bold;margin:3px 0;color:#555;">QUICK CHAPTER TEST</div>
+          <div style="font-size:12px;color:#444;">${IE.icon} ${IE.subject} — Class ${u?.class||11}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;font-family:'Times New Roman',serif;color:#555;">
+          <span>Student: <strong style="color:#1a1a2e;">${u?.name||'Student'}</strong></span>
+          <span>${date}</span>
         </div>
       </div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;font-family:'Times New Roman',serif;">
-        <span>Student: <strong>${u?.name||'Student'}</strong></span>
-        <span>Roll: ${u?.id||'—'}</span>
-      </div>
-    </div>
 
-    <!-- RESULT SUMMARY — stamped like teacher correction -->
-    <div style="background:#fff;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(13,27,75,.08);position:relative;overflow:hidden;">
-      <!-- Red teacher stamp -->
-      <div style="position:absolute;top:12px;right:12px;width:80px;height:80px;border-radius:50%;border:3px solid ${passed?'#4caf50':'#f44336'};display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-15deg);opacity:.9;">
-        <div style="font-size:18px;font-weight:900;color:${passed?'#4caf50':'#f44336'};">${score}%</div>
-        <div style="font-size:9px;font-weight:700;color:${passed?'#4caf50':'#f44336'};">${passed?'PASSED':'FAILED'}</div>
-      </div>
-      <div style="font-family:'Times New Roman',serif;">
-        <div style="font-size:14px;font-weight:bold;margin-bottom:10px;">MARKS SUMMARY</div>
-        <div style="font-size:13px;line-height:2;">
-          Total Questions: ${tot}<br>
-          Correct Answers: <span style="color:#4caf50;font-weight:bold;">✓ ${corr}</span><br>
-          Wrong Answers: <span style="color:#f44336;font-weight:bold;">✗ ${tot-corr}</span><br>
-          Marks Obtained: <strong style="font-size:16px;">${corr}/${tot}</strong><br>
-          Percentage: <strong>${score}%</strong><br>
-          Pass Mark Required: <strong>45%</strong><br>
-          Result: <strong style="color:${passed?'#4caf50':'#f44336'};">${passed?'PASS ✓':'FAIL ✗'}</strong>
+      <!-- SCORE BADGE -->
+      <div style="background:#fff;border-radius:16px;padding:20px;margin-bottom:12px;box-shadow:0 2px 12px rgba(13,27,75,.08);border:1px solid #f0e2b0;text-align:center;">
+        <div style="position:relative;width:90px;height:90px;border-radius:50%;background:conic-gradient(from 200deg, #fff8dc, #ffd700, #d4af37, #b8860b, #ffd700, #fff8dc);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(212,175,55,0.5), inset 0 2px 4px rgba(255,255,255,0.6);">
+          <div style="width:74px;height:74px;border-radius:50%;background:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 2px 6px rgba(0,0,0,0.08);">
+            <div style="font-family:Georgia,serif;font-size:20px;font-weight:900;color:#1a1a2e;">${score}%</div>
+            <div style="font-family:Arial,sans-serif;font-size:8px;font-weight:800;color:${passed?'#2e7d32':'#c62828'};letter-spacing:1px;">${passed?'PASSED':'FAILED'}</div>
+          </div>
+        </div>
+        <div style="font-family:Georgia,serif;font-size:22px;font-weight:900;color:#1a1a2e;margin-bottom:2px;">${corr} / ${tot}</div>
+        <div style="font-family:Arial,sans-serif;font-size:12px;color:#888;">Marks Obtained</div>
+        <div style="display:flex;justify-content:center;gap:24px;margin-top:14px;">
+          <div style="text-align:center;">
+            <div style="font-family:Arial,sans-serif;font-size:18px;font-weight:800;color:#2e7d32;">✓ ${corr}</div>
+            <div style="font-size:10px;color:#999;">Correct</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:Arial,sans-serif;font-size:18px;font-weight:800;color:#c62828;">✗ ${tot-corr}</div>
+            <div style="font-size:10px;color:#999;">Wrong</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:Arial,sans-serif;font-size:18px;font-weight:800;color:#b8860b;">45%</div>
+            <div style="font-size:10px;color:#999;">Pass Mark</div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- TEACHER'S REMARKS in red -->
-    <div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 12px rgba(13,27,75,.08);">
-      <div style="font-family:'Times New Roman',serif;font-size:14px;font-weight:bold;margin-bottom:8px;">Teacher's Remarks:</div>
-      <div style="font-family:'Segoe Script','Comic Sans MS',cursive;font-size:14px;color:#c62828;line-height:1.8;">
-        ${score>=90?`Excellent work ${u?.name}! You have mastered this chapter. Keep up the brilliant effort! 🌟`
-         :score>=75?`Great job ${u?.name}! You have passed comfortably. Review the ${tot-corr} wrong answer(s) to score even higher next time! 👍`
-         :score>=60?`Well done ${u?.name}, you have passed! A little more revision and you'll be scoring full marks. 📚`
-         :score>=45?`${u?.name}, you have passed, but only just. Please revise this chapter again to build a stronger foundation. ✏️`
-         :score>=30?`${u?.name}, you did not pass this time. Go back to the AI tutor, revise the chapter, and try again. Don't give up! 💪`
-         :`${u?.name}, this chapter needs serious revision. Please study with your AI teacher from the basics before attempting again. I believe in you! 🌱`}
+      <!-- TEACHER'S REMARKS -->
+      <div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 12px rgba(13,27,75,.08);border:1px solid #f0e2b0;">
+        <div style="font-family:'Times New Roman',serif;font-size:13px;font-weight:bold;margin-bottom:6px;color:#1a1a2e;">📝 Teacher's Remarks</div>
+        <div style="font-family:'Segoe Script','Comic Sans MS',cursive;font-size:13px;color:#c62828;line-height:1.7;">
+          ${score>=90?`Excellent work ${u?.name}! You have mastered this chapter. Keep up the brilliant effort! 🌟`
+           :score>=75?`Great job ${u?.name}! You have passed comfortably. Review the ${tot-corr} wrong answer(s) to score even higher next time! 👍`
+           :score>=60?`Well done ${u?.name}, you have passed! A little more revision and you'll be scoring full marks. 📚`
+           :score>=45?`${u?.name}, you have passed, but only just. Please revise this chapter again to build a stronger foundation. ✏️`
+           :score>=30?`${u?.name}, you did not pass this time. Go back to the AI tutor, revise the chapter, and try again. Don't give up! 💪`
+           :`${u?.name}, this chapter needs serious revision. Please study with your AI teacher from the basics before attempting again. I believe in you! 🌱`}
+        </div>
+        <div style="font-family:'Segoe Script','Comic Sans MS',cursive;font-size:11px;color:#c62828;margin-top:6px;">
+          — Miss BrightMind
+        </div>
       </div>
-      <div style="font-family:'Segoe Script','Comic Sans MS',cursive;font-size:12px;color:#c62828;margin-top:8px;">
-        — Miss BrightMind &nbsp;&nbsp; ${date}
+
+      <!-- CHALLENGE BANNER -->
+      <div style="background:linear-gradient(135deg,#fff8dc,#ffd700,#f5d76e);border-radius:16px;padding:18px;text-align:center;box-shadow:0 4px 16px rgba(212,175,55,0.4);">
+        <div style="font-family:Georgia,serif;font-size:17px;font-weight:900;color:#1a1a2e;">🏆 Are you ready to beat my score? 🔥</div>
+        <div style="display:inline-block;background:#1a1a2e;padding:8px 20px;border-radius:20px;margin-top:10px;">
+          <span style="font-family:Arial,sans-serif;font-size:13px;color:#ffd700;font-weight:800;">brightmindteacher.com</span>
+        </div>
       </div>
+
     </div>
-    <div style="background:linear-gradient(135deg,#fff8e1,#fff3cd);border:2px solid #d4af37;border-radius:16px;padding:16px;text-align:center;">
-      <div style="font-family:Georgia,serif;font-size:16px;font-weight:bold;color:#1a1a2e;">🏆 Are you ready to beat my score? 🔥</div>
-      <div style="font-family:Arial,sans-serif;font-size:13px;color:#b8860b;font-weight:700;margin-top:6px;">brightmindteacher.com</div>
+    </div>
     </div>
     </div>
     <!-- END share-capture-area -->
