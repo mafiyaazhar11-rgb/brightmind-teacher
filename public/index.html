@@ -201,7 +201,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 .result-total{font-size:18px;color:var(--gray-text);}
 .result-stars{font-size:36px;margin:14px 0;letter-spacing:3px;}
 .result-grade{font-size:17px;font-weight:800;margin-bottom:6px;}
-.result-msg{font-size:13px;color:var(--gray-text);line-height:1.6;margin-bottom:16px;}
+.result-msg{font-size:15px;color:var(--gray-text);line-height:1.6;margin-bottom:16px;}
 .result-breakdown{background:rgba(255,255,255,0.55);border-radius:13px;padding:14px;margin-bottom:16px;text-align:left;}
 .rb-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--gray-mid);}
 .rb-row:last-child{border:none;font-weight:700;font-size:14px;}
@@ -4615,8 +4615,8 @@ function showCorrectedPaper(score, corr, tot, timeTaken){
 
       <!-- TEACHER'S REMARKS -->
       <div style="background:linear-gradient(135deg,#bfe3fb,#a6d8f7);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 12px rgba(13,27,75,.08);border:1px solid #8fc9ee;">
-        <div style="font-family:'Times New Roman',serif;font-size:13px;font-weight:bold;margin-bottom:6px;color:#1a1a2e;">📝 Teacher's Remarks</div>
-        <div style="font-family:'Segoe Script','Comic Sans MS',cursive;font-size:13px;color:#c62828;line-height:1.7;">
+        <div style="font-family:'Times New Roman',serif;font-size:15px;font-weight:bold;margin-bottom:8px;color:#1a1a2e;">📝 Teacher's Remarks</div>
+        <div style="font-family:'Segoe Script','Comic Sans MS',cursive;font-size:18px;color:#c62828;line-height:1.7;">
           ${score>=90?`Excellent work ${u?.name}! You have mastered this chapter. Keep up the brilliant effort! 🌟`
            :score>=75?`Great job ${u?.name}! You have passed comfortably. Review the ${tot-corr} wrong answer(s) to score even higher next time! 👍`
            :score>=60?`Well done ${u?.name}, you have passed! A little more revision and you'll be scoring full marks. 📚`
@@ -4624,7 +4624,7 @@ function showCorrectedPaper(score, corr, tot, timeTaken){
            :score>=30?`${u?.name}, you did not pass this time. Go back to the AI tutor, revise the chapter, and try again. Don't give up! 💪`
            :`${u?.name}, this chapter needs serious revision. Please study with your AI teacher from the basics before attempting again. I believe in you! 🌱`}
         </div>
-        <div style="font-family:'Segoe Script','Comic Sans MS',cursive;font-size:11px;color:#c62828;margin-top:6px;">
+        <div style="font-family:'Segoe Script','Comic Sans MS',cursive;font-size:14px;color:#c62828;margin-top:8px;">
           — Miss BrightMind
         </div>
       </div>
@@ -4757,7 +4757,7 @@ body{font-family:'Times New Roman',serif;font-size:12pt;max-width:210mm;margin:0
 .stamp-result{font-size:10px;font-weight:bold;color:${passed?'green':'red'};}
 .correct{color:green;font-weight:bold;}
 .wrong{color:red;font-weight:bold;}
-.remarks{font-family:'Comic Sans MS',cursive;color:#c62828;font-size:13pt;line-height:1.8;}
+.remarks{font-family:'Comic Sans MS',cursive;color:#c62828;font-size:16pt;line-height:1.8;}
 .q-row{margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #ddd;display:flex;gap:10px;}
 .q-num{background:${passed?'green':'red'};color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;flex-shrink:0;margin-top:2px;}
 .footer{margin-top:20px;background:#1a237e;color:white;padding:14px;text-align:center;border-radius:10px;}
