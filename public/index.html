@@ -1219,7 +1219,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 <div id="exam-overlay">
   <div class="exam-hdr">
     <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div><div class="exam-title" id="exam-title">Chapter Exam</div><div class="exam-meta">10 Questions · Pass: 85/100</div></div>
+      <div><div class="exam-title" id="exam-title">Chapter Exam</div><div class="exam-meta">15 Questions · Pass: 45/100</div></div>
       <div class="exam-timer" id="exam-timer">⏱ 15:00</div>
     </div>
     <div class="exam-prog-bar"><div class="exam-prog-fill" id="exam-prog" style="width:0%"></div></div>
@@ -1239,6 +1239,10 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     <div class="result-msg" id="res-msg">Outstanding!</div>
     <div class="result-breakdown" id="res-breakdown"></div>
     <div class="result-rank-badge"><div class="rt">🇮🇳 Your India Rank</div><div class="rv" id="res-rank">#42</div></div>
+    <button onclick="shareExamResult()" style="width:100%;background:#25D366;color:#fff;font-size:14px;font-weight:700;padding:13px;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.645 17.46c-.795.795-1.77 1.338-2.84 1.57-.516.112-1.048.166-1.58.16a9.9 9.9 0 01-5.095-1.41l-3.572.937.955-3.498a9.9 9.9 0 01-1.398-5.128C3.915 6.97 7.595 3.29 12.185 3.29c2.215 0 4.298.862 5.863 2.427a8.24 8.24 0 012.42 5.858c-.002 4.57-3.677 8.25-8.823 8.885z"/></svg>
+      Share Result on WhatsApp
+    </button>
     <button class="btn-main" onclick="backFromResult()" style="margin-bottom:10px;">Continue Learning 📚</button>
     <button onclick="startExam()" style="width:100%;background:var(--gray-light);color:var(--blue-dark);font-size:14px;font-weight:700;padding:12px;border-radius:12px;border:none;cursor:pointer;">Retake Exam 🔄</button>
   </div>
@@ -3371,7 +3375,7 @@ async function startExam(){
   document.getElementById('exam-title').textContent=S.examSub.name+' — Chapter Exam';
   document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">📚 Loading questions from question bank...<br><br>Please wait...</div>';
   try{
-    const dbRes=await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(S.examSub.name)+'&count=10');
+    const dbRes=await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(S.examSub.name)+'&count=15');
     const dbData=await dbRes.json();
     if(dbData.ok&&dbData.questions&&dbData.questions.length>=5){
       S.examQs=dbData.questions.map(q=>({q:q.question,options:q.options,correct:q.correct,explanation:q.explanation||''}));
@@ -3423,7 +3427,7 @@ function submitExam(){
   if(S.examTimer)clearInterval(S.examTimer);
   const tot=S.examQs.length;
   const corr=Object.entries(S.examAns).filter(([i,a])=>S.examQs[i]?.correct===a).length;
-  const score=Math.round((corr/tot)*100);const passed=score>=85;
+  const score=Math.round((corr/tot)*100);const passed=score>=45;
   document.getElementById('exam-overlay').classList.remove('open');
   showResult(score,corr,tot,passed);
   if(S.user){
@@ -3444,10 +3448,11 @@ function showResult(score,corr,tot,passed){
   document.getElementById('res-stars').textContent='⭐'.repeat(stars)+(stars<5?'☆'.repeat(5-stars):'');
   let trophy,grade,msg;
   if(score>=90){trophy='🏆';grade='Outstanding! 5 Stars!';msg='Brilliant! You have mastered this chapter. Move to the next topic!';}
-  else if(score>=85){trophy='🥇';grade='Excellent! Passed!';msg='Great job! You passed. Review mistakes to score even higher next time!';}
-  else if(score>=75){trophy='🥈';grade='Almost There! 3 Stars';msg='Good effort but not passed yet. Study harder and retake after reviewing your notes.';}
-  else if(score>=60){trophy='🥉';grade='Keep Trying! 2 Stars';msg='Not passed. Go back to the AI tutor, study more, then retake the exam.';}
-  else{trophy='📚';grade='Needs More Study';msg='Do not give up! Revise the full chapter with your AI teacher then try again.';}
+  else if(score>=75){trophy='🥇';grade='Excellent! Passed!';msg='Great job! You passed comfortably. Review mistakes to score even higher next time!';}
+  else if(score>=60){trophy='🥈';grade='Well Done! Passed';msg='You passed! A little more revision and you will be scoring full marks.';}
+  else if(score>=45){trophy='🥉';grade='Passed — Just Made It';msg='You passed, but only just. Please revise this chapter again to build a stronger foundation.';}
+  else if(score>=30){trophy='📖';grade='Not Passed Yet';msg='Go back to the AI tutor, revise the chapter, and try again. Don\'t give up!';}
+  else{trophy='📚';grade='Needs Serious Revision';msg='This chapter needs serious revision. Please study with your AI teacher from the basics before attempting again.';}
   document.getElementById('res-trophy').textContent=trophy;
   document.getElementById('res-grade').textContent=(passed?'✅ PASSED — ':'')+grade;
   document.getElementById('res-msg').textContent=msg;
@@ -3455,11 +3460,18 @@ function showResult(score,corr,tot,passed){
   document.getElementById('res-breakdown').innerHTML=`
     <div class="rb-row"><span>Correct Answers</span><span style="color:var(--green);">✅ ${corr}/${tot}</span></div>
     <div class="rb-row"><span>Wrong Answers</span><span style="color:var(--red);">❌ ${tot-corr}/${tot}</span></div>
-    <div class="rb-row"><span>Pass Mark Required</span><span>85/100</span></div>
+    <div class="rb-row"><span>Pass Mark Required</span><span>45/100</span></div>
     <div class="rb-row"><span>Your Score</span><span style="color:${passed?'var(--green)':'var(--red)'};">${score}/100 — ${passed?'PASSED':'NOT PASSED'}</span></div>`;
 }
 function getStars(s){return s>=90?5:s>=80?4:s>=65?3:s>=50?2:1;}
 function backFromResult(){document.getElementById('result-overlay').classList.remove('open');}
+function shareExamResult(){
+  const score=document.getElementById('res-score').textContent;
+  const subj=S.examSub?.name||'this subject';
+  const name=S.user?.name||'I';
+  const text=`🎓 *BrightMind Teacher Exam Result*\n\n${name} scored *${score}/100* in ${subj}!\n\n📚 Studying smart with BrightMind Teacher AI tutor.\n👉 brightmindteacher.com`;
+  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+}
 
 // ══════════════════════════════════════
 // HOMEWORK SUBMISSION — OPTION C
@@ -4331,7 +4343,7 @@ async function openInstantExam(subjectId, subjectName, icon){
     </div>`;
   document.getElementById('instant-exam-overlay').style.display='flex';
   try{
-    const dbRes = await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(subjectName)+'&count=10');
+    const dbRes = await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(subjectName)+'&count=15');
     const dbData = await dbRes.json();
     if(dbData.ok && dbData.questions && dbData.questions.length >= 5){
       IE.questions = dbData.questions.map(q=>({q:q.question,options:q.options,correct:q.correct,explanation:q.explanation||'',marks:1}));
@@ -4438,9 +4450,9 @@ async function ieSubmit(){
     if(!S.user.examHist)S.user.examHist=[];
     S.user.examHist.push({
       subject:IE.subject, score, stars:getStars(score),
-      date:new Date().toISOString(), passed:score>=85
+      date:new Date().toISOString(), passed:score>=45
     });
-    S.user.xp=(S.user.xp||0)+(score>=85?300:100);
+    S.user.xp=(S.user.xp||0)+(score>=45?300:100);
     checkBadges(S.user); saveUser();
     document.getElementById('stat-ex').textContent=S.user.examHist.length;
   }
@@ -4449,7 +4461,7 @@ async function ieSubmit(){
 function showIEResult(score,corr,tot,t){showCorrectedPaper(score,corr,tot,t);}
 function showCorrectedPaper(score, corr, tot, timeTaken){
   const u = S.user;
-  const passed = score>=85;
+  const passed = score>=45;
   const date = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
   const board = {CBSE:'CBSE',TN:'Tamil Nadu Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board'}[u?.board]||'CBSE';
 
@@ -4487,8 +4499,9 @@ function showCorrectedPaper(score, corr, tot, timeTaken){
           Total Questions: ${tot}<br>
           Correct Answers: <span style="color:#4caf50;font-weight:bold;">✓ ${corr}</span><br>
           Wrong Answers: <span style="color:#f44336;font-weight:bold;">✗ ${tot-corr}</span><br>
-          Marks Obtained: <strong>${corr}/${tot}</strong><br>
+          Marks Obtained: <strong style="font-size:16px;">${corr}/${tot}</strong><br>
           Percentage: <strong>${score}%</strong><br>
+          Pass Mark Required: <strong>45%</strong><br>
           Result: <strong style="color:${passed?'#4caf50':'#f44336'};">${passed?'PASS ✓':'FAIL ✗'}</strong>
         </div>
       </div>
@@ -4499,10 +4512,11 @@ function showCorrectedPaper(score, corr, tot, timeTaken){
       <div style="font-family:'Times New Roman',serif;font-size:14px;font-weight:bold;margin-bottom:8px;">Teacher's Remarks:</div>
       <div style="font-family:'Segoe Script','Comic Sans MS',cursive;font-size:14px;color:#c62828;line-height:1.8;">
         ${score>=90?`Excellent work ${u?.name}! You have mastered this chapter. Keep up the brilliant effort! 🌟`
-         :score>=85?`Well done ${u?.name}! You have passed. Review the ${tot-corr} wrong answer(s) to improve further. 👍`
-         :score>=70?`Good attempt ${u?.name}. You are close to passing. Revise the weak areas and try again. Work harder! 📚`
-         :score>=50?`${u?.name}, needs improvement. Study the chapter carefully and attempt again. Don't give up! ✏️`
-         :`${u?.name}, please revise the full chapter with your AI teacher before attempting again. I believe in you! 💪`}
+         :score>=75?`Great job ${u?.name}! You have passed comfortably. Review the ${tot-corr} wrong answer(s) to score even higher next time! 👍`
+         :score>=60?`Well done ${u?.name}, you have passed! A little more revision and you'll be scoring full marks. 📚`
+         :score>=45?`${u?.name}, you have passed, but only just. Please revise this chapter again to build a stronger foundation. ✏️`
+         :score>=30?`${u?.name}, you did not pass this time. Go back to the AI tutor, revise the chapter, and try again. Don't give up! 💪`
+         :`${u?.name}, this chapter needs serious revision. Please study with your AI teacher from the basics before attempting again. I believe in you! 🌱`}
       </div>
       <div style="font-family:'Segoe Script','Comic Sans MS',cursive;font-size:12px;color:#c62828;margin-top:8px;">
         — Miss BrightMind &nbsp;&nbsp; ${date}
@@ -4553,7 +4567,7 @@ function shareCorrectedPaper(){
   const tot = IE.questions.length;
   const corr = Object.entries(IE.answers).filter(([i,a])=>IE.questions[i]?.correct===a).length;
   const score = Math.round((corr/tot)*100);
-  const passed = score>=85;
+  const passed = score>=45;
 
   const text = `📋 My ${IE.subject} Exam Result\n\n`+
     `Student: ${u?.name}\n`+
@@ -4575,7 +4589,7 @@ function downloadCorrectedPaper(){
   const tot = IE.questions.length;
   const corr = Object.entries(IE.answers).filter(([i,a])=>IE.questions[i]?.correct===a).length;
   const score = Math.round((corr/tot)*100);
-  const passed = score>=85;
+  const passed = score>=45;
   const date = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
   const board = {CBSE:'CBSE',TN:'Tamil Nadu Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board'}[u?.board]||'CBSE';
 
@@ -4621,7 +4635,7 @@ body{font-family:'Times New Roman',serif;font-size:12pt;max-width:210mm;margin:0
   <strong>WRONG:</strong> <span class="wrong">✗ ${tot-corr}</span>
 </div>
 <div style="margin-bottom:14px;"><strong>Teacher's Remarks:</strong><br>
-<div class="remarks">${score>=90?`Excellent! Mastered this chapter!`:score>=85?`Well done! Passed. Review wrong answers.`:score>=70?`Good attempt. Revise weak areas.`:`Please revise the chapter carefully and try again.`}</div>
+<div class="remarks">${score>=90?`Excellent! Mastered this chapter!`:score>=75?`Well done! Passed comfortably. Review wrong answers.`:score>=60?`Good job! Passed. A little more revision and you will score even higher.`:score>=45?`Passed, but only just. Please revise this chapter again.`:`Not passed. Please revise the chapter carefully with your AI teacher and try again.`}</div>
 <div class="remarks">— Miss BrightMind &nbsp; ${date}</div>
 </div>
 <hr style="margin:14px 0;">
