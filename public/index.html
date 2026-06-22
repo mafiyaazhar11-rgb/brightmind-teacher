@@ -577,6 +577,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 .ob-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);cursor:pointer;transition:all .3s;}
 .ob-dot.active{background:#ffd600;width:22px;border-radius:4px;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -1231,6 +1232,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 <!-- ══ RESULT OVERLAY ══ -->
 <div id="result-overlay">
   <div class="result-card">
+    <div id="result-share-capture">
     <div class="result-trophy" id="res-trophy">🏆</div>
     <div class="result-score" id="res-score">85</div>
     <div class="result-total">out of 100</div>
@@ -1239,7 +1241,12 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     <div class="result-msg" id="res-msg">Outstanding!</div>
     <div class="result-breakdown" id="res-breakdown"></div>
     <div class="result-rank-badge"><div class="rt">🇮🇳 Your India Rank</div><div class="rv" id="res-rank">#42</div></div>
-    <button onclick="shareExamResult()" style="width:100%;background:#25D366;color:#fff;font-size:14px;font-weight:700;padding:13px;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;">
+    <div style="background:linear-gradient(135deg,#fff8e1,#fff3cd);border:2px solid #d4af37;border-radius:16px;padding:14px;text-align:center;margin-top:12px;">
+      <div style="font-family:Georgia,serif;font-size:15px;font-weight:bold;color:#1a1a2e;">🏆 Are you ready to beat my score? 🔥</div>
+      <div style="font-family:Arial,sans-serif;font-size:12px;color:#b8860b;font-weight:700;margin-top:5px;">brightmindteacher.com</div>
+    </div>
+    </div>
+    <button onclick="shareExamResult()" style="width:100%;background:#25D366;color:#fff;font-size:14px;font-weight:700;padding:13px;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;margin-top:14px;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.645 17.46c-.795.795-1.77 1.338-2.84 1.57-.516.112-1.048.166-1.58.16a9.9 9.9 0 01-5.095-1.41l-3.572.937.955-3.498a9.9 9.9 0 01-1.398-5.128C3.915 6.97 7.595 3.29 12.185 3.29c2.215 0 4.298.862 5.863 2.427a8.24 8.24 0 012.42 5.858c-.002 4.57-3.677 8.25-8.823 8.885z"/></svg>
       Share Result on WhatsApp
     </button>
@@ -2040,6 +2047,7 @@ function downloadRankCard(){
   h+='<button class="btn" onclick="window.print()">&#128438; Save as PDF</button></body></html>';
   const w=window.open('','_blank');if(w){w.document.write(h);w.document.close();}
 }
+
 
 function shareRankCard(){
   const u=S.user;if(!u)return;
@@ -3465,12 +3473,37 @@ function showResult(score,corr,tot,passed){
 }
 function getStars(s){return s>=90?5:s>=80?4:s>=65?3:s>=50?2:1;}
 function backFromResult(){document.getElementById('result-overlay').classList.remove('open');}
-function shareExamResult(){
+async function shareExamResult(){
   const score=document.getElementById('res-score').textContent;
   const subj=S.examSub?.name||'this subject';
   const name=S.user?.name||'I';
-  const text=`🎓 *BrightMind Teacher Exam Result*\n\n${name} scored *${score}/100* in ${subj}!\n\n📚 Studying smart with BrightMind Teacher AI tutor.\n👉 brightmindteacher.com`;
-  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+  const fallbackText=`🎓 *BrightMind Teacher Exam Result*\n\n${name} scored *${score}/100* in ${subj}!\n\nAre you ready to beat my score? 🔥\n👉 brightmindteacher.com`;
+
+  const target = document.getElementById('result-share-capture');
+  if(!target || !window.html2canvas){
+    window.open('https://wa.me/?text='+encodeURIComponent(fallbackText),'_blank');
+    return;
+  }
+
+  try{
+    const canvas = await html2canvas(target, {scale:2, backgroundColor:'#ffffff', useCORS:true});
+    const blob = await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+    const file = new File([blob], 'brightmind-result.png', {type:'image/png'});
+
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:'BrightMind Teacher — My Result', text: fallbackText});
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'brightmind-result.png';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+    window.open('https://wa.me/?text='+encodeURIComponent(fallbackText),'_blank');
+  }catch(e){
+    console.error('Screenshot share error:', e);
+    window.open('https://wa.me/?text='+encodeURIComponent(fallbackText),'_blank');
+  }
 }
 
 // ══════════════════════════════════════
@@ -4467,6 +4500,7 @@ function showCorrectedPaper(score, corr, tot, timeTaken){
 
   // Build corrected paper HTML
   let paperHTML = `
+    <div id="share-capture-area" style="background:#f0f2f8;padding:4px;">
     <!-- PAPER HEADER -->
     <div style="background:#fff;border-radius:16px;padding:20px;margin-bottom:14px;box-shadow:0 2px 12px rgba(13,27,75,.08);">
       <div style="text-align:center;border-bottom:3px double #000;padding-bottom:12px;margin-bottom:12px;font-family:'Times New Roman',serif;">
@@ -4522,6 +4556,12 @@ function showCorrectedPaper(score, corr, tot, timeTaken){
         — Miss BrightMind &nbsp;&nbsp; ${date}
       </div>
     </div>
+    <div style="background:linear-gradient(135deg,#fff8e1,#fff3cd);border:2px solid #d4af37;border-radius:16px;padding:16px;text-align:center;">
+      <div style="font-family:Georgia,serif;font-size:16px;font-weight:bold;color:#1a1a2e;">🏆 Are you ready to beat my score? 🔥</div>
+      <div style="font-family:Arial,sans-serif;font-size:13px;color:#b8860b;font-weight:700;margin-top:6px;">brightmindteacher.com</div>
+    </div>
+    </div>
+    <!-- END share-capture-area -->
 
     <!-- QUESTION BY QUESTION CORRECTION -->
     <div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 12px rgba(13,27,75,.08);">
@@ -4562,26 +4602,46 @@ function closeCorrectedPaper(){
   document.getElementById('corrected-paper-overlay').style.display='none';
 }
 
-function shareCorrectedPaper(){
+async function shareCorrectedPaper(){
   const u = S.user;
   const tot = IE.questions.length;
   const corr = Object.entries(IE.answers).filter(([i,a])=>IE.questions[i]?.correct===a).length;
   const score = Math.round((corr/tot)*100);
   const passed = score>=45;
 
-  const text = `📋 My ${IE.subject} Exam Result\n\n`+
+  const fallbackText = `📋 My ${IE.subject} Exam Result\n\n`+
     `Student: ${u?.name}\n`+
-    `Class: ${u?.class} · ${u?.board||'CBSE'}\n`+
-    `Subject: ${IE.icon} ${IE.subject}\n\n`+
     `Score: ${corr}/${tot} (${score}%)\n`+
-    `Result: ${passed?'✅ PASSED':'❌ Not Passed'}\n`+
-    `Correct: ${corr} · Wrong: ${tot-corr}\n\n`+
-    `📚 Practised on BrightMind Teacher\n`+
-    `🧠 AI Tutor in Tamil & English\n`+
-    `👉 brightmindteacher.com\n`+
-    `Only ₹199/month!`;
+    `Result: ${passed?'✅ PASSED':'❌ Not Passed'}\n\n`+
+    `Are you ready to beat my score? 🔥\n`+
+    `👉 brightmindteacher.com`;
 
-  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+  const target = document.getElementById('share-capture-area');
+  if(!target || !window.html2canvas){
+    window.open('https://wa.me/?text='+encodeURIComponent(fallbackText),'_blank');
+    return;
+  }
+
+  try{
+    const canvas = await html2canvas(target, {scale:2, backgroundColor:'#f0f2f8', useCORS:true});
+    const blob = await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+    const file = new File([blob], 'brightmind-result.png', {type:'image/png'});
+
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:'BrightMind Teacher — My Result', text: fallbackText});
+      return;
+    }
+    // Fallback: download image + open WhatsApp text
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'brightmind-result.png';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+    window.open('https://wa.me/?text='+encodeURIComponent(fallbackText),'_blank');
+  }catch(e){
+    console.error('Screenshot share error:', e);
+    window.open('https://wa.me/?text='+encodeURIComponent(fallbackText),'_blank');
+  }
 }
 
 function downloadCorrectedPaper(){
