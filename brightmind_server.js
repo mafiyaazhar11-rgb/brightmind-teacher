@@ -409,6 +409,29 @@ app.get('/api/admin/students', async (req, res) => {
   }
 });
 
+// ADMIN — Edit a student's board/class/state (fixes wrong registration data)
+app.post('/api/admin/edit-student', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false, msg: 'Unauthorized' });
+    const { id, board, class: cls, state, name } = req.body;
+    if (!id) return res.json({ ok: false, msg: 'Missing student id' });
+    await pool.query(
+      `UPDATE bmt_students SET
+        board = COALESCE($1, board),
+        class = COALESCE($2, class),
+        state = COALESCE($3, state),
+        name = COALESCE($4, name)
+       WHERE id = $5`,
+      [board || null, cls || null, state || null, name || null, id]
+    );
+    res.json({ ok: true, msg: 'Student updated successfully' });
+  } catch (e) {
+    console.error('edit-student error:', e.message);
+    res.json({ ok: false, msg: e.message });
+  }
+});
+
 // ADMIN — Stats summary
 app.get('/api/admin/stats', async (req, res) => {
   try {
