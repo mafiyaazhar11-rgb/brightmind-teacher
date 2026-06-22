@@ -134,6 +134,12 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 .msg-bub{padding:11px 14px;border-radius:17px;font-size:14px;line-height:1.6;}
 .msg.ai .msg-bub{background:rgba(255,255,255,0.95);color:#0a0f2e;border-bottom-left-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,0.3);}
 .msg.user .msg-bub{background:linear-gradient(135deg,#1a237e,#3949ab);color:#fff;border-bottom-right-radius:6px;box-shadow:0 4px 16px rgba(26,35,126,0.5);}
+.teach-wrap{display:flex;flex-direction:column;gap:8px;}
+.teach-body{display:contents;}
+.teach-label{font-size:11px;font-weight:800;color:var(--blue-mid);text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;}
+.teach-step{display:flex;gap:10px;align-items:flex-start;background:#f3f4ff;border-radius:12px;padding:9px 12px;margin:2px 0;}
+.teach-step-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--blue-mid);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.teach-step-text{font-size:14px;line-height:1.5;}
 .msg-time{font-size:10px;opacity:.5;margin-top:3px;}
 .typing{display:none;align-items:center;gap:9px;padding:0 14px 6px;}
 .typing.show{display:flex;}
@@ -3111,7 +3117,19 @@ async function sendPhotoQuestion(){
   if(bubble)bubble.textContent='📷 Reading your photo...';
 
   try{
-    const sys=`You are Miss BrightMind, an expert Indian teacher for Class ${S.user?.class||11} ${S.sub?.name||''} student. Board: ${S.user?.board||'CBSE'}. A student has sent you a photo of their question or problem. Identify the question in the image and solve/explain it step by step. Be encouraging and clear. If it is a maths problem, show all working steps.`;
+    const sys=`You are Miss BrightMind, an expert Indian teacher for Class ${S.user?.class||11} ${S.sub?.name||''} student. Board: ${S.user?.board||'CBSE'}. A student has sent you a photo of their question or problem.
+
+Identify the question in the image and solve/explain it fully. Format your answer EXACTLY like this:
+
+**The Question:** (1 short line restating what you see)
+
+**Step 1:** (one clear action, 1-2 sentences)
+**Step 2:** (one clear action, 1-2 sentences)
+**Step 3:** (continue numbering for each step)
+
+**Final Answer:** (the result, clearly stated)
+
+Rules: Each step must be SHORT — maximum 2 sentences. Use simple words. Put each step on its own line starting with "**Step N:**". For maths, show the calculation clearly. Be warm and encouraging, like a real teacher, not a textbook.`;
 
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:1500,system:sys,
@@ -3324,9 +3342,46 @@ function addMsg(role,text){
   const m=document.getElementById('chat-msgs');
   const t=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
   const av=role==='user'?(S.user?.name?.[0]||'S'):'🧠';
-  const html=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  const html=formatTeachingText(text);
   m.innerHTML+=`<div class="msg ${role}"><div class="msg-av">${av}</div><div><div class="msg-bub">${html}</div><div class="msg-time">${t}</div></div></div>`;
   m.scrollTop=m.scrollHeight;
+}
+
+// Formats AI responses: turns **Step N:** markers into clear numbered blocks,
+// **The Question:** / **Final Answer:** into highlighted labels, bold text, line breaks.
+function formatTeachingText(text){
+  if(!text) return '';
+  let safe = text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  // Split into blocks on our known markers, keeping the marker with its content
+  const parts = safe.split(/(\*\*Step \d+:\*\*|\*\*(?:The Question|Final Answer|Answer):\*\*)/g);
+  let html = '';
+  let i = 0;
+  // If the text doesn't start with a marker, treat the leading chunk as plain intro text
+  if(parts.length===1){
+    html = '<div class="teach-body">'+parts[0].replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')+'</div>';
+  } else {
+    while(i < parts.length){
+      const chunk = parts[i];
+      const stepMatch = chunk.match(/^\*\*Step (\d+):\*\*$/);
+      const labelMatch = chunk.match(/^\*\*(The Question|Final Answer|Answer):\*\*$/);
+      if(stepMatch){
+        const content = (parts[i+1]||'').trim().replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+        html += '<div class="teach-step"><div class="teach-step-num">'+stepMatch[1]+'</div><div class="teach-step-text">'+content+'</div></div>';
+        i += 2;
+      } else if(labelMatch){
+        const content = (parts[i+1]||'').trim().replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+        html += '<div class="teach-label">'+labelMatch[1]+'</div><div class="teach-body">'+content+'</div>';
+        i += 2;
+      } else {
+        const content = chunk.trim();
+        if(content) html += '<div class="teach-body">'+content.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')+'</div>';
+        i += 1;
+      }
+    }
+  }
+  return '<div class="teach-wrap">'+html+'</div>';
 }
 function sendQ(q){document.getElementById('chat-inp').value=q;sendMsg();}
 function changeLang(){
