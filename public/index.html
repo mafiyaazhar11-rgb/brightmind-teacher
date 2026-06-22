@@ -997,7 +997,9 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
           <div style="font-size:14px;font-weight:700;color:var(--blue-dark);">💬 Contact Support</div>
           <div style="font-size:12px;color:var(--gray-text);margin-top:2px;">Have an issue? Message us!</div>
         </div>
-        <button onclick="showSupportChat()" style="background:var(--blue-mid);color:#fff;border:none;padding:9px 16px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;">Message →</button>
+        <button onclick="showSupportChat()" style="position:relative;background:var(--blue-mid);color:#fff;border:none;padding:9px 16px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;">Message →
+          <span id="support-reply-badge" style="display:none;position:absolute;top:-4px;right:-4px;width:12px;height:12px;background:#e53935;border-radius:50%;border:2px solid #fff;"></span>
+        </button>
       </div>
       <!-- PHOTO GALLERY -->
       <div class="sec-title">📷 My Photo Questions</div>
@@ -1397,10 +1399,11 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
 
 <!-- ══ SUPPORT CHAT OVERLAY ══ -->
 <div id="support-overlay" style="display:none;position:fixed;inset:0;z-index:110;background:rgba(13,27,75,.7);align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:22px 22px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;animation:slideUp .3s ease;">
+  <div style="background:#fff;border-radius:22px 22px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;animation:slideUp .3s ease;">
     <div style="width:38px;height:4px;background:var(--gray-mid);border-radius:4px;margin:0 auto 18px;"></div>
     <div style="font-size:18px;font-weight:800;color:var(--blue-dark);margin-bottom:4px;">💬 Message to Support</div>
     <div style="font-size:12px;color:var(--gray-text);margin-bottom:16px;">We respond within 24 hours. Describe your issue clearly.</div>
+    <div id="support-past-replies" style="margin-bottom:16px;"></div>
     <div style="display:flex;flex-direction:column;gap:12px;">
       <div>
         <label style="font-size:13px;font-weight:600;color:var(--blue-dark);">Issue Type</label>
@@ -2265,6 +2268,8 @@ function loginUser(u){
   }
   // Check renewal reminder for paid students
   if(u.isPaid) setTimeout(()=>checkRenewalReminder(u), 2000);
+  // Check for unseen support replies
+  setTimeout(checkSupportReplyBadge, 1500);
   // 30-min demo timer
   if(!u.isPaid){
     S.sessionTimer=setInterval(()=>{
@@ -3976,10 +3981,36 @@ async function loadAdminSupport(){
       <div style="text-align:right;">
         <div style="font-size:11px;font-weight:700;color:${colors[m.issue_type]||'var(--blue-mid)'};">${m.issue_type?.toUpperCase()}</div>
         <div style="font-size:10px;color:var(--gray-text);">${new Date(m.created_at).toLocaleString('en-IN')}</div>
+        <div style="font-size:10px;font-weight:700;color:${m.status==='resolved'?'#2e7d32':'#e65100'};margin-top:2px;">${m.status==='resolved'?'✅ Resolved':'🟠 Open'}</div>
       </div>
     </div>
     <div style="font-size:13px;color:var(--blue-dark);background:var(--gray-light);border-radius:8px;padding:10px 12px;line-height:1.6;">${m.message}</div>
+    ${m.admin_reply?`<div style="margin-top:10px;background:#e3f2fd;border-radius:8px;padding:10px 12px;border-left:3px solid var(--blue-mid);">
+      <div style="font-size:10px;font-weight:700;color:var(--blue-mid);margin-bottom:4px;">YOUR REPLY · ${new Date(m.replied_at).toLocaleString('en-IN')}</div>
+      <div style="font-size:13px;color:var(--blue-dark);line-height:1.6;">${m.admin_reply}</div>
+    </div>`:''}
+    <div style="margin-top:10px;display:flex;gap:8px;">
+      <input type="text" id="reply-inp-${m.id}" placeholder="${m.admin_reply?'Update reply...':'Type your reply...'}" style="flex:1;padding:8px 12px;border:1px solid var(--gray-mid);border-radius:8px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;"/>
+      <button onclick="sendSupportReply('${m.id}')" style="background:var(--blue-mid);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">📤 Reply</button>
+    </div>
   </div>`).join('');
+}
+
+async function sendSupportReply(id){
+  const inp=document.getElementById('reply-inp-'+id);
+  const reply=inp?.value.trim();
+  if(!reply){alert('Please type a reply first!');return;}
+  const res=await fetch(API_URL+'/api/admin/support-reply',{
+    method:'POST',headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},
+    body:JSON.stringify({id, reply, status:'resolved'})
+  });
+  const d=await res.json();
+  if(d.ok){
+    alert('✅ Reply sent! The student will see it next time they open the app.');
+    loadAdminSupport();
+  }else{
+    alert('Failed to send reply: '+(d.msg||'Try again'));
+  }
 }
 
 async function loadAdminRevenue(){
@@ -5486,9 +5517,44 @@ function viewPhoto(idx){
 function showSupportChat(){
   document.getElementById('support-overlay').style.display='flex';
   document.getElementById('support-msg').value='';
+  loadMySupportReplies();
 }
 function closeSupportChat(){
   document.getElementById('support-overlay').style.display='none';
+}
+
+async function loadMySupportReplies(){
+  const el=document.getElementById('support-past-replies');
+  if(!el||!S.user?.id)return;
+  try{
+    const res=await fetch(API_URL+'/api/support/my-replies/'+S.user.id);
+    const d=await res.json();
+    if(!d.ok||!d.replies?.length){el.innerHTML='';return;}
+    el.innerHTML=d.replies.map(r=>`
+      <div style="background:#e3f2fd;border-radius:12px;padding:12px 14px;margin-bottom:10px;border-left:3px solid var(--blue-mid);">
+        <div style="font-size:11px;color:var(--gray-text);margin-bottom:4px;">You asked: "${r.message.substring(0,80)}${r.message.length>80?'...':''}"</div>
+        <div style="font-size:13px;font-weight:700;color:var(--blue-mid);margin-bottom:4px;">📨 Miss BrightMind Team replied:</div>
+        <div style="font-size:13px;color:var(--blue-dark);line-height:1.6;">${r.admin_reply}</div>
+        <div style="font-size:10px;color:var(--gray-text);margin-top:6px;">${new Date(r.replied_at).toLocaleString('en-IN')}</div>
+      </div>`).join('');
+    // Mark all as seen
+    d.replies.filter(r=>!r.reply_seen).forEach(r=>{
+      fetch(API_URL+'/api/support/mark-seen',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:r.id})}).catch(()=>{});
+    });
+    checkSupportReplyBadge();
+  }catch(e){el.innerHTML='';}
+}
+
+// Checks if there are unseen replies and shows/hides a notification badge on the support button
+async function checkSupportReplyBadge(){
+  if(!S.user?.id)return;
+  try{
+    const res=await fetch(API_URL+'/api/support/my-replies/'+S.user.id);
+    const d=await res.json();
+    const hasUnseen=d.ok&&d.replies?.some(r=>!r.reply_seen);
+    const badge=document.getElementById('support-reply-badge');
+    if(badge)badge.style.display=hasUnseen?'inline-block':'none';
+  }catch(e){}
 }
 async function sendSupportMessage(){
   const type=document.getElementById('support-type').value;
