@@ -3091,10 +3091,71 @@ function bbFinished(){
     <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;">
       <button class="bb-next-btn" onclick="bbRestartFromBeginning()">↩️ Review Again</button>
       <button class="bb-replay-btn" onclick="closeBlackboard()">✓ All Clear! Close</button>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
+      <button class="bb-replay-btn" onclick="downloadBlackboardSolution()" style="background:linear-gradient(135deg,#1565c0,#1976d2);color:#fff;">📥 Download Image</button>
+      <button class="bb-replay-btn" onclick="shareBlackboardSolution()" style="background:#25D366;color:#fff;">📤 Share with Friends</button>
     </div>`;
   canvas.appendChild(finDiv);
   canvas.scrollTop=canvas.scrollHeight;
   speakText('Excellent! We have completed all the steps. Do you understand the solution? You can review it again or close the blackboard.');
+}
+
+// Captures the entire blackboard (all steps, rough work) as a single PNG image
+async function captureBlackboardImage(){
+  const canvas=document.getElementById('bb-canvas');
+  if(!canvas||!window.html2canvas)return null;
+  try{
+    const cv=await html2canvas(canvas, {
+      scale:2,
+      backgroundColor:'#142e14',
+      useCORS:true,
+      width: canvas.scrollWidth,
+      height: canvas.scrollHeight,
+      windowWidth: canvas.scrollWidth,
+      windowHeight: canvas.scrollHeight
+    });
+    return await new Promise(resolve=>cv.toBlob(resolve,'image/png'));
+  }catch(e){
+    console.error('Blackboard capture error:', e);
+    return null;
+  }
+}
+
+async function downloadBlackboardSolution(){
+  const blob=await captureBlackboardImage();
+  if(!blob){alert('Could not capture the blackboard. Please try again.');return;}
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='brightmind-solution-'+Date.now()+'.png';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+}
+
+async function shareBlackboardSolution(){
+  const blob=await captureBlackboardImage();
+  const fallbackText='📚 Check out this solution I worked through on BrightMind Teacher!\\n\\n👉 brightmindteacher.com';
+  if(!blob){
+    window.open('https://wa.me/?text='+encodeURIComponent(fallbackText),'_blank');
+    return;
+  }
+  try{
+    const file=new File([blob],'brightmind-solution.png',{type:'image/png'});
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:'BrightMind Teacher Solution', text: fallbackText});
+      return;
+    }
+    // Fallback: download + open WhatsApp text
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download='brightmind-solution.png';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+    window.open('https://wa.me/?text='+encodeURIComponent(fallbackText),'_blank');
+  }catch(e){
+    console.error('Share error:', e);
+    window.open('https://wa.me/?text='+encodeURIComponent(fallbackText),'_blank');
+  }
 }
 
 // BLACKBOARD PHOTO UPLOAD
