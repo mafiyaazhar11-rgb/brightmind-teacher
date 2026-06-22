@@ -4006,7 +4006,7 @@ async function renderAdmin(){
     st.map(u=>`<div class="asr">
       <div class="asr-top">
         <div class="asr-av">${u.name[0].toUpperCase()}</div>
-        <div class="asr-info"><div class="asr-name">${u.name}</div><div class="asr-meta">Class ${u.class} · ${u.state} · ${new Date(u.regOn||Date.now()).toLocaleDateString('en-IN')}</div></div>
+        <div class="asr-info"><div class="asr-name">${u.name}</div><div class="asr-meta">Class ${u.class} · ${u.board||'CBSE'} · ${u.state} · ${new Date(u.regOn||Date.now()).toLocaleDateString('en-IN')}</div></div>
         <div class="asr-plan ${u.isPaid?'paid':'free'}">${u.isPaid?'💎 Paid':'🆓 Free'}</div>
       </div>
       <div class="asr-stats">
@@ -4019,6 +4019,7 @@ async function renderAdmin(){
       <button onclick="adminExtendAccess('${u.id}','${u.name}')" style="margin-top:8px;background:#e8f5e9;color:#1b5e20;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-left:6px;">⏰ Extend Access</button>
       <button onclick="adminGivePremium('${u.id}','${u.name}')" style="margin-top:8px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--blue-dark);border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-left:6px;">💎 Give Premium</button>
       <button onclick="adminLoginAs('${u.id}','${u.name}')" style="margin-top:8px;background:linear-gradient(135deg,#4a148c,#7b1fa2);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-left:6px;">👁️ View as Student</button>
+      <button onclick="adminEditStudent('${u.id}','${u.name}','${u.board||'CBSE'}','${u.class}','${u.state}')" style="margin-top:8px;background:#fff3e0;color:#e65100;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;margin-left:6px;">✏️ Edit Board/Class</button>
     </div>`).join('');
 }
 
@@ -5466,6 +5467,34 @@ async function adminGivePremium(studentId, studentName){
     renderAdmin();
   } else {
     alert('Failed. Try again!');
+  }
+}
+
+async function adminEditStudent(studentId, studentName, currentBoard, currentClass, currentState){
+  const boardOptions='CBSE, ICSE, TN, KL, KA, AP, TS, MH, UP, WB, GJ, RJ, OTHER';
+  const newBoard = prompt(`Edit Board for ${studentName}\n\nCurrent: ${currentBoard}\n\nValid options: ${boardOptions}\n\nEnter new board code (or leave blank to keep current):`, currentBoard);
+  if(newBoard===null) return; // cancelled
+  const newClass = prompt(`Edit Class for ${studentName}\n\nCurrent: ${currentClass}\n\nEnter new class 9-12 (or leave blank to keep current):`, currentClass);
+  if(newClass===null) return;
+  const newState = prompt(`Edit State for ${studentName}\n\nCurrent: ${currentState}\n\nEnter new state (or leave blank to keep current):`, currentState);
+  if(newState===null) return;
+
+  const res = await fetch(API_URL+'/api/admin/edit-student', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-admin-key':'azhar2026'},
+    body: JSON.stringify({
+      id: studentId,
+      board: newBoard?.trim() || null,
+      class: newClass?.trim() || null,
+      state: newState?.trim() || null
+    })
+  });
+  const d = await res.json();
+  if(d.ok){
+    alert(`✅ ${studentName}'s profile updated!\nBoard: ${newBoard||currentBoard} | Class: ${newClass||currentClass} | State: ${newState||currentState}\n\nThey may need to log out and log back in to see the change.`);
+    renderAdmin();
+  } else {
+    alert('Failed: '+(d.msg||'Try again'));
   }
 }
 
