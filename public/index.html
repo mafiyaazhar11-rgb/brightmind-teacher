@@ -2597,7 +2597,7 @@ function startSyllabusChat(){
     try{
       const sys=LANG_SYS[S.lang||'en']+' You are Miss BrightMind, a warm caring teacher for Class '+SYL.cls+' '+SYL.subject+' ('+bf+'). Chapter: '+SYL.chapter+'. Topic: '+SYL.topic+'. Teach sentence by sentence. Use simple words. Give real-life examples. Follow '+bf+' syllabus exactly.';
       const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,system:sys,
+        body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:1200,system:sys,
           messages:[{role:'user',content:teachPrompt}]})});
       const d=await r.json();
       const reply=(d.content&&d.content[0]&&d.content[0].text)||'';
@@ -2708,6 +2708,19 @@ async function sendToBlackboard(){
   const inp=document.getElementById('bb-inp');
   const q=inp.value.trim();
   if(!q)return;
+
+  // FREE TIER LIMIT: max 4 blackboard uses lifetime, then must pay
+  if(S.user && !S.user.isPaid){
+    const bbUsedKey='bmt_bb_used_'+S.user.id;
+    const bbUsed=parseInt(localStorage.getItem(bbUsedKey)||'0');
+    if(bbUsed>=4){
+      document.getElementById('blackboard-overlay').classList.remove('open');
+      document.getElementById('paywall-overlay').classList.add('open');
+      return;
+    }
+    localStorage.setItem(bbUsedKey, String(bbUsed+1));
+  }
+
   inp.value='';
   bbWriting=true;
   bbAllSteps=[];
@@ -2777,7 +2790,7 @@ Return ONLY JSON array.`
     const prompt=modePrompts[bbCurrentMode]+'\n\nQuestion/Topic: '+q;
 
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,system:sys,
+      body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:2000,system:sys,
         messages:[{role:'user',content:prompt}]})});
     const d=await r.json();
     let raw=d.content?.[0]?.text||'[]';
@@ -3031,7 +3044,7 @@ async function handleBBPhotoUpload(event){
 {"step":N,"title":"FINAL ANSWER","content":"complete answer","speak":"..."}]
 Return ONLY JSON array.`;
       const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,system:sys,
+        body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:2000,system:sys,
           messages:[{role:'user',content:[
             {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
             {type:'text',text:'Please solve this question from my photo step by step on the blackboard.'}
@@ -3103,7 +3116,7 @@ async function sendPhotoQuestion(){
     const sys=`You are Miss BrightMind, an expert Indian teacher for Class ${S.user?.class||11} ${S.sub?.name||''} student. Board: ${S.user?.board||'CBSE'}. A student has sent you a photo of their question or problem. Identify the question in the image and solve/explain it step by step. Be encouraging and clear. If it is a maths problem, show all working steps.`;
 
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,system:sys,
+      body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:1500,system:sys,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:mediaType,data:bbPhotoBase64}},
           {type:'text',text:'Please solve or explain this question from my photo. Show step by step working.'}
@@ -3359,8 +3372,15 @@ async function sendMsg(){
     const boardFull={CBSE:'CBSE',TN:'Tamil Nadu State Board',MH:'Maharashtra State Board',KA:'Karnataka Board',KL:'Kerala Board',AP:'AP Board',TS:'Telangana Board',UP:'UP Board',WB:'WB Board',GJ:'Gujarat Board',RJ:'Rajasthan Board'}[SYL.board]||SYL.board+' Board';
     const sys=LANG_SYS[S.lang]+` You are Miss BrightMind, teaching: Subject: ${SYL.subject||S.sub?.name}. Board: ${boardFull||'CBSE'}. Class: ${S.user?.class||11}. Chapter: ${SYL.chapter||'General'}. Topic: ${SYL.topic||'General'}. Student is from ${S.user?.state||'India'}. Always follow the exact ${boardFull} syllabus. Use textbook examples. Keep explanations aligned to board exam patterns. IMPORTANT: Teach ONE small idea at a time — maximum 3-4 short sentences per reply. Never dump the whole topic, all formulas, or all examples in one message. After each small piece, ask a simple question or say "want me to continue?" before moving to the next part. This is a real-time conversation, not an essay.`;
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:sys,messages:S.chatHist})});
+      body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:1000,system:sys,messages:S.chatHist})});
     const d=await r.json();
+    if(d.limit_reached){
+      ty.classList.remove('show');
+      S.chatHist.pop();
+      addMsg('ai','🌟 You have used all your free questions for today! Upgrade to ask unlimited questions and unlock full access.');
+      setTimeout(()=>showModal('sub-modal'),1200);
+      return;
+    }
     const rep=d.content?.[0]?.text||(d.error?.message)||'Sorry, please try again!';
     if(d.error){console.error('AI error:',d.error);}
     S.chatHist.push({role:'assistant',content:rep});
@@ -3376,7 +3396,7 @@ async function assignHW(topic){
   addMsg('ai','📝 **Homework Time!** Generating your homework...');
   try{
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:400,
+      body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:400,
         messages:[{role:'user',content:`Create 2 short homework questions for Class ${S.user?.class} student about: "${topic}" in ${S.sub?.name}. Numbered list, concise and clear.`}]})});
     const d=await r.json();const hw=d.content?.[0]?.text||'';
     if(S.user){if(!S.user.homework)S.user.homework=[];
@@ -3397,8 +3417,13 @@ async function startExam(){
   document.getElementById('exam-title').textContent=S.examSub.name+' — Chapter Exam';
   document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">📚 Loading questions from question bank...<br><br>Please wait...</div>';
   try{
-    const dbRes=await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(S.examSub.name)+'&count=15');
+    const dbRes=await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(S.examSub.name)+'&count=15&student_id='+encodeURIComponent(S.user?.id||''));
     const dbData=await dbRes.json();
+    if(dbData.msg==='exam_limit_reached'){
+      document.getElementById('exam-overlay').classList.remove('open');
+      document.getElementById('paywall-overlay').classList.add('open');
+      return;
+    }
     if(dbData.ok&&dbData.questions&&dbData.questions.length>=5){
       S.examQs=dbData.questions.map(q=>({q:q.question,options:q.options,correct:q.correct,explanation:q.explanation||''}));
       startTimer();renderExamQ();
@@ -3533,7 +3558,7 @@ async function submitHWAnswer(idx){
   if(btn){btn.textContent='Checking... ⏳';btn.disabled=true;}
   try{
     const r=await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:500,
+      body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:500,
         messages:[{role:'user',content:`You are a tough but fair teacher. 
 Question: "${hw.q}"
 Student Answer: "${answer}"
@@ -4390,8 +4415,13 @@ async function openInstantExam(subjectId, subjectName, icon){
     </div>`;
   document.getElementById('instant-exam-overlay').style.display='flex';
   try{
-    const dbRes = await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(subjectName)+'&count=15');
+    const dbRes = await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(subjectName)+'&count=15&student_id='+encodeURIComponent(S.user?.id||''));
     const dbData = await dbRes.json();
+    if(dbData.msg==='exam_limit_reached'){
+      document.getElementById('instant-exam-overlay').style.display='none';
+      document.getElementById('paywall-overlay').classList.add('open');
+      return;
+    }
     if(dbData.ok && dbData.questions && dbData.questions.length >= 5){
       IE.questions = dbData.questions.map(q=>({q:q.question,options:q.options,correct:q.correct,explanation:q.explanation||'',marks:1}));
       IE.currentQ=0; ieStartTimer(); ieRenderQuestion();
@@ -5061,7 +5091,7 @@ Return ONLY this JSON:
 }`;
 
     const r = await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:3000,
+      body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:3000,
         messages:[{role:'user',content:prompt}]})});
     const d = await r.json();
     let raw = d.content?.[0]?.text||'{}';
@@ -5158,7 +5188,7 @@ Return ONLY a JSON object:
 Make questions exam-realistic and curriculum-appropriate. Return ONLY JSON.`;
 
     const r = await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:3000,
+      body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:3000,
         messages:[{role:'user',content:prompt}]})});
     const d = await r.json();
     let raw = d.content?.[0]?.text||'{}';
