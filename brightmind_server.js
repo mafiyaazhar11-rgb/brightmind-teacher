@@ -1077,27 +1077,73 @@ app.post('/api/admin/qbank/generate-blanks', async (req, res) => {
   try {
     const key = req.headers['x-admin-key'];
     if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
-    const { board, class: cls, subject, chapter, topic, count = 10 } = req.body;
+    const { board, class: cls, subject, chapter, topic, count: rawCount = 10 } = req.body;
+    const count = Math.min(Math.max(parseInt(rawCount) || 10, 1), 50); // hard safety clamp: 1-50
     if (!board || !cls || !subject) return res.status(400).json({ ok: false, msg: 'Missing params' });
     const boardFull = {CBSE:'CBSE',TN:'Tamil Nadu State Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board'}[board]||board;
-    const prompt = `Generate EXACTLY ${count} fill-in-the-blank questions for ${boardFull} Class ${cls} ${subject}${chapter?' Chapter: '+chapter:''}${topic?' Topic: '+topic:''}.
-Rules: Each question must have ONE blank (shown as ___) for a single word or short phrase answer. Real syllabus content. The answer should be short (1-4 words) so a student can type it quickly. Include easy(40%)/medium(40%)/hard(20%).
+
+    // Pull existing questions for this exact board+class+subject so the AI avoids repeating them,
+    // and so we can do a real duplicate check (not just a misleading comment) before inserting.
+    const existingRes = await pool.query(
+      `SELECT question FROM bmt_question_bank WHERE board=$1 AND class=$2 AND LOWER(subject)=LOWER($3) AND question_type='blank'`,
+      [board, cls, subject]
+    );
+    const existingSet = new Set(existingRes.rows.map(r => r.question.trim().toLowerCase()));
+    const existingSample = existingRes.rows.slice(0, 15).map(r => r.question); // give AI a few examples to avoid repeating
+
+    async function callAIForQuestions(howMany, avoidList) {
+      const avoidText = avoidList.length
+        ? `\nDo NOT repeat any of these existing questions (write genuinely different ones):\n${avoidList.map(q=>'- '+q).join('\n')}`
+        : '';
+      const prompt = `Generate EXACTLY ${howMany} fill-in-the-blank questions for ${boardFull} Class ${cls} ${subject}${chapter?' Chapter: '+chapter:''}${topic?' Topic: '+topic:''}.
+Rules: Each question must have ONE blank (shown as ___) for a single word or short phrase answer. Real syllabus content. The answer should be short (1-4 words) so a student can type it quickly. Include easy(40%)/medium(40%)/hard(20%).${avoidText}
 Return ONLY valid JSON array:
 [{"q":"The capital of India is ___.","answer":"New Delhi","explanation":"why this is correct","difficulty":"easy","chapter":"chap name"}]`;
-    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01'},
-      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:3000, messages:[{role:'user',content:prompt}] })
-    });
-    const aiData = await aiRes.json();
-    if (aiData.error) return res.json({ ok:false, msg:aiData.error.message });
-    let raw = (aiData.content?.[0]?.text||'[]').replace(/```json|```/g,'').trim();
-    let questions;
-    try { questions = JSON.parse(raw); } catch(e) { return res.json({ ok:false, msg:'Invalid JSON from AI', raw:raw.substring(0,300) }); }
-    if (!Array.isArray(questions)||!questions.length) return res.json({ ok:false, msg:'No questions returned' });
+      const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01'},
+        body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:6000, messages:[{role:'user',content:prompt}] })
+      });
+      const aiData = await aiRes.json();
+      if (aiData.error) throw new Error(aiData.error.message);
+      let raw = (aiData.content?.[0]?.text||'[]').replace(/```json|```/g,'').trim();
+      let parsed;
+      try { parsed = JSON.parse(raw); } catch(e) { throw new Error('Invalid JSON from AI'); }
+      if (!Array.isArray(parsed)) throw new Error('AI did not return an array');
+      return parsed;
+    }
+
+    let accepted = [];      // questions confirmed unique and ready to insert
+    let duplicatesSkipped = 0;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 4; // generation rounds — generous enough to fill gaps, capped to avoid runaway cost
+
+    try {
+      let batch = await callAIForQuestions(count, existingSample);
+      while (accepted.length < count && attempts < MAX_ATTEMPTS) {
+        attempts++;
+        for (const q of batch) {
+          if (!q.q || !q.answer) continue;
+          const key = q.q.trim().toLowerCase();
+          if (existingSet.has(key)) { duplicatesSkipped++; continue; } // real duplicate check, not a guess
+          existingSet.add(key); // also guards against duplicates within the same batch
+          accepted.push(q);
+          if (accepted.length >= count) break;
+        }
+        if (accepted.length < count && attempts < MAX_ATTEMPTS) {
+          // Ask for replacements only for the shortfall, avoiding everything seen so far
+          const shortfall = count - accepted.length;
+          batch = await callAIForQuestions(shortfall, [...existingSample, ...accepted.map(a=>a.q)].slice(-15));
+        }
+      }
+    } catch(e) {
+      return res.json({ ok:false, msg:e.message });
+    }
+
+    if (!accepted.length) return res.json({ ok:false, msg:'No unique questions could be generated' });
+
     let saved = 0;
-    for (const q of questions) {
-      if (!q.q||!q.answer) continue;
+    for (const q of accepted) {
       try {
         await pool.query(
           `INSERT INTO bmt_question_bank (board,class,subject,chapter,topic,question,question_type,blank_answer,explanation,difficulty)
@@ -1105,9 +1151,9 @@ Return ONLY valid JSON array:
           [board,cls,subject,q.chapter||chapter||'',topic||'',q.q,q.answer,q.explanation||'',q.difficulty||'medium']
         );
         saved++;
-      } catch(e) { /* skip duplicates */ }
+      } catch(e) { /* DB-level failure (rare) — count stays accurate via 'saved' */ }
     }
-    res.json({ ok:true, generated:questions.length, saved, board, class:cls, subject });
+    res.json({ ok:true, generated:accepted.length, saved, duplicatesSkipped, attempts, board, class:cls, subject });
   } catch(e) { res.json({ ok:false, msg:e.message }); }
 });
 
