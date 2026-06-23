@@ -1141,6 +1141,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
   <div class="syl-body" id="syl-body" style="flex:1;overflow-y:auto;"></div>
   <div class="syl-footer">
     <button class="btn-main" id="syl-start-btn" onclick="startSyllabusChat()" style="display:none;">Start Learning 🚀</button>
+    <button class="btn-main" id="syl-lesson-btn" onclick="startInteractiveLesson()" style="display:none;background:linear-gradient(135deg,#ffd600,#ff8f00);color:#1a1a1a;margin-top:8px;">🎓 Try Interactive Lesson</button>
   </div>
 </div>
 
@@ -1210,6 +1211,38 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     <button class="bb-send" onclick="sendToBlackboard()" style="background:linear-gradient(135deg,#ffd600,#ff8f00);border:none;width:44px;height:44px;border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(255,214,0,0.4);">✏️</button>
   </div>
 </div>
+
+<!-- ══ INTERACTIVE LESSON OVERLAY ══ -->
+<div id="lesson-overlay" style="display:none;position:fixed;inset:0;z-index:110;flex-direction:column;background:linear-gradient(180deg,#1a3a1a,#142e14);">
+  <div class="bb-hdr">
+    <div style="display:flex;align-items:center;gap:8px;flex:1;">
+      <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#ffd600,#ff8f00);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🎓</div>
+      <div>
+        <div style="font-size:10px;color:rgba(255,214,0,0.7);font-weight:700;letter-spacing:1px;">INTERACTIVE LESSON</div>
+        <div style="font-size:15px;font-weight:800;color:#fff;" id="lesson-title">Chapter Title</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:5px 10px;text-align:center;">
+        <div style="font-size:11px;color:#ffd600;font-weight:700;" id="lesson-progress">Part 1/5</div>
+      </div>
+      <button id="lesson-voice-btn" onclick="toggleLessonVoice(this)"
+        style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;width:36px;height:36px;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Toggle voice">🔊</button>
+      <button onclick="closeLessonOverlay()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;width:36px;height:36px;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+  </div>
+
+  <div class="bb-board" id="lesson-canvas" style="flex:1;overflow-y:auto;background:linear-gradient(180deg,#1a3a1a,#142e14);padding:16px;font-family:'Courier New',monospace;border-left:8px solid #3d2008;border-right:8px solid #3d2008;border-bottom:12px solid #3d2008;">
+    <!-- Lesson content rendered by JS -->
+  </div>
+
+  <!-- Mic footer for spoken answers — only shown during checkpoint questions -->
+  <div id="lesson-mic-footer" style="display:none;padding:14px;background:#3d2008;display:flex;align-items:center;gap:10px;flex-shrink:0;">
+    <div style="flex:1;color:#fff;font-size:13px;" id="lesson-mic-hint">🎤 Tap to answer with your voice</div>
+    <button id="lesson-mic-btn" onclick="lessonStartMic()" style="width:54px;height:54px;background:linear-gradient(135deg,#ffd600,#ff8f00);border:none;border-radius:50%;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(255,214,0,0.4);flex-shrink:0;">🎤</button>
+  </div>
+</div>
+
 <!-- ══ PHOTO OVERLAY ══ -->
 <div class="photo-overlay" id="photo-overlay">
   <div class="po-title">📷 Photo Question</div>
@@ -2443,7 +2476,7 @@ const SYLLABUS={
     }
   },
   TN:{
-    9:{Mathematics:{icon:'📐',chapters:['Set Language','Real Numbers','Algebra','Geometry','Coordinate Geometry','Trigonometry','Mensuration','Statistics','Probability']},Science:{icon:'🔬',chapters:['Measurement','Motion','Laws of Motion','Fluids','Heat','Electricity','Magnetism','Sound','Cell Biology','Organisation of Life','Plant Physiology','Nutrition','Transportation','Matter around us','Changes around us']},English:{icon:'📖',chapters:['Prose','Poetry','Supplementary','Grammar','Writing Skills']},Tamil:{icon:'📜',chapters:['உரைநடை','கவிதை','இலக்கணம் - எழுத்து','இலக்கணம் - சொல்','இலக்கணம் - பொருள்','இலக்கணம் - யாப்பு','இலக்கணம் - அணி','படைப்பு எழுத்து']}},
+    9:{Mathematics:{icon:'📐',chapters:['Set Language','Real Numbers','Algebra','Geometry','Coordinate Geometry','Trigonometry','Mensuration','Statistics','Probability']},Science:{icon:'🔬',chapters:['Measurement','Motion','Laws of Motion','Fluids','Heat','Electricity','Magnetism','Sound','Cell Biology','Organisation of Life','Plant Physiology','Nutrition','Transportation','Matter around us','Changes around us']},English:{icon:'📖',chapters:['Prose','Poetry','Supplementary','Grammar','Writing Skills']},'Social Science':{icon:'🌍',chapters:['History: Evolution of Humans and Society – Prehistoric Period','History: Ancient Civilisations','History: Early Tamil Society and Culture','History: Intellectual Awakening and Socio-Political Changes','History: The Classical World','History: The Middle Ages','History: State and Society in Medieval India','History: The Beginning of the Modern Age','History: The Age of Revolutions','History: Industrial Revolution','History: Colonialism in Asia and Africa','Geography: Lithosphere I – Endogenetic Processes','Geography: Lithosphere II – Exogenetic Processes','Geography: Atmosphere','Geography: Hydrosphere','Geography: Biosphere','Geography: Man and Environment','Geography: Mapping Skills','Geography: Disaster Management','Civics: Forms of Government and Democracy','Civics: Election, Political Parties and Pressure Groups','Civics: Human Rights','Civics: Forms of Government','Civics: Local Self Government','Civics: Road Safety','Economics: Understanding Development','Economics: Employment in India and Tamil Nadu','Economics: Money and Credit','Economics: Tamil Nadu Agriculture','Economics: Migration']},Tamil:{icon:'📜',chapters:['உரைநடை','கவிதை','இலக்கணம் - எழுத்து','இலக்கணம் - சொல்','இலக்கணம் - பொருள்','இலக்கணம் - யாப்பு','இலக்கணம் - அணி','படைப்பு எழுத்து']}},
     10:{Mathematics:{icon:'📐',chapters:['Relations and Functions','Numbers and Sequences','Algebra','Trigonometry','Geometry','Coordinate Geometry','Mensuration','Statistics and Probability']},Science:{icon:'🔬',chapters:['Laws of Motion','Optics','Thermal Physics','Electricity','Acoustics','Nuclear Physics','Atoms and Molecules','Periodic Classification','Chemical Bonding','Chemistry of p-Block','Carbon Compounds','Plant Anatomy','Plant Physiology','Structural Organisation of Animals','Transportation','Nervous System','Reproduction','Genetics','Evolution']},English:{icon:'📖',chapters:['Prose - Empowered Women','Prose - Conservation','Poetry','Supplementary','Grammar','Writing']},Tamil:{icon:'📜',chapters:['உரைநடை','கவிதை','இலக்கணம்','கட்டுரை','கடிதம்','சுருக்கம்']}},
     11:{Mathematics:{icon:'📐',chapters:['Sets Relations Functions','Basic Algebra','Trigonometry','Combinatorics','Statistics','Vector Algebra','Matrices','Differential Calculus','Integral Calculus','Probability Distributions']},Physics:{icon:'⚛️',chapters:['Nature of Physical World','Kinematics','Laws of Motion','Work Energy Power','Gravitation','Properties of Matter','Heat and Thermodynamics','Oscillations','Wave Motion']},Chemistry:{icon:'🧪',chapters:['Basic Concepts','Quantum Mechanical Model','Periodic Classification','Hydrogen','Alkali and Alkaline Earth Metals','Gaseous State','Thermodynamics','Physical and Chemical Equilibrium','Solutions','Chemical Bonding','Basic Concepts of Organic Chemistry','Hydrocarbons','Haloalkanes','Environmental Chemistry']},Biology:{icon:'🌱',chapters:['Living World','Plant Kingdom','Animal Kingdom','Cell','Cell Division','Transport in Plants','Mineral Nutrition','Photosynthesis','Respiration','Plant Growth','Biomolecules','Digestion','Respiration in Animals','Circulation','Excretion','Locomotion','Neural Control','Endocrine System']},Tamil:{icon:'📜',chapters:['இயல் 1 - கவிதை','இயல் 2 - உரைநடை','இயல் 3 - நாடகம்','சங்க இலக்கியம்','தமிழ் இலக்கண வரலாறு','புணர்ச்சி','தொடரியல்','பொருளியல்','படைப்பு எழுத்து','மொழிபெயர்ப்பு']}},
     12:{Mathematics:{icon:'📐',chapters:['Applications of Matrices','Complex Numbers','Theory of Equations','Inverse Trigonometric Functions','2D Analytical Geometry','Applications of Vector Algebra','Applications of Differential Calculus','Differentials and Partial Derivatives','Applications of Integration','Ordinary Differential Equations','Probability Distributions','Discrete Mathematics']},Physics:{icon:'⚛️',chapters:['Electrostatics','Current Electricity','Effects of Electric Current','Electromagnetic Induction','Electromagnetic Waves','Ray and Wave Optics','Dual Nature of Radiation','Atomic and Nuclear Physics','Semiconductor Devices','Communication Systems']},Chemistry:{icon:'🧪',chapters:['Metallurgy','p-Block Elements I','p-Block Elements II','Transition and Inner Transition','Coordination Chemistry','Solid State','Chemical Kinetics','Ionic Equilibrium','Electrochemistry','Surface Chemistry','Hydroxy Compounds','Carbonyl Compounds','Carboxylic Acids','Organic Nitrogen Compounds','Biomolecules','Chemistry in Everyday Life']},Biology:{icon:'🌱',chapters:['Asexual Reproduction','Sexual Reproduction','Reproductive Health','Principles of Inheritance','Chromosomal Basis','Molecular Genetics','Evolution','Human Health','Microbiology','Immunology','Genomics','Food Production','Microbes in Human Welfare','Applications of Biotechnology','Environmental Issues','Biodiversity','Ecosystem','Environmental Issues']},Tamil:{icon:'📜',chapters:['இயல் 1','இயல் 2','இயல் 3','இயல் 4','இயல் 5','இயல் 6','தமிழ் இலக்கிய வரலாறு','மரபு இலக்கணம்','புதுக்கவிதை','கட்டுரை எழுத்து']}}
@@ -2485,6 +2518,126 @@ const SOUTH_SYLLABUS={
 // Merge into main SYLLABUS
 Object.assign(SYLLABUS, SOUTH_SYLLABUS);
 
+// ══════════════════════════════════════════════════════════════
+// INTERACTIVE LESSON DATA — pre-written teaching scripts.
+// AI is called ONLY at each checkpoint, to grade the student's
+// spoken answer. Everything else (chunks, questions, reactions)
+// is fixed content, written once, used unlimited times for free.
+// ══════════════════════════════════════════════════════════════
+const LESSON_DATA = {
+  'CBSE_9_Democratic Politics I': {
+    title: 'Democratic Politics I',
+    lang: 'en',
+    intro: "Hello! Today we're learning about Democracy — what it really means, and why it matters so much in a country like India. By the end of this lesson, you'll be able to explain what makes a government 'democratic' and why people value it. Let's begin!",
+    chunks: [
+      {
+        title: "What is Democracy?",
+        text: "Democracy is a form of government where the rulers are elected by the people. In a democracy, ordinary citizens — not kings, not the army, not a small group of rich people — choose who governs them. This happens through free and fair elections, where every adult citizen has the right to vote.",
+      },
+      {
+        title: "Key Features",
+        text: "A democracy has some important features. First, only one final decision-making body, like a Parliament, holds real power. Second, this body is chosen by the people through elections. Third, these elections offer a real choice between different parties and candidates — not just one option. Fourth, every adult citizen has one vote with equal value.",
+      },
+      {
+        title: "Why India Chose Democracy",
+        text: "When India became independent in 1947, our leaders chose democracy because they believed every citizen — rich or poor, man or woman, from any caste or religion — deserved an equal say in how the country is run. This was a bold choice, since India was a huge, diverse country, and many doubted democracy could work here.",
+      },
+      {
+        title: "Democracy vs Other Governments",
+        text: "Compare this to a monarchy, where one king or queen rules for life, passing power to their children, with no say from the people. Or a military dictatorship, where the army controls the government by force. In both cases, ordinary citizens have no real way to remove the rulers if they're unhappy. Democracy gives people that power, through voting.",
+      },
+      {
+        title: "Why It Matters",
+        text: "Democracy matters because it makes governments accountable to the people. If a government performs badly, citizens can vote them out in the next election. This keeps leaders responsible, encourages them to work for the public good, and protects the rights and dignity of every citizen, no matter how powerful or powerless they are.",
+      },
+    ],
+    checkpoints: [
+      {
+        question: "In your own words, what is democracy?",
+        expectedAnswer: "A form of government where rulers are chosen by the people through elections, where everyone gets to vote.",
+        keyPoints: ["elected by people", "voting", "citizens choose"],
+      },
+      {
+        question: "Can you name one key feature that makes a government truly democratic?",
+        expectedAnswer: "Elections must be free and fair, offering a real choice between parties, with one vote per adult citizen.",
+        keyPoints: ["free and fair elections", "equal vote", "real choice between parties"],
+      },
+      {
+        question: "Why did India's leaders choose democracy when we became independent?",
+        expectedAnswer: "Because they believed every citizen deserved an equal say in governing the country, regardless of background.",
+        keyPoints: ["equal say", "every citizen", "regardless of background"],
+      },
+      {
+        question: "What is one key difference between a democracy and a monarchy?",
+        expectedAnswer: "In a monarchy, one ruler holds power for life and passes it to their children; in a democracy, people choose and can remove their rulers.",
+        keyPoints: ["monarchy passes power by birth", "democracy people choose", "people can remove rulers"],
+      },
+      {
+        question: "Why does democracy matter? Give one reason.",
+        expectedAnswer: "It makes governments accountable — if they perform badly, people can vote them out, keeping leaders responsible.",
+        keyPoints: ["accountable", "vote out", "responsible to people"],
+      },
+    ],
+    wrapup: "Wonderful work today! You now understand what democracy means, its key features, why India chose it, how it's different from other governments, and why it matters. Want to try a few practice questions on this chapter, or move on to the next topic?",
+  },
+
+  'TN_9_Civics: Forms of Government and Democracy': {
+    title: 'அரசாங்க அமைப்புகள் மற்றும் மக்களாட்சி (Forms of Government and Democracy)',
+    lang: 'ta-en',
+    intro: "வணக்கம்! Today நாம் படிக்கப் போவது Forms of Government மற்றும் Democracy பற்றி — அதாவது, அரசாங்கம் எப்படி பல வகைகளில் இருக்கும், and ஏன் democracy ஒரு சிறந்த அமைப்பு என்று. Let's begin!",
+    chunks: [
+      {
+        title: "Forms of Government — அரசாங்க வகைகள்",
+        text: "அரசாங்கங்கள் (Governments) பல வகைகளில் இருக்கும். Monarchy-ல் ஒரு King அல்லது Queen ஆட்சி செய்வார். Dictatorship-ல் ஒரு நபர் அல்லது குழு, மக்களின் ஒப்புதல் இல்லாமல் ஆட்சி செய்வார். Democracy-ல், மக்களே தங்கள் தலைவர்களை தேர்தலின் மூலம் தேர்ந்தெடுக்கிறார்கள்.",
+      },
+      {
+        title: "Democracy என்றால் என்ன?",
+        text: "Democracy என்ற சொல் Greek மொழியில் இருந்து வந்தது — 'Demos' என்றால் மக்கள், 'Kratos' என்றால் ஆட்சி. அதாவது, மக்களே ஆட்சி செய்வது. Democracy-ல், இறுதி அதிகாரம் (final authority) மக்களிடம்தான் இருக்கும், ஒரு அரசரிடமோ அல்லது ஒரு சிறு குழுவிடமோ இல்லை.",
+      },
+      {
+        title: "Direct மற்றும் Indirect Democracy",
+        text: "Direct Democracy-ல், மக்கள் நேரடியாக முடிவுகளை எடுப்பார்கள் — Switzerland-ல் இது நடைமுறையில் உள்ளது. ஆனால் பெரிய நாடுகளில் இது சாத்தியமில்லை, அதனால் Indirect Democracy பின்பற்றப்படுகிறது — மக்கள் தங்களுக்காக பிரதிநிதிகளை (representatives) தேர்ந்தெடுப்பார்கள். India ஒரு Indirect Democracy நாடு.",
+      },
+      {
+        title: "Why India is the Largest Democracy",
+        text: "India உலகின் மிகப்பெரிய democracy நாடு, ஏனென்றால் இங்கு 90 கோடிக்கும் மேற்பட்ட மக்கள் வாக்களிக்கும் உரிமை பெற்றுள்ளனர். Caste, religion, gender எதுவாக இருந்தாலும், ஒவ்வொரு adult citizen-க்கும் ஒரு vote, அந்த vote-ன் மதிப்பு சமமானது.",
+      },
+      {
+        title: "Democracy-ன் முக்கியத்துவம்",
+        text: "Democracy முக்கியமானது, ஏனென்றால் இது அரசாங்கத்தை மக்களுக்கு பொறுப்புடையதாக (accountable) ஆக்குகிறது. அரசாங்கம் சரியாக செயல்படவில்லை என்றால், மக்கள் அடுத்த தேர்தலில் அவர்களை வீழ்த்தலாம் (vote out). இது ஒவ்வொரு குடிமகனின் (citizen) உரிமைகளையும் காப்பாற்றுகிறது.",
+      },
+    ],
+    checkpoints: [
+      {
+        question: "Democracy என்ற வார்த்தை எந்த மொழியில் இருந்து வந்தது, அதன் பொருள் என்ன?",
+        expectedAnswer: "Greek மொழியில் இருந்து வந்தது — Demos means people, Kratos means rule. So it means rule by the people.",
+        keyPoints: ["Greek", "Demos people", "Kratos rule"],
+      },
+      {
+        question: "Monarchy மற்றும் Democracy-க்கு உள்ள ஒரு வித்தியாசத்தை சொல்லுங்கள்?",
+        expectedAnswer: "Monarchy-ல் ஒரு king ஆட்சி செய்வார், அதிகாரம் family-க்குள் இருக்கும். Democracy-ல் மக்கள் தங்கள் தலைவர்களை தேர்ந்தெடுப்பார்கள்.",
+        keyPoints: ["monarchy king family", "democracy people elect"],
+      },
+      {
+        question: "India ஏன் Indirect Democracy-யை பின்பற்றுகிறது?",
+        expectedAnswer: "ஏனெனில் India ஒரு பெரிய நாடு, எல்லா மக்களும் நேரடியாக முடிவெடுக்க முடியாது, so மக்கள் representatives-ஐ தேர்ந்தெடுக்கிறார்கள்.",
+        keyPoints: ["large country", "representatives", "cannot decide directly"],
+      },
+      {
+        question: "India ஏன் உலகின் மிகப்பெரிய democracy நாடு என்று அழைக்கப்படுகிறது?",
+        expectedAnswer: "ஏனெனில் 90 கோடிக்கும் மேற்பட்ட மக்கள் வாக்களிக்கும் உரிமை பெற்றுள்ளனர், caste, religion, gender வேறுபாடு இல்லாமல்.",
+        keyPoints: ["90 crore voters", "no caste religion gender difference", "equal vote"],
+      },
+      {
+        question: "Democracy ஏன் முக்கியம்? ஒரு காரணம் சொல்லுங்கள்.",
+        expectedAnswer: "அரசாங்கத்தை மக்களுக்கு பொறுப்புடையதாக ஆக்குகிறது — சரியாக செயல்படவில்லை என்றால் மக்கள் vote out செய்யலாம்.",
+        keyPoints: ["accountable", "vote out", "responsible"],
+      },
+    ],
+    wrapup: "Semma work today! நீங்கள் இப்போது அரசாங்க வகைகள் பற்றியும், democracy-ன் meaning, India ஏன் largest democracy என்றும் புரிந்துகொண்டீர்கள். Practice questions try பண்ணலாமா, அல்லது next chapter-க்கு செல்லலாமா?",
+  },
+};
+
 // Topics for each chapter (AI generates these dynamically, but we seed common ones)
 const CHAPTER_TOPICS={
   'Quadratic Equations':['Standard Form ax²+bx+c=0','Factorisation Method','Completing the Square','Quadratic Formula','Nature of Roots (Discriminant)','Sum and Product of Roots','Word Problems'],
@@ -2522,6 +2675,8 @@ function openSubject(id){
 function closeSyllabus(){
   document.getElementById('syllabus-overlay').classList.remove('open');
   document.getElementById('syl-start-btn').style.display='none';
+  const lessonBtn=document.getElementById('syl-lesson-btn');
+  if(lessonBtn) lessonBtn.style.display='none';
 }
 
 function renderSyllabusStep(){
@@ -2597,7 +2752,16 @@ function renderSyllabusStep(){
         🧠 Your AI teacher will explain <b>${SYL.topic}</b> from <b>${SYL.chapter}</b> step by step, exactly as per your <b>${boardFull}</b> syllabus.
       </div>`;
     document.getElementById('syl-start-btn').style.display='block';
+
+    // Show the Interactive Lesson button only if we have pre-written content for this exact chapter
+    const lessonKey = SYL.board+'_'+SYL.cls+'_'+SYL.chapter;
+    const lessonBtn = document.getElementById('syl-lesson-btn');
+    if(lessonBtn) lessonBtn.style.display = LESSON_DATA[lessonKey] ? 'block' : 'none';
   }
+}
+
+function startInteractiveLesson(){
+  openLesson(SYL.board, SYL.cls, SYL.chapter);
 }
 
 function selSubject(name){SYL.subject=name;SYL.step=2;renderSyllabusStep();}
@@ -2696,6 +2860,231 @@ let bbPhotoBase64=null;
 // BLACKBOARD — CHALK WRITING STEP BY STEP
 // ══════════════════════════════════════
 let bbCurrentMode='solve', bbAllSteps=[], bbCurrentStep=0, bbWriting=false;
+
+// ══════════════════════════════════════════════════════════════
+// INTERACTIVE LESSON ENGINE
+// Pre-written content drives everything. AI is called ONLY to
+// grade a student's spoken checkpoint answer — nothing else.
+// ══════════════════════════════════════════════════════════════
+let LESSON = {key:null, data:null, partIndex:0, mode:'chunk', checkpointIndex:0, voiceOn:true, micRecognition:null};
+
+function openLesson(board, cls, chapterName){
+  const key = board+'_'+cls+'_'+chapterName;
+  const data = LESSON_DATA[key];
+  if(!data){
+    alert('This lesson is not ready yet. Please try the Blackboard for now — Miss BrightMind can still help you with this chapter there!');
+    return;
+  }
+  LESSON = {key, data, partIndex:0, mode:'intro', checkpointIndex:0, voiceOn:true, micRecognition:null};
+  document.getElementById('lesson-overlay').style.display='flex';
+  document.getElementById('lesson-title').textContent=data.title;
+  document.getElementById('lesson-mic-footer').style.display='none';
+  const canvas=document.getElementById('lesson-canvas');
+  canvas.innerHTML='';
+  renderLessonIntro();
+}
+
+function closeLessonOverlay(){
+  window.speechSynthesis.cancel();
+  if(LESSON.micRecognition){try{LESSON.micRecognition.stop();}catch(e){}}
+  document.getElementById('lesson-overlay').style.display='none';
+}
+
+function toggleLessonVoice(btn){
+  LESSON.voiceOn = !LESSON.voiceOn;
+  btn.textContent = LESSON.voiceOn ? '🔊' : '🔇';
+  if(!LESSON.voiceOn) window.speechSynthesis.cancel();
+}
+
+function lessonSpeak(text){
+  if(!LESSON.voiceOn) return;
+  const oldVoiceOn = voiceOn; // reuse global speakText, temporarily honoring lesson's own toggle
+  voiceOn = true;
+  // Use the chapter's language if it's a Tamil-English mix, otherwise default
+  if(LESSON.data && LESSON.data.lang==='ta-en' && S.lang==='en'){
+    // Don't force-switch global lang selector — just let speakText's board-based auto-detect handle it
+  }
+  speakText(text);
+  voiceOn = oldVoiceOn;
+}
+
+function lessonProgressLabel(){
+  const total = LESSON.data.chunks.length;
+  const part = Math.min(LESSON.partIndex+1, total);
+  document.getElementById('lesson-progress').textContent = `Part ${part}/${total}`;
+}
+
+function lessonAppendCard(html){
+  const canvas=document.getElementById('lesson-canvas');
+  const card=document.createElement('div');
+  card.style.cssText='background:rgba(255,255,255,0.04);border-radius:10px;padding:14px 16px;margin-bottom:14px;border-left:3px solid #ffd600;';
+  card.innerHTML=html;
+  canvas.appendChild(card);
+  canvas.scrollTop=canvas.scrollHeight;
+  return card;
+}
+
+function renderLessonIntro(){
+  const canvas=document.getElementById('lesson-canvas');
+  canvas.innerHTML=`<div style="text-align:center;padding:10px 0 20px;">
+    <div style="font-size:40px;margin-bottom:8px;">🎓</div>
+    <div style="font-family:'Courier New',monospace;font-size:12px;color:#ffd600;letter-spacing:1px;">MISS BRIGHTMIND'S LESSON</div>
+  </div>`;
+  lessonAppendCard(`<div style="font-family:'Courier New',monospace;font-size:16px;color:#e8ffe8;line-height:1.8;">${LESSON.data.intro}</div>`);
+  lessonSpeak(LESSON.data.intro);
+  setTimeout(()=>{
+    lessonAppendCard(`<button onclick="lessonNextChunk()" style="background:linear-gradient(135deg,#ffd600,#ff8f00);color:#1a1a1a;border:none;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Let's Begin →</button>`);
+  }, 600);
+}
+
+function lessonNextChunk(){
+  window.speechSynthesis.cancel();
+  const chunks = LESSON.data.chunks;
+  if(LESSON.partIndex >= chunks.length){
+    lessonFinish();
+    return;
+  }
+  lessonProgressLabel();
+  const chunk = chunks[LESSON.partIndex];
+  lessonAppendCard(`
+    <div style="font-family:'Courier New',monospace;font-size:12px;color:#ffd600;letter-spacing:1px;margin-bottom:8px;">── ${chunk.title.toUpperCase()} ──</div>
+    <div style="font-family:'Courier New',monospace;font-size:16px;color:#e8ffe8;line-height:1.8;">${chunk.text}</div>
+  `);
+  lessonSpeak(chunk.text);
+
+  // After every chunk, decide: ask a checkpoint question, or continue to next chunk?
+  // We space checkpoints roughly evenly across the chunks (1 checkpoint per chunk here, 5 chunks = 5 checkpoints)
+  const cpIndex = LESSON.partIndex;
+  LESSON.partIndex++;
+
+  setTimeout(()=>{
+    if(cpIndex < LESSON.data.checkpoints.length){
+      lessonAppendCard(`<button onclick="lessonAskCheckpoint(${cpIndex})" style="background:linear-gradient(135deg,#ffd600,#ff8f00);color:#1a1a1a;border:none;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Quick Check ✋</button>`);
+    } else {
+      lessonAppendCard(`<button onclick="lessonNextChunk()" style="background:linear-gradient(135deg,#ffd600,#ff8f00);color:#1a1a1a;border:none;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Continue →</button>`);
+    }
+  }, 600);
+}
+
+function lessonAskCheckpoint(cpIndex){
+  LESSON.checkpointIndex = cpIndex;
+  LESSON.mode = 'checkpoint';
+  const cp = LESSON.data.checkpoints[cpIndex];
+  lessonAppendCard(`
+    <div style="font-family:'Courier New',monospace;font-size:12px;color:#ff8f00;letter-spacing:1px;margin-bottom:8px;">── ✋ QUICK CHECK ──</div>
+    <div style="font-family:'Courier New',monospace;font-size:16px;color:#fff8dc;line-height:1.8;font-weight:700;">${cp.question}</div>
+    <div id="lesson-answer-display" style="margin-top:10px;font-family:'Courier New',monospace;font-size:14px;color:#a8d8a8;font-style:italic;"></div>
+  `);
+  lessonSpeak(cp.question);
+  document.getElementById('lesson-mic-footer').style.display='flex';
+  document.getElementById('lesson-mic-hint').textContent='🎤 Tap to answer with your voice';
+}
+
+function lessonStartMic(){
+  const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRec){alert('Sorry! Your browser does not support voice input. Please use Chrome on Android, or type your answer instead.');return;}
+  const recognition=new SpeechRec();
+  LESSON.micRecognition = recognition;
+  recognition.continuous=false; recognition.interimResults=false;
+  const micLangCodes={'en':'en-IN','ta-en':'en-IN'}; // ta-en lessons: student likely answers in English/Tanglish, en-IN mic handles both reasonably
+  recognition.lang = micLangCodes[LESSON.data.lang] || 'en-IN';
+
+  const btn=document.getElementById('lesson-mic-btn');
+  const hint=document.getElementById('lesson-mic-hint');
+
+  recognition.onstart=()=>{
+    btn.style.background='linear-gradient(135deg,#e53935,#b71c1c)';
+    hint.textContent='🔴 Listening... speak your answer now!';
+    window.speechSynthesis.cancel();
+  };
+  recognition.onresult=(e)=>{
+    const transcript=Array.from(e.results).map(r=>r[0].transcript).join('');
+    const disp=document.getElementById('lesson-answer-display');
+    if(disp) disp.textContent='You said: "'+transcript+'"';
+    lessonGradeAnswer(transcript);
+  };
+  recognition.onerror=(e)=>{
+    btn.style.background='linear-gradient(135deg,#ffd600,#ff8f00)';
+    hint.textContent='🎤 Tap to answer with your voice';
+    if(e.error==='not-allowed'){alert('Microphone access denied. Please allow microphone in browser settings, or type your answer.');}
+  };
+  recognition.onend=()=>{
+    btn.style.background='linear-gradient(135deg,#ffd600,#ff8f00)';
+  };
+  recognition.start();
+}
+
+// THE ONLY AI CALL IN THE WHOLE LESSON — grades one short spoken answer.
+async function lessonGradeAnswer(studentAnswer){
+  const hint=document.getElementById('lesson-mic-hint');
+  hint.textContent='🧠 Checking your answer...';
+  const cp = LESSON.data.checkpoints[LESSON.checkpointIndex];
+
+  try{
+    const sys = `You are grading a Class 9 student's spoken answer to a quick check question. Be generous — accept answers that capture the key idea even if phrased differently or imperfectly, including Tamil-English mixed answers if relevant. Respond with ONLY valid JSON: {"grade":"correct"|"partial"|"incorrect","reason":"one short sentence why"}`;
+    const prompt = `Question: ${cp.question}\nExpected answer covers these key points: ${cp.keyPoints.join(', ')}\nModel answer: ${cp.expectedAnswer}\nStudent's spoken answer: "${studentAnswer}"\n\nGrade this.`;
+
+    const r = await fetch(API_URL+'/api/ai', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({model:'claude-sonnet-4-6', student_id:S.user?.id, request_type:'lesson_grade', max_tokens:150, system:sys, messages:[{role:'user',content:prompt}]})
+    });
+    const d = await r.json();
+
+    if(d.limit_reached){
+      hint.textContent='🎤 Tap to answer with your voice';
+      lessonAppendCard(`<div style="font-family:'Courier New',monospace;font-size:14px;color:#ffd600;">You've reached today's question limit. Let's continue the lesson without grading for now!</div>`);
+      setTimeout(()=>lessonAfterCheckpoint('partial'), 800);
+      return;
+    }
+
+    let raw = d.content?.[0]?.text || '{"grade":"partial","reason":"Could not check, let\'s continue"}';
+    raw = raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
+    let result;
+    try{ result = JSON.parse(raw); }catch(e){ result = {grade:'partial', reason:'Good attempt!'}; }
+
+    hint.textContent='🎤 Tap to answer with your voice';
+    lessonShowReaction(result.grade, result.reason);
+
+  }catch(e){
+    console.error('Lesson grading error:', e);
+    hint.textContent='🎤 Tap to answer with your voice';
+    lessonShowReaction('partial', 'Good attempt! Let\'s continue.');
+  }
+}
+
+function lessonShowReaction(grade, reason){
+  const colors = {correct:'#00e676', partial:'#ffd600', incorrect:'#ff7043'};
+  const icons = {correct:'✅', partial:'👍', incorrect:'💡'};
+  const labels = {correct:'Correct!', partial:'Good try!', incorrect:'Let\'s look again'};
+  lessonAppendCard(`
+    <div style="font-family:'Courier New',monospace;font-size:15px;color:${colors[grade]||'#ffd600'};font-weight:700;">${icons[grade]||'👍'} ${labels[grade]||'Good try!'}</div>
+    <div style="font-family:'Courier New',monospace;font-size:13px;color:#c8e6c9;margin-top:4px;">${reason||''}</div>
+  `);
+  lessonSpeak((labels[grade]||'Good try!')+'. '+(reason||''));
+  document.getElementById('lesson-mic-footer').style.display='none';
+  setTimeout(()=>lessonAfterCheckpoint(grade), 1000);
+}
+
+function lessonAfterCheckpoint(grade){
+  LESSON.mode='chunk';
+  lessonAppendCard(`<button onclick="lessonNextChunk()" style="background:linear-gradient(135deg,#ffd600,#ff8f00);color:#1a1a1a;border:none;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Continue Lesson →</button>`);
+}
+
+function lessonFinish(){
+  window.speechSynthesis.cancel();
+  document.getElementById('lesson-mic-footer').style.display='none';
+  document.getElementById('lesson-progress').textContent='Complete! 🎉';
+  lessonAppendCard(`
+    <div style="text-align:center;padding:10px 0;">
+      <div style="font-size:36px;margin-bottom:8px;">🎉</div>
+      <div style="font-family:'Courier New',monospace;font-size:16px;color:#fff8dc;line-height:1.8;">${LESSON.data.wrapup}</div>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+        <button onclick="closeLessonOverlay()" style="background:linear-gradient(135deg,#ffd600,#ff8f00);color:#1a1a1a;border:none;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✓ Done for Today</button>
+      </div>
+    </div>
+  `);
+  lessonSpeak(LESSON.data.wrapup);
+}
 
 function openBlackboard(){
   document.getElementById('blackboard-overlay').classList.add('open');
