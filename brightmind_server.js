@@ -1389,6 +1389,169 @@ app.post('/api/admin/qbank/auto-bulk', async (req, res) => {
   }
 });
 
+// AUTO BULK GENERATE — FILL-IN-THE-BLANK — one click generates blanks for
+// EVERY subject across EVERY class (9-12) for a board, same pattern as the
+// MCQ auto-bulk above. Reuses the duplicate-detection logic from the
+// single-subject generate-blanks endpoint so repeated runs stay safe.
+app.post('/api/admin/qbank/auto-bulk-blanks', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
+
+    const { board, count: rawCount = 20 } = req.body;
+    if (!board) return res.status(400).json({ ok: false, msg: 'Board required' });
+    const countPerSubject = Math.min(Math.max(parseInt(rawCount) || 20, 1), 50);
+
+    const SYLLABUS = {
+      TN: {
+        '9':  ['Tamil','English','Mathematics','Science','Social Science'],
+        '10': ['Tamil','English','Mathematics','Science','Social Science'],
+        '11': ['Tamil','English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','Accountancy','History','Geography'],
+        '12': ['Tamil','English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','Accountancy','History','Geography']
+      },
+      CBSE: {
+        '9':  ['English','Mathematics','Science','Social Science','Hindi'],
+        '10': ['English','Mathematics','Science','Social Science','Hindi'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Accountancy','Business Studies','Economics','History','Geography'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Accountancy','Business Studies','Economics','History','Geography']
+      },
+      KL: {
+        '9':  ['Malayalam','English','Mathematics','Physics','Chemistry','Biology','Social Science'],
+        '10': ['Malayalam','English','Mathematics','Physics','Chemistry','Biology','Social Science'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
+      },
+      KA: {
+        '9':  ['Kannada','English','Mathematics','Science','Social Science'],
+        '10': ['Kannada','English','Mathematics','Science','Social Science'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
+      },
+      AP: {
+        '9':  ['Telugu','English','Mathematics','Physical Science','Biological Science','Social Studies'],
+        '10': ['Telugu','English','Mathematics','Physical Science','Biological Science','Social Studies'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
+      },
+      TS: {
+        '9':  ['Telugu','English','Mathematics','Physical Science','Biological Science','Social Studies'],
+        '10': ['Telugu','English','Mathematics','Physical Science','Biological Science','Social Studies'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
+      }
+    };
+    const boardMap = {
+      TN:'Tamil Nadu State Board', CBSE:'CBSE',
+      KL:'Kerala Board (SCERT)', KA:'Karnataka State Board (KSEEB)',
+      AP:'Andhra Pradesh State Board', TS:'Telangana State Board'
+    };
+    const boardFull = boardMap[board] || board;
+    const classes = SYLLABUS[board];
+    if (!classes) return res.json({ ok: false, msg: 'Board not in syllabus map' });
+
+    // Respond immediately — this runs for several minutes in the background
+    res.json({ ok: true, msg: 'Bulk fill-in-the-blank generation started in background', board, boardFull });
+
+    (async () => {
+      let totalSaved = 0, totalDuplicatesSkipped = 0;
+      let errors = [];
+      const allCombos = [];
+      for (const [cls, subjects] of Object.entries(classes)) {
+        for (const subject of subjects) allCombos.push({ cls, subject });
+      }
+      console.log(`🚀 Auto-bulk BLANKS started: ${board} — ${allCombos.length} subject-class combos`);
+
+      for (const { cls, subject } of allCombos) {
+        try {
+          // Skip if this subject already has enough blank questions
+          const existingCount = await pool.query(
+            `SELECT COUNT(*) FROM bmt_question_bank WHERE board=$1 AND class=$2 AND LOWER(subject)=LOWER($3) AND question_type='blank'`,
+            [board, cls, subject]
+          );
+          if (parseInt(existingCount.rows[0].count) >= countPerSubject) {
+            console.log(`⏭️ Skip ${board} Cl${cls} ${subject} blanks — already has ${existingCount.rows[0].count}`);
+            continue;
+          }
+
+          // Pull existing questions for duplicate-avoidance, same logic as single-subject endpoint
+          const existingRes = await pool.query(
+            `SELECT question FROM bmt_question_bank WHERE board=$1 AND class=$2 AND LOWER(subject)=LOWER($3) AND question_type='blank'`,
+            [board, cls, subject]
+          );
+          const existingSet = new Set(existingRes.rows.map(r => r.question.trim().toLowerCase()));
+          let existingSample = existingRes.rows.slice(0, 15).map(r => r.question);
+
+          async function callAI(howMany, avoidList) {
+            const avoidText = avoidList.length
+              ? `\nDo NOT repeat any of these existing questions:\n${avoidList.map(q=>'- '+q).join('\n')}`
+              : '';
+            const prompt = `Generate EXACTLY ${howMany} fill-in-the-blank questions for ${boardFull} Class ${cls} ${subject}.
+Rules: ONE blank (___) per question, answer 1-4 words, real syllabus content, easy(40%)/medium(40%)/hard(20%).${avoidText}
+Return ONLY valid JSON array: [{"q":"...___...","answer":"...","explanation":"...","difficulty":"easy","chapter":"..."}]`;
+            const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+              method:'POST',
+              headers:{'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01'},
+              body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:6000, messages:[{role:'user',content:prompt}] })
+            });
+            const aiData = await aiRes.json();
+            if (aiData.error) throw new Error(aiData.error.message);
+            let raw = (aiData.content?.[0]?.text||'[]').replace(/```json|```/g,'').trim();
+            const s2 = raw.indexOf('['), e2 = raw.lastIndexOf(']');
+            if (s2!==-1 && e2!==-1) raw = raw.substring(s2, e2+1);
+            return JSON.parse(raw);
+          }
+
+          let accepted = [], attempts = 0;
+          const need = countPerSubject - parseInt(existingCount.rows[0].count);
+          let batch = await callAI(need, existingSample);
+          while (accepted.length < need && attempts < 3) {
+            attempts++;
+            for (const q of batch) {
+              if (!q.q || !q.answer) continue;
+              const dupKey = q.q.trim().toLowerCase();
+              if (existingSet.has(dupKey)) { totalDuplicatesSkipped++; continue; }
+              existingSet.add(dupKey);
+              accepted.push(q);
+              if (accepted.length >= need) break;
+            }
+            if (accepted.length < need && attempts < 3) {
+              const shortfall = need - accepted.length;
+              batch = await callAI(shortfall, [...existingSample, ...accepted.map(a=>a.q)].slice(-15));
+            }
+          }
+
+          let saved = 0;
+          for (const q of accepted) {
+            try {
+              await pool.query(
+                `INSERT INTO bmt_question_bank (board,class,subject,chapter,question,question_type,blank_answer,explanation,difficulty)
+                 VALUES ($1,$2,$3,$4,$5,'blank',$6,$7,$8)`,
+                [board,cls,subject,q.chapter||'',q.q,q.answer,q.explanation||'',q.difficulty||'medium']
+              );
+              saved++;
+            } catch(e) { /* DB-level failure, rare */ }
+          }
+          totalSaved += saved;
+          console.log(`✅ ${board} Cl${cls} ${subject} blanks: ${saved} saved`);
+
+          // Rate limit between subjects to avoid hitting API limits
+          await new Promise(r => setTimeout(r, 1200));
+
+        } catch(e) {
+          errors.push(`${cls} ${subject}: ${e.message}`);
+          console.error(`❌ ${cls} ${subject} blanks:`, e.message);
+        }
+      }
+      console.log(`🎉 Auto-bulk BLANKS complete: ${totalSaved} saved, ${totalDuplicatesSkipped} duplicates skipped. Errors: ${errors.length}`);
+      if (errors.length) console.log('Errors:', errors);
+    })();
+
+  } catch(e) {
+    console.error('Auto-bulk blanks error:', e.message);
+    res.json({ ok: false, msg: e.message });
+  }
+});
+
 // GET bulk generation status
 app.get('/api/admin/qbank/status', async (req, res) => {
   try {
