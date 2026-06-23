@@ -150,6 +150,24 @@ async function initDB() {
       created_by VARCHAR(50) DEFAULT 'admin'
     );
     CREATE INDEX IF NOT EXISTS idx_qbank_lookup ON bmt_question_bank(board, class, subject);
+
+    CREATE TABLE IF NOT EXISTS bmt_lessons (
+      id BIGSERIAL PRIMARY KEY,
+      board VARCHAR(20) NOT NULL,
+      class VARCHAR(5) NOT NULL,
+      subject VARCHAR(100) NOT NULL,
+      chapter VARCHAR(255) NOT NULL,
+      title VARCHAR(255) NOT NULL,
+      lang VARCHAR(10) DEFAULT 'en',
+      intro TEXT,
+      chunks JSONB NOT NULL,
+      checkpoints JSONB NOT NULL,
+      wrapup TEXT,
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE(board, class, subject, chapter)
+    );
+    CREATE INDEX IF NOT EXISTS idx_lessons_lookup ON bmt_lessons(board, class, subject, chapter);
   `);
   console.log('✅ BrightMind DB tables ready');
 }
@@ -780,6 +798,98 @@ app.get('/api/qbank/test', async (req, res) => {
     res.json({ ok: true, total: parseInt(total.rows[0].n), top10: sample.rows });
   } catch(e) {
     res.json({ ok: false, error: e.message });
+  }
+});
+
+// ── INTERACTIVE LESSONS ──────────────────────────────────
+
+// Fetch one full lesson (intro, chunks, checkpoints, wrapup) for the student to take
+app.get('/api/lessons/get', async (req, res) => {
+  try {
+    const { board, class: cls, subject, chapter } = req.query;
+    if (!board || !cls || !subject || !chapter) {
+      return res.json({ ok: false, msg: 'Missing board/class/subject/chapter' });
+    }
+    const result = await pool.query(
+      `SELECT * FROM bmt_lessons WHERE board=$1 AND class=$2 AND subject=$3 AND chapter=$4`,
+      [board, cls, subject, chapter]
+    );
+    if (!result.rows.length) return res.json({ ok: false, msg: 'Lesson not found' });
+    const row = result.rows[0];
+    res.json({
+      ok: true,
+      lesson: {
+        title: row.title,
+        lang: row.lang,
+        intro: row.intro,
+        chunks: row.chunks,
+        checkpoints: row.checkpoints,
+        wrapup: row.wrapup
+      }
+    });
+  } catch (e) {
+    console.error('lessons/get error:', e.message);
+    res.json({ ok: false, msg: e.message });
+  }
+});
+
+// List which board/class/subject/chapter combos have a lesson available
+// (used by the frontend to decide whether to show the "Try Interactive Lesson" button)
+app.get('/api/lessons/available', async (req, res) => {
+  try {
+    const result = await pool.query(`SELECT board, class, subject, chapter FROM bmt_lessons`);
+    res.json({ ok: true, lessons: result.rows });
+  } catch (e) {
+    res.json({ ok: false, lessons: [] });
+  }
+});
+
+// ADMIN — Create or update a lesson
+app.post('/api/admin/lessons/save', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false, msg: 'Unauthorized' });
+    const { board, class: cls, subject, chapter, title, lang, intro, chunks, checkpoints, wrapup } = req.body;
+    if (!board || !cls || !subject || !chapter || !title || !chunks || !checkpoints) {
+      return res.json({ ok: false, msg: 'Missing required lesson fields' });
+    }
+    await pool.query(
+      `INSERT INTO bmt_lessons (board, class, subject, chapter, title, lang, intro, chunks, checkpoints, wrapup, updated_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NOW())
+       ON CONFLICT (board, class, subject, chapter)
+       DO UPDATE SET title=$5, lang=$6, intro=$7, chunks=$8, checkpoints=$9, wrapup=$10, updated_at=NOW()`,
+      [board, cls, subject, chapter, title, lang || 'en', intro || '', JSON.stringify(chunks), JSON.stringify(checkpoints), wrapup || '']
+    );
+    res.json({ ok: true, msg: 'Lesson saved successfully' });
+  } catch (e) {
+    console.error('lessons/save error:', e.message);
+    res.json({ ok: false, msg: e.message });
+  }
+});
+
+// ADMIN — List all lessons (for the admin panel lesson manager)
+app.get('/api/admin/lessons/list', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
+    const result = await pool.query(`SELECT id, board, class, subject, chapter, title, lang, created_at, updated_at FROM bmt_lessons ORDER BY updated_at DESC`);
+    res.json({ ok: true, lessons: result.rows });
+  } catch (e) {
+    res.json({ ok: false, lessons: [] });
+  }
+});
+
+// ADMIN — Delete a lesson
+app.post('/api/admin/lessons/delete', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
+    const { id } = req.body;
+    if (!id) return res.json({ ok: false, msg: 'Missing lesson id' });
+    await pool.query(`DELETE FROM bmt_lessons WHERE id=$1`, [id]);
+    res.json({ ok: true, msg: 'Lesson deleted' });
+  } catch (e) {
+    res.json({ ok: false, msg: e.message });
   }
 });
 
