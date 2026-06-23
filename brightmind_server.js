@@ -904,8 +904,15 @@ app.post('/api/admin/lessons/delete', async (req, res) => {
 
 app.get('/api/qbank/exam', async (req, res) => {
   try {
-    const { board, class: cls, subject, count = 15, student_id } = req.query;
+    const { board, class: cls, subject, count = 15, student_id, qtype = 'any' } = req.query;
     if (!board || !cls || !subject) return res.json({ ok: false, msg: 'Missing params' });
+
+    // qtype: 'any' (default, existing behavior — MCQ + blank mixed),
+    // 'blank' (Fill in the Blanks button — typing-only, no MCQ),
+    // 'mcq' (reserved for future use)
+    const typeFilter = qtype === 'blank' ? `AND question_type='blank'`
+                      : qtype === 'mcq' ? `AND (question_type='mcq' OR question_type IS NULL)`
+                      : ''; // 'any' — no filter, existing mixed behavior unchanged
 
     // Enforce free-tier exam cap server-side (cannot be bypassed from frontend)
     if (student_id) {
@@ -932,7 +939,7 @@ app.get('/api/qbank/exam', async (req, res) => {
     if (board !== 'ANY') {
       result = await pool.query(
         `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks, question_type, blank_answer
-         FROM bmt_question_bank WHERE board=$1 AND class=$2 AND LOWER(subject) LIKE LOWER($3)
+         FROM bmt_question_bank WHERE board=$1 AND class=$2 AND LOWER(subject) LIKE LOWER($3) ${typeFilter}
          ORDER BY RANDOM() LIMIT $4`,
         [board, cls, `%${subject}%`, parseInt(count)]
       );
@@ -941,7 +948,7 @@ app.get('/api/qbank/exam', async (req, res) => {
     if (result.rows.length < 5 && board !== 'ANY') {
       result = await pool.query(
         `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks, question_type, blank_answer
-         FROM bmt_question_bank WHERE board=$1 AND LOWER(subject) LIKE LOWER($2)
+         FROM bmt_question_bank WHERE board=$1 AND LOWER(subject) LIKE LOWER($2) ${typeFilter}
          ORDER BY RANDOM() LIMIT $3`,
         [board, `%${subject}%`, parseInt(count)]
       );
@@ -950,7 +957,7 @@ app.get('/api/qbank/exam', async (req, res) => {
     if (result.rows.length < 5) {
       result = await pool.query(
         `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks, question_type, blank_answer
-         FROM bmt_question_bank WHERE LOWER(subject) LIKE LOWER($1)
+         FROM bmt_question_bank WHERE LOWER(subject) LIKE LOWER($1) ${typeFilter}
          ORDER BY RANDOM() LIMIT $2`,
         [`%${subject}%`, parseInt(count)]
       );
