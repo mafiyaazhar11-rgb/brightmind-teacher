@@ -454,12 +454,15 @@ app.get('/api/admin/stats', async (req, res) => {
     const byState = await pool.query(
       'SELECT state, COUNT(*) as count FROM bmt_students GROUP BY state ORDER BY count DESC'
     );
+    const revenueResult = await pool.query(
+      `SELECT COALESCE(SUM(amount),0) as total FROM bmt_payments WHERE status='success'`
+    );
     res.json({
       ok: true,
       total: parseInt(total.rows[0].count),
       paid:  parseInt(paid.rows[0].count),
       exams: parseInt(exams.rows[0].sum) || 0,
-      revenue: parseInt(paid.rows[0].count) * 199,
+      revenue: parseInt(revenueResult.rows[0].total) || (parseInt(paid.rows[0].count) * 249),
       byState: byState.rows
     });
   } catch (e) {
@@ -1209,7 +1212,7 @@ app.post('/api/ai', async (req, res) => {
           // Reset count if it's a new day
           if (lastDay !== today) qToday = 0;
 
-          const limit = s.is_paid ? (s.plan === 'premium' ? 18 : s.plan === 'all' ? 12 : (s.daily_q_limit ?? 5)) : (s.daily_q_limit ?? 5);
+          const limit = s.is_paid ? (s.plan === 'premium' ? 18 : s.plan === 'all' ? 15 : (s.daily_q_limit ?? 5)) : (s.daily_q_limit ?? 5);
 
           if (qToday >= limit) {
             return res.json({ content: [{ type: 'text', text: 'LIMIT_REACHED' }], limit_reached: true, daily_limit: limit, questions_today: qToday });
