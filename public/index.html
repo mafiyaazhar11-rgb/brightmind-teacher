@@ -1428,6 +1428,30 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
         <button onclick="autoBulkGenerate('TS')" style="background:linear-gradient(135deg,#1a5fff,#4488ff);color:#fff;border:none;padding:10px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;">🌟 Telangana</button>
       </div>
       <div id="adm-qbank-log" style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;font-size:11px;color:rgba(255,255,255,0.7);max-height:200px;overflow-y:auto;font-family:monospace;min-height:40px;"></div>
+
+      <div class="sec-title" style="margin-top:20px;">✍️ Generate Fill-in-the-Blank Questions</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:10px;">Student types the answer — graded with red-pen style spelling tolerance.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <select id="blank-board" style="padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:12px;">
+          <option value="CBSE">CBSE</option>
+          <option value="TN">Tamil Nadu</option>
+          <option value="KL">Kerala</option>
+          <option value="KA">Karnataka</option>
+          <option value="AP">AP Board</option>
+          <option value="TS">Telangana</option>
+        </select>
+        <select id="blank-class" style="padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:12px;">
+          <option value="9">Class 9</option>
+          <option value="10">Class 10</option>
+          <option value="11">Class 11</option>
+          <option value="12">Class 12</option>
+        </select>
+      </div>
+      <input id="blank-subject" placeholder="Subject (e.g. Mathematics)" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:12px;margin-bottom:8px;box-sizing:border-box;"/>
+      <input id="blank-chapter" placeholder="Chapter (optional, e.g. Real Numbers)" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:12px;margin-bottom:8px;box-sizing:border-box;"/>
+      <input id="blank-count" type="number" value="10" min="1" max="30" placeholder="How many questions (default 10)" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:12px;margin-bottom:10px;box-sizing:border-box;"/>
+      <button onclick="generateBlankQuestions()" style="width:100%;background:linear-gradient(135deg,#ff6f00,#ffa726);color:#1a1a1a;border:none;padding:12px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px;">✍️ Generate Fill-in-the-Blank</button>
+      <div id="adm-blank-log" style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;font-size:11px;color:rgba(255,255,255,0.7);max-height:200px;overflow-y:auto;font-family:monospace;min-height:40px;"></div>
     </div>
     <div id="adm-tab-support" style="display:none;">
       <div class="sec-title">💬 Student Support Messages</div>
@@ -2410,9 +2434,11 @@ function renderSubjects(){
         +'<div style="height:4px;background:rgba(255,255,255,0.1);border-radius:4px;margin-bottom:10px;overflow:hidden;">'
         +'<div style="height:100%;width:'+p+'%;background:linear-gradient(90deg,#ffd600,#ff8f00);border-radius:4px;transition:width .8s;"></div>'
         +'</div>'
-        +'<div style="display:flex;gap:6px;">'
+        +'<div style="display:flex;gap:6px;margin-bottom:6px;">'
         +'<button data-id="'+s.id+'" onclick="openSubject(this.dataset.id)" style="flex:1;background:linear-gradient(135deg,#1a237e,#3949ab);color:#fff;border:none;padding:9px 4px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">📚 Study</button>'
         +'<button data-id="'+s.id+'" data-name="'+s.name+'" data-icon="'+s.icon+'" onclick="openInstantExam(this.dataset.id,this.dataset.name,this.dataset.icon)" style="flex:1;background:linear-gradient(135deg,#e65100,#ff6f00);color:#fff;border:none;padding:9px 4px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">📝 Exam</button>'
+        +'</div>'
+        +'<button data-id="'+s.id+'" data-name="'+s.name+'" data-icon="'+s.icon+'" onclick="openBlankExam(this.dataset.id,this.dataset.name,this.dataset.icon)" style="width:100%;background:linear-gradient(135deg,#6a1b9a,#9c27b0);color:#fff;border:none;padding:9px 4px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;">✍️ Fill in the Blanks</button>'
         +'</div></div>';
     });
     if(pair.length===1) cards.push('<div style="flex:1;"></div>');
@@ -4375,6 +4401,38 @@ async function loadQBankStats(){
   }catch(e){el.innerHTML='<div style="color:#ff7043;">Network error: '+e.message+'</div>';}
 }
 
+async function generateBlankQuestions(){
+  const board = document.getElementById('blank-board').value;
+  const cls = document.getElementById('blank-class').value;
+  const subject = document.getElementById('blank-subject').value.trim();
+  const chapter = document.getElementById('blank-chapter').value.trim();
+  const count = parseInt(document.getElementById('blank-count').value) || 10;
+  const log = document.getElementById('adm-blank-log');
+
+  if(!subject){
+    log.innerHTML = '<span style="color:#ff7043;">⚠️ Please enter a subject first.</span>';
+    return;
+  }
+
+  log.innerHTML = `🚀 Generating ${count} fill-in-the-blank questions for ${board} Class ${cls} ${subject}${chapter?' — '+chapter:''}...<br>`;
+
+  try{
+    const res = await fetch(API_URL+'/api/admin/qbank/generate-blanks', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','x-admin-key':'azhar2026'},
+      body: JSON.stringify({ board, class: cls, subject, chapter, count })
+    });
+    const d = await res.json();
+    if(d.ok){
+      log.innerHTML += `<span style="color:#00e676;">✅ Generated ${d.generated}, saved ${d.saved} (duplicates skipped) for ${d.board} Class ${d.class} ${d.subject}</span>`;
+    } else {
+      log.innerHTML += `<span style="color:#ff7043;">❌ Failed: ${d.msg||'unknown error'}</span>`;
+    }
+  }catch(e){
+    log.innerHTML += `<span style="color:#ff7043;">❌ Network error: ${e.message}</span>`;
+  }
+}
+
 async function autoBulkGenerate(board){
   const log=document.getElementById('adm-qbank-log');
   const subjects=['Mathematics','Science','English','Social Science'];
@@ -5006,7 +5064,7 @@ async function openInstantExam(subjectId, subjectName, icon){
       return;
     }
     if(dbData.ok && dbData.questions && dbData.questions.length >= 5){
-      IE.questions = dbData.questions.map(q=>({q:q.question,options:q.options,correct:q.correct,explanation:q.explanation||'',marks:1}));
+      IE.questions = dbData.questions.map(q=>({q:q.question,options:q.options,correct:q.correct,explanation:q.explanation||'',marks:1,question_type:q.question_type||'mcq',blank_answer:q.blank_answer||''}));
       IE.currentQ=0; ieStartTimer(); ieRenderQuestion();
     } else {
       document.getElementById('instant-exam-overlay').style.display='none';
@@ -5020,6 +5078,47 @@ async function openInstantExam(subjectId, subjectName, icon){
 function closeInstantExam(){
   if(IE.timer) clearInterval(IE.timer);
   document.getElementById('instant-exam-overlay').style.display='none';
+}
+
+// Dedicated "Fill in the Blanks" exam — typing only, no MCQ mixed in.
+// Reuses the same Quick Exam overlay/renderer, since ieRenderQuestion()
+// already branches on question_type to show a text box for blanks.
+async function openBlankExam(subjectId, subjectName, icon){
+  if(!S.isPaid && checkTrial(S.user)==='expired'){checkPaywall();return;}
+  IE = {subject:subjectName, subjectId, icon, questions:[], answers:{}, currentQ:0, timer:null, secs:900, startTime:Date.now()};
+  document.getElementById('ie-title').textContent = icon+' '+subjectName+' — Fill in the Blanks';
+  document.getElementById('ie-subtitle').textContent = '10 questions · Type your answer · Spelling-tolerant grading';
+  document.getElementById('ie-body').innerHTML = `
+    <div style="text-align:center;padding:40px 20px;">
+      <div style="font-size:48px;margin-bottom:12px;">✍️</div>
+      <div style="font-size:16px;font-weight:700;color:var(--blue-dark);margin-bottom:6px;">Loading ${subjectName} Fill-in-the-Blanks...</div>
+      <div style="font-size:13px;color:var(--gray-text);">Fetching from question bank</div>
+      <div style="display:flex;gap:6px;justify-content:center;margin-top:16px;">
+        <div style="width:10px;height:10px;background:#9c27b0;border-radius:50%;animation:tdot 1.2s infinite;"></div>
+        <div style="width:10px;height:10px;background:#9c27b0;border-radius:50%;animation:tdot 1.2s .2s infinite;"></div>
+        <div style="width:10px;height:10px;background:#9c27b0;border-radius:50%;animation:tdot 1.2s .4s infinite;"></div>
+      </div>
+    </div>`;
+  document.getElementById('instant-exam-overlay').style.display='flex';
+  try{
+    const dbRes = await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(subjectName)+'&count=10&qtype=blank&student_id='+encodeURIComponent(S.user?.id||''));
+    const dbData = await dbRes.json();
+    if(dbData.msg==='exam_limit_reached'){
+      document.getElementById('instant-exam-overlay').style.display='none';
+      document.getElementById('paywall-overlay').classList.add('open');
+      return;
+    }
+    if(dbData.ok && dbData.questions && dbData.questions.length >= 5){
+      IE.questions = dbData.questions.map(q=>({q:q.question,options:q.options,correct:q.correct,explanation:q.explanation||'',marks:1,question_type:q.question_type||'blank',blank_answer:q.blank_answer||''}));
+      IE.currentQ=0; ieStartTimer(); ieRenderQuestion();
+    } else {
+      document.getElementById('instant-exam-overlay').style.display='none';
+      alert('No Fill-in-the-Blank questions yet for: '+subjectName+'\nBoard: '+(S.user?.board||'CBSE')+' | Class: '+(S.user?.class||9)+'\n\nAdmin: go to Q-Bank tab and generate Fill-in-the-Blank questions for this subject first.');
+    }
+  }catch(e){
+    document.getElementById('instant-exam-overlay').style.display='none';
+    alert('Exam load error: '+e.message+'\n\nPlease screenshot this and report to admin.');
+  }
 }
 
 function ieStartTimer(){
