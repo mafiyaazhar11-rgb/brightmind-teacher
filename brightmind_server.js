@@ -65,6 +65,7 @@ async function initDB() {
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS demo_exam_limit INTEGER DEFAULT 999;
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS demo_exam_used INTEGER DEFAULT 0;
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS blackboard_today INTEGER DEFAULT 0;
+    ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS medium VARCHAR(10) DEFAULT 'english';
     ALTER TABLE bmt_students ADD COLUMN IF NOT EXISTS last_blackboard_day TIMESTAMP;
     CREATE UNIQUE INDEX IF NOT EXISTS bmt_students_email_unique ON bmt_students(email) WHERE email IS NOT NULL;
 
@@ -186,6 +187,7 @@ function sanitize(s) {
   return {
     id: s.id, name: s.name, email: s.email||null, board: s.board || 'CBSE',
     class: s.class, state: s.state, stream: s.stream || 'science', stream: s.stream || 'science',
+    medium: s.medium || 'english',
     is_paid: s.is_paid || false, plan: s.plan || 'free',
     subscription_type: s.subscription_type || 'monthly',
     sub_expiry: s.subscription_end || null,
@@ -216,11 +218,12 @@ function sanitize(s) {
 // REGISTER
 app.post('/api/register', async (req, res) => {
   try {
-    const { name, password, board, class: cls, state, mobile, email, stream } = req.body;
+    const { name, password, board, class: cls, state, mobile, email, stream, medium } = req.body;
     if (!name || !password || !cls || !state) return res.json({ ok: false, msg: 'Please fill all fields!' });
     // Defensive cleanup: board/state must be single clean values, never comma-joined
     const cleanBoard = board ? board.split(',')[0].trim() : 'CBSE';
     const cleanState = state.split(',')[0].trim();
+    const cleanMedium = (medium === 'tamil') ? 'tamil' : 'english'; // default safe to english
 
     // Enforce Class 9-12 only — BrightMind Teacher targets senior school students
     const clsNum = parseInt(cls);
@@ -242,9 +245,9 @@ app.post('/api/register', async (req, res) => {
 
     // FREE TIER LIMITS: 5 questions/day, 0 photo uploads, max 2 quick exams lifetime
     await pool.query(
-      `INSERT INTO bmt_students (name, password, board, class, state, email, mobile, stream, reg_on, daily_q_limit, daily_photo_limit, demo_exam_limit, demo_exam_used)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW(),5,0,2,0)`,
-      [name, password, cleanBoard, cls, cleanState, email || null, mobile || null, stream || 'science']
+      `INSERT INTO bmt_students (name, password, board, class, state, email, mobile, stream, medium, reg_on, daily_q_limit, daily_photo_limit, demo_exam_limit, demo_exam_used)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW(),5,0,2,0)`,
+      [name, password, cleanBoard, cls, cleanState, email || null, mobile || null, stream || 'science', cleanMedium]
     );
 
     // Audit log
