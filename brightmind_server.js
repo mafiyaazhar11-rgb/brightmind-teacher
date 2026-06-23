@@ -138,11 +138,11 @@ async function initDB() {
       chapter VARCHAR(200),
       topic VARCHAR(200),
       question TEXT NOT NULL,
-      option_a TEXT NOT NULL,
-      option_b TEXT NOT NULL,
-      option_c TEXT NOT NULL,
-      option_d TEXT NOT NULL,
-      correct_answer VARCHAR(1) NOT NULL,
+      option_a TEXT,
+      option_b TEXT,
+      option_c TEXT,
+      option_d TEXT,
+      correct_answer VARCHAR(1),
       explanation TEXT,
       difficulty VARCHAR(10) DEFAULT 'medium',
       marks INTEGER DEFAULT 1,
@@ -150,6 +150,15 @@ async function initDB() {
       created_by VARCHAR(50) DEFAULT 'admin'
     );
     CREATE INDEX IF NOT EXISTS idx_qbank_lookup ON bmt_question_bank(board, class, subject);
+    -- Fill-in-the-blank support: existing rows default to 'mcq', untouched.
+    ALTER TABLE bmt_question_bank ADD COLUMN IF NOT EXISTS question_type VARCHAR(20) DEFAULT 'mcq';
+    ALTER TABLE bmt_question_bank ADD COLUMN IF NOT EXISTS blank_answer TEXT;
+    -- Relax NOT NULL on MCQ-only columns so fill-in-the-blank rows can omit them safely.
+    ALTER TABLE bmt_question_bank ALTER COLUMN option_a DROP NOT NULL;
+    ALTER TABLE bmt_question_bank ALTER COLUMN option_b DROP NOT NULL;
+    ALTER TABLE bmt_question_bank ALTER COLUMN option_c DROP NOT NULL;
+    ALTER TABLE bmt_question_bank ALTER COLUMN option_d DROP NOT NULL;
+    ALTER TABLE bmt_question_bank ALTER COLUMN correct_answer DROP NOT NULL;
 
     CREATE TABLE IF NOT EXISTS bmt_lessons (
       id BIGSERIAL PRIMARY KEY,
@@ -922,7 +931,7 @@ app.get('/api/qbank/exam', async (req, res) => {
     // Level 1: exact board + class + subject
     if (board !== 'ANY') {
       result = await pool.query(
-        `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks
+        `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks, question_type, blank_answer
          FROM bmt_question_bank WHERE board=$1 AND class=$2 AND LOWER(subject) LIKE LOWER($3)
          ORDER BY RANDOM() LIMIT $4`,
         [board, cls, `%${subject}%`, parseInt(count)]
@@ -931,7 +940,7 @@ app.get('/api/qbank/exam', async (req, res) => {
     // Level 2: any class same board
     if (result.rows.length < 5 && board !== 'ANY') {
       result = await pool.query(
-        `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks
+        `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks, question_type, blank_answer
          FROM bmt_question_bank WHERE board=$1 AND LOWER(subject) LIKE LOWER($2)
          ORDER BY RANDOM() LIMIT $3`,
         [board, `%${subject}%`, parseInt(count)]
@@ -940,7 +949,7 @@ app.get('/api/qbank/exam', async (req, res) => {
     // Level 3: any board any class — just match subject
     if (result.rows.length < 5) {
       result = await pool.query(
-        `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks
+        `SELECT question, option_a, option_b, option_c, option_d, correct_answer, explanation, marks, question_type, blank_answer
          FROM bmt_question_bank WHERE LOWER(subject) LIKE LOWER($1)
          ORDER BY RANDOM() LIMIT $2`,
         [`%${subject}%`, parseInt(count)]
@@ -948,9 +957,22 @@ app.get('/api/qbank/exam', async (req, res) => {
     }
     if (result.rows.length < 5) return res.json({ ok: false, msg: 'no_questions' });
 
-    // Shuffle options so correct answer is NOT always A
+    // Shuffle options so correct answer is NOT always A (MCQ only).
+    // Fill-in-the-blank rows pass through with no options, graded by typed text match.
     const LETTERS = ['A','B','C','D'];
     const questions = result.rows.map(q => {
+      const qType = q.question_type || 'mcq';
+
+      if (qType === 'blank') {
+        return {
+          question: q.question || 'Question unavailable',
+          question_type: 'blank',
+          blank_answer: q.blank_answer || '',
+          explanation: q.explanation || '',
+          marks: q.marks || 1
+        };
+      }
+
       // Null-safe option values
       const a = q.option_a || 'Option A';
       const b = q.option_b || 'Option B';
@@ -975,6 +997,7 @@ app.get('/api/qbank/exam', async (req, res) => {
       const newCorrect = shuffled.find(o => o.wasCorrect)?.newLetter || 'A';
       return {
         question: q.question || 'Question unavailable',
+        question_type: 'mcq',
         options: shuffled.map(o => o.newLetter + ') ' + o.text),
         correct: newCorrect,
         explanation: q.explanation || '',
@@ -1039,6 +1062,77 @@ Return ONLY valid JSON array:
     }
     res.json({ ok:true, generated:questions.length, saved, board, class:cls, subject });
   } catch(e) { res.json({ ok:false, msg:e.message }); }
+});
+
+// FILL-IN-THE-BLANK GENERATOR — separate from MCQ, student types the answer,
+// AI grades it generously (accepts spelling variations) at exam-submit time.
+app.post('/api/admin/qbank/generate-blanks', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
+    const { board, class: cls, subject, chapter, topic, count = 10 } = req.body;
+    if (!board || !cls || !subject) return res.status(400).json({ ok: false, msg: 'Missing params' });
+    const boardFull = {CBSE:'CBSE',TN:'Tamil Nadu State Board',KL:'Kerala Board',KA:'Karnataka Board',AP:'AP Board',TS:'Telangana Board'}[board]||board;
+    const prompt = `Generate EXACTLY ${count} fill-in-the-blank questions for ${boardFull} Class ${cls} ${subject}${chapter?' Chapter: '+chapter:''}${topic?' Topic: '+topic:''}.
+Rules: Each question must have ONE blank (shown as ___) for a single word or short phrase answer. Real syllabus content. The answer should be short (1-4 words) so a student can type it quickly. Include easy(40%)/medium(40%)/hard(20%).
+Return ONLY valid JSON array:
+[{"q":"The capital of India is ___.","answer":"New Delhi","explanation":"why this is correct","difficulty":"easy","chapter":"chap name"}]`;
+    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01'},
+      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:3000, messages:[{role:'user',content:prompt}] })
+    });
+    const aiData = await aiRes.json();
+    if (aiData.error) return res.json({ ok:false, msg:aiData.error.message });
+    let raw = (aiData.content?.[0]?.text||'[]').replace(/```json|```/g,'').trim();
+    let questions;
+    try { questions = JSON.parse(raw); } catch(e) { return res.json({ ok:false, msg:'Invalid JSON from AI', raw:raw.substring(0,300) }); }
+    if (!Array.isArray(questions)||!questions.length) return res.json({ ok:false, msg:'No questions returned' });
+    let saved = 0;
+    for (const q of questions) {
+      if (!q.q||!q.answer) continue;
+      try {
+        await pool.query(
+          `INSERT INTO bmt_question_bank (board,class,subject,chapter,topic,question,question_type,blank_answer,explanation,difficulty)
+           VALUES ($1,$2,$3,$4,$5,$6,'blank',$7,$8,$9)`,
+          [board,cls,subject,q.chapter||chapter||'',topic||'',q.q,q.answer,q.explanation||'',q.difficulty||'medium']
+        );
+        saved++;
+      } catch(e) { /* skip duplicates */ }
+    }
+    res.json({ ok:true, generated:questions.length, saved, board, class:cls, subject });
+  } catch(e) { res.json({ ok:false, msg:e.message }); }
+});
+
+// GRADE a fill-in-the-blank answer — generous matching: accepts minor spelling
+// mistakes/case differences, marks exact-or-close matches correct, like a
+// teacher's red pen circling small errors but still giving the mark.
+app.post('/api/qbank/grade-blank', async (req, res) => {
+  try {
+    const { question, correctAnswer, studentAnswer } = req.body;
+    if (!question || !correctAnswer || studentAnswer === undefined) {
+      return res.json({ ok: false, msg: 'Missing question/correctAnswer/studentAnswer' });
+    }
+    const sys = `You are a teacher marking a fill-in-the-blank answer with a red pen. Be generous with minor spelling mistakes (1-2 letters off, capitalization, extra/missing space) — mark these CORRECT but note the spelling slip. Only mark INCORRECT if the meaning is genuinely wrong. Respond with ONLY valid JSON: {"correct":true|false,"spelling_note":"e.g. 'Delhi' not 'Dehli' — small spelling slip, marked correct" or "" if no issue,"remark":"one short teacher remark"}`;
+    const prompt = `Question: ${question}\nCorrect answer: ${correctAnswer}\nStudent's typed answer: "${studentAnswer}"\n\nGrade this.`;
+    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01'},
+      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:150, system:sys, messages:[{role:'user',content:prompt}] })
+    });
+    const aiData = await aiRes.json();
+    if (aiData.error) {
+      // Fallback: simple case-insensitive exact match if AI grading fails
+      const isMatch = studentAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+      return res.json({ ok: true, correct: isMatch, spelling_note: '', remark: isMatch ? 'Correct!' : 'Not quite right.' });
+    }
+    let raw = (aiData.content?.[0]?.text||'{}').replace(/```json|```/g,'').trim();
+    let result;
+    try { result = JSON.parse(raw); } catch(e) { result = { correct: false, spelling_note: '', remark: 'Could not grade automatically.' }; }
+    res.json({ ok: true, ...result });
+  } catch(e) {
+    res.json({ ok: false, msg: e.message });
+  }
 });
 
 // AUTO BULK GENERATE — one API call generates ALL subjects for a board
