@@ -1236,10 +1236,16 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     <!-- Lesson content rendered by JS -->
   </div>
 
-  <!-- Mic footer for spoken answers — only shown during checkpoint questions -->
-  <div id="lesson-mic-footer" style="display:none;padding:14px;background:#3d2008;display:flex;align-items:center;gap:10px;flex-shrink:0;">
-    <div style="flex:1;color:#fff;font-size:13px;" id="lesson-mic-hint">🎤 Tap to answer with your voice</div>
-    <button id="lesson-mic-btn" onclick="lessonStartMic()" style="width:54px;height:54px;background:linear-gradient(135deg,#ffd600,#ff8f00);border:none;border-radius:50%;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(255,214,0,0.4);flex-shrink:0;">🎤</button>
+  <!-- Mic + Type footer for checkpoint answers — only shown during checkpoint questions -->
+  <div id="lesson-mic-footer" style="display:none;padding:12px 14px;background:#3d2008;flex-direction:column;gap:8px;flex-shrink:0;">
+    <div style="color:#fff;font-size:12px;" id="lesson-mic-hint">🎤 Tap to speak, or type your answer below</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <input type="text" id="lesson-type-inp" placeholder="Type your answer here..." autocomplete="off"
+        style="flex:1;padding:12px 14px;border-radius:10px;border:none;font-size:14px;font-family:Arial,sans-serif;"
+        onkeydown="if(event.key==='Enter')lessonSubmitTyped()"/>
+      <button onclick="lessonSubmitTyped()" style="background:linear-gradient(135deg,#00c853,#00e676);border:none;width:48px;height:48px;border-radius:10px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✓</button>
+      <button id="lesson-mic-btn" onclick="lessonStartMic()" style="width:48px;height:48px;background:linear-gradient(135deg,#ffd600,#ff8f00);border:none;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(255,214,0,0.4);flex-shrink:0;">🎤</button>
+    </div>
   </div>
 </div>
 
@@ -2898,7 +2904,7 @@ function lessonAskCheckpoint(cpIndex){
   `);
   lessonSpeak(cp.question);
   document.getElementById('lesson-mic-footer').style.display='flex';
-  document.getElementById('lesson-mic-hint').textContent='🎤 Tap to answer with your voice';
+  document.getElementById('lesson-mic-hint').textContent='🎤 Tap to speak, or type your answer below';
 }
 
 function lessonStartMic(){
@@ -2936,6 +2942,20 @@ function lessonStartMic(){
 }
 
 // THE ONLY AI CALL IN THE WHOLE LESSON — grades one short spoken answer.
+function lessonSubmitTyped(){
+  const inp = document.getElementById('lesson-type-inp');
+  const answer = inp?.value.trim();
+  if(!answer){
+    const hint = document.getElementById('lesson-mic-hint');
+    if(hint) hint.textContent = '✍️ Please type something first, or use the mic!';
+    return;
+  }
+  inp.value = '';
+  const disp = document.getElementById('lesson-answer-display');
+  if(disp) disp.textContent = 'You typed: "'+answer+'"';
+  lessonGradeAnswer(answer);
+}
+
 async function lessonGradeAnswer(studentAnswer){
   const hint=document.getElementById('lesson-mic-hint');
   hint.textContent='🧠 Checking your answer...';
@@ -3921,9 +3941,35 @@ function renderExamQ(){
   document.getElementById('exam-qnum').textContent=`Q ${S.examIdx+1} of ${tot}`;
   document.getElementById('exam-prog').style.width=((S.examIdx/tot)*100)+'%';
   const done=Object.keys(S.examAns).length;
-  const corr=Object.entries(S.examAns).filter(([i,a])=>S.examQs[i]?.correct===a).length;
+  const corr=Object.entries(S.examAns).filter(([i,a])=>S.examQs[i]?.correct===(a?.letter??a)).length;
   document.getElementById('exam-live').textContent=`Score: ${corr}/${done}`;
   const saved=S.examAns[S.examIdx];
+
+  // FILL-IN-THE-BLANK question
+  if(q.question_type==='blank'){
+    const gradedResult = saved && typeof saved==='object' ? saved : null;
+    document.getElementById('exam-body').innerHTML=`
+      <div class="exam-q-card">
+        <div class="exam-qnum">QUESTION ${S.examIdx+1} OF ${tot} · ✍️ FILL IN THE BLANK</div>
+        <div class="exam-qtext">${q.q}</div>
+        <input type="text" id="blank-inp-${S.examIdx}" placeholder="Type your answer..." value="${gradedResult?gradedResult.typed:''}" ${gradedResult?'disabled':''}
+          style="width:100%;padding:14px 16px;border-radius:12px;border:2px solid ${gradedResult?(gradedResult.correct?'#4caf50':'#f44336'):'var(--gray-mid)'};font-size:16px;font-family:Arial,sans-serif;margin-top:12px;box-sizing:border-box;"
+          onkeydown="if(event.key==='Enter')submitBlankAnswer(${S.examIdx})"/>
+        ${!gradedResult?`<button onclick="submitBlankAnswer(${S.examIdx})" style="margin-top:10px;width:100%;background:var(--blue-mid);color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Check Answer ✓</button>`:''}
+        ${gradedResult?`<div style="margin-top:12px;padding:12px 14px;background:${gradedResult.correct?'#e8f5e9':'#ffebee'};border-radius:10px;">
+          <div style="font-weight:700;color:${gradedResult.correct?'#2e7d32':'#c62828'};">${gradedResult.correct?'✅ Correct!':'❌ Not quite'} — Answer: <span style="text-decoration:underline;">${q.blank_answer}</span></div>
+          ${gradedResult.spelling_note?`<div style="color:#e65100;font-size:13px;margin-top:6px;font-style:italic;">✏️ ${gradedResult.spelling_note}</div>`:''}
+          <div style="color:#555;font-size:13px;margin-top:6px;">${gradedResult.remark||q.explanation||''}</div>
+        </div>`:''}
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="btn-main" onclick="nextQ()" style="flex:1;">Next →</button>
+        <button onclick="submitExam()" style="flex:1;background:var(--gold);color:var(--blue-dark);font-size:15px;font-weight:700;padding:14px;border-radius:12px;border:none;cursor:pointer;">Submit ✓</button>
+      </div>`;
+    return;
+  }
+
+  // MCQ question (existing behavior, unchanged)
   document.getElementById('exam-body').innerHTML=`
     <div class="exam-q-card">
       <div class="exam-qnum">QUESTION ${S.examIdx+1} OF ${tot}</div>
@@ -3940,12 +3986,38 @@ function renderExamQ(){
       <button onclick="submitExam()" style="flex:1;background:var(--gold);color:var(--blue-dark);font-size:15px;font-weight:700;padding:14px;border-radius:12px;border:none;cursor:pointer;">Submit ✓</button>
     </div>`;
 }
+
+async function submitBlankAnswer(idx){
+  const inp = document.getElementById('blank-inp-'+idx);
+  const typed = inp?.value.trim();
+  if(!typed) return;
+  const q = S.examQs[idx];
+
+  try{
+    const r = await fetch(API_URL+'/api/qbank/grade-blank', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ question: q.q, correctAnswer: q.blank_answer, studentAnswer: typed })
+    });
+    const d = await r.json();
+    S.examAns[idx] = { letter: d.correct ? 'CORRECT' : 'WRONG', typed, correct: d.correct, spelling_note: d.spelling_note||'', remark: d.remark||'' };
+  }catch(e){
+    // Fallback: simple case-insensitive match if grading API fails
+    const isMatch = typed.toLowerCase() === (q.blank_answer||'').toLowerCase();
+    S.examAns[idx] = { letter: isMatch?'CORRECT':'WRONG', typed, correct: isMatch, spelling_note:'', remark: isMatch?'Correct!':'Not quite right.' };
+  }
+  renderExamQ();
+}
+
 function pickOpt(letter){if(S.examAns[S.examIdx])return;S.examAns[S.examIdx]=letter;renderExamQ();}
 function nextQ(){if(S.examIdx<S.examQs.length-1){S.examIdx++;renderExamQ();}else submitExam();}
 function submitExam(){
   if(S.examTimer)clearInterval(S.examTimer);
   const tot=S.examQs.length;
-  const corr=Object.entries(S.examAns).filter(([i,a])=>S.examQs[i]?.correct===a).length;
+  const corr=Object.entries(S.examAns).filter(([i,a])=>{
+    const q=S.examQs[i];
+    if(q?.question_type==='blank') return a && typeof a==='object' && a.correct;
+    return q?.correct===a;
+  }).length;
   const score=Math.round((corr/tot)*100);const passed=score>=45;
   document.getElementById('exam-overlay').classList.remove('open');
   showResult(score,corr,tot,passed);
@@ -4970,13 +5042,43 @@ function ieRenderQuestion(){
   if(!q) return;
   const tot = IE.questions.length;
   const done = Object.keys(IE.answers).length;
-  const corr = Object.entries(IE.answers).filter(([i,a])=>IE.questions[i]?.correct===a).length;
+  const corr = Object.entries(IE.answers).filter(([i,a])=>{
+    const qq=IE.questions[i];
+    if(qq?.question_type==='blank') return a && typeof a==='object' && a.correct;
+    return qq?.correct===a;
+  }).length;
 
   document.getElementById('ie-qnum').textContent = `Question ${IE.currentQ+1} of ${tot}`;
   document.getElementById('ie-score').textContent = `Score: ${corr}/${done}`;
   document.getElementById('ie-prog').style.width = ((IE.currentQ/tot)*100)+'%';
 
   const saved = IE.answers[IE.currentQ];
+
+  // FILL-IN-THE-BLANK question
+  if(q.question_type==='blank'){
+    const graded = saved && typeof saved==='object' ? saved : null;
+    document.getElementById('ie-body').innerHTML=`
+      <div style="background:#fff;border-radius:16px;padding:18px;box-shadow:0 2px 12px rgba(13,27,75,.08);">
+        <div style="font-size:11px;font-weight:700;color:#e53935;letter-spacing:1px;margin-bottom:8px;">QUESTION ${IE.currentQ+1} OF ${tot} · ✍️ FILL IN THE BLANK</div>
+        <div style="font-size:16px;font-weight:600;color:var(--blue-dark);line-height:1.6;margin-bottom:16px;">${q.q}</div>
+        <input type="text" id="ie-blank-inp-${IE.currentQ}" placeholder="Type your answer..." value="${graded?graded.typed:''}" ${graded?'disabled':''}
+          style="width:100%;padding:14px 16px;border-radius:12px;border:2px solid ${graded?(graded.correct?'#4caf50':'#f44336'):'var(--gray-mid)'};font-size:16px;font-family:Arial,sans-serif;box-sizing:border-box;"
+          onkeydown="if(event.key==='Enter')ieSubmitBlankAnswer(${IE.currentQ})"/>
+        ${!graded?`<button onclick="ieSubmitBlankAnswer(${IE.currentQ})" style="margin-top:10px;width:100%;background:#e53935;color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Check Answer ✓</button>`:''}
+        ${graded?`<div style="margin-top:12px;padding:12px;background:${graded.correct?'#e8f5e9':'#ffebee'};border-radius:10px;font-size:13px;line-height:1.5;">
+          <div style="font-weight:700;color:${graded.correct?'#1b5e20':'#b71c1c'};">${graded.correct?'✅ Correct!':'❌ Not quite'} — Answer: <span style="text-decoration:underline;">${q.blank_answer}</span></div>
+          ${graded.spelling_note?`<div style="color:#e65100;margin-top:6px;font-style:italic;">✏️ ${graded.spelling_note}</div>`:''}
+          <div style="color:var(--blue-dark);margin-top:6px;">${graded.remark||q.explanation||''}</div>
+        </div>`:''}
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button onclick="ieNext()" style="flex:1;background:#e53935;color:#fff;font-size:15px;font-weight:700;padding:14px;border-radius:12px;border:none;cursor:pointer;">Next Question →</button>
+        <button onclick="ieSubmit()" style="flex:1;background:var(--gold);color:var(--blue-dark);font-size:15px;font-weight:700;padding:14px;border-radius:12px;border:none;cursor:pointer;">Submit ✓</button>
+      </div>`;
+    return;
+  }
+
+  // MCQ question (existing behavior, unchanged)
   document.getElementById('ie-body').innerHTML=`
     <div style="background:#fff;border-radius:16px;padding:18px;box-shadow:0 2px 12px rgba(13,27,75,.08);">
       <div style="font-size:11px;font-weight:700;color:#e53935;letter-spacing:1px;margin-bottom:8px;">QUESTION ${IE.currentQ+1} OF ${tot}</div>
@@ -5005,6 +5107,26 @@ function ieRenderQuestion(){
     </div>`;
 }
 
+async function ieSubmitBlankAnswer(idx){
+  const inp = document.getElementById('ie-blank-inp-'+idx);
+  const typed = inp?.value.trim();
+  if(!typed) return;
+  const q = IE.questions[idx];
+
+  try{
+    const r = await fetch(API_URL+'/api/qbank/grade-blank', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ question: q.q, correctAnswer: q.blank_answer, studentAnswer: typed })
+    });
+    const d = await r.json();
+    IE.answers[idx] = { typed, correct: d.correct, spelling_note: d.spelling_note||'', remark: d.remark||'' };
+  }catch(e){
+    const isMatch = typed.toLowerCase() === (q.blank_answer||'').toLowerCase();
+    IE.answers[idx] = { typed, correct: isMatch, spelling_note:'', remark: isMatch?'Correct!':'Not quite right.' };
+  }
+  ieRenderQuestion();
+}
+
 function ieSelectAnswer(letter){iePickOpt(letter);}
 function iePickOpt(letter){
   if(IE.answers[IE.currentQ]) return;
@@ -5026,7 +5148,11 @@ async function ieSubmit(){
   closeInstantExam();
 
   const tot = IE.questions.length;
-  const corr = Object.entries(IE.answers).filter(([i,a])=>IE.questions[i]?.correct===a).length;
+  const corr = Object.entries(IE.answers).filter(([i,a])=>{
+    const q=IE.questions[i];
+    if(q?.question_type==='blank') return a && typeof a==='object' && a.correct;
+    return q?.correct===a;
+  }).length;
   const score = Math.round((corr/tot)*100);
   const timeTaken = Math.round((Date.now()-IE.startTime)/60000);
 
@@ -5150,7 +5276,31 @@ function showCorrectedPaper(score, corr, tot, timeTaken){
     <div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 12px rgba(13,27,75,.08);">
       <div style="font-family:'Times New Roman',serif;font-size:14px;font-weight:bold;margin-bottom:12px;">DETAILED CORRECTION</div>
       ${IE.questions.map((q,i)=>{
-        const studentAns = IE.answers[i]||'—';
+        const saved = IE.answers[i];
+
+        if(q.question_type==='blank'){
+          const graded = saved && typeof saved==='object' ? saved : null;
+          const isCorrect = graded?.correct || false;
+          const typedAns = graded?.typed || '—';
+          return `<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #eee;">
+            <div style="display:flex;align-items:flex-start;gap:8px;">
+              <span style="background:${isCorrect?'#4caf50':'#f44336'};color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;flex-shrink:0;margin-top:2px;">${i+1}</span>
+              <div style="flex:1;">
+                <div style="font-size:13px;color:var(--blue-dark);line-height:1.5;margin-bottom:6px;">✍️ ${q.q}</div>
+                <div style="font-size:12px;margin-bottom:3px;">
+                  <span style="color:#555;">Your answer: </span>
+                  <span style="color:${isCorrect?'#4caf50':'#f44336'};font-weight:700;${!isCorrect?'text-decoration:line-through;':''}">${typedAns}</span>
+                  ${!isCorrect?`&nbsp;&nbsp;<span style="color:#555;">Correct: </span><span style="color:#4caf50;font-weight:700;">${q.blank_answer} ✓</span>`:' ✓'}
+                </div>
+                ${graded?.spelling_note?`<div style="font-size:11px;color:#e65100;font-family:'Segoe Script','Comic Sans MS',cursive;line-height:1.5;margin-top:4px;">✏️ ${graded.spelling_note}</div>`:''}
+                ${!isCorrect?`<div style="font-size:11px;color:#c62828;font-family:'Segoe Script','Comic Sans MS',cursive;line-height:1.5;margin-top:4px;">${q.explanation||graded?.remark||''}</div>`:''}
+              </div>
+              <div style="font-size:14px;color:${isCorrect?'#4caf50':'#f44336'};font-weight:bold;flex-shrink:0;">${isCorrect?'+1':'0'}</div>
+            </div>
+          </div>`;
+        }
+
+        const studentAns = saved||'—';
         const isCorrect = studentAns===q.correct;
         return `<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #eee;">
           <div style="display:flex;align-items:flex-start;gap:8px;">
