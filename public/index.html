@@ -2523,125 +2523,6 @@ const SOUTH_SYLLABUS={
 Object.assign(SYLLABUS, SOUTH_SYLLABUS);
 
 // ══════════════════════════════════════════════════════════════
-// INTERACTIVE LESSON DATA — pre-written teaching scripts.
-// AI is called ONLY at each checkpoint, to grade the student's
-// spoken answer. Everything else (chunks, questions, reactions)
-// is fixed content, written once, used unlimited times for free.
-// ══════════════════════════════════════════════════════════════
-const LESSON_DATA = {
-  'CBSE_9_Democratic Politics I': {
-    title: 'Democratic Politics I',
-    lang: 'en',
-    intro: "Hello! Today we're learning about Democracy — what it really means, and why it matters so much in a country like India. By the end of this lesson, you'll be able to explain what makes a government 'democratic' and why people value it. Let's begin!",
-    chunks: [
-      {
-        title: "What is Democracy?",
-        text: "Democracy is a form of government where the rulers are elected by the people. In a democracy, ordinary citizens — not kings, not the army, not a small group of rich people — choose who governs them. This happens through free and fair elections, where every adult citizen has the right to vote.",
-      },
-      {
-        title: "Key Features",
-        text: "A democracy has some important features. First, only one final decision-making body, like a Parliament, holds real power. Second, this body is chosen by the people through elections. Third, these elections offer a real choice between different parties and candidates — not just one option. Fourth, every adult citizen has one vote with equal value.",
-      },
-      {
-        title: "Why India Chose Democracy",
-        text: "When India became independent in 1947, our leaders chose democracy because they believed every citizen — rich or poor, man or woman, from any caste or religion — deserved an equal say in how the country is run. This was a bold choice, since India was a huge, diverse country, and many doubted democracy could work here.",
-      },
-      {
-        title: "Democracy vs Other Governments",
-        text: "Compare this to a monarchy, where one king or queen rules for life, passing power to their children, with no say from the people. Or a military dictatorship, where the army controls the government by force. In both cases, ordinary citizens have no real way to remove the rulers if they're unhappy. Democracy gives people that power, through voting.",
-      },
-      {
-        title: "Why It Matters",
-        text: "Democracy matters because it makes governments accountable to the people. If a government performs badly, citizens can vote them out in the next election. This keeps leaders responsible, encourages them to work for the public good, and protects the rights and dignity of every citizen, no matter how powerful or powerless they are.",
-      },
-    ],
-    checkpoints: [
-      {
-        question: "In your own words, what is democracy?",
-        expectedAnswer: "A form of government where rulers are chosen by the people through elections, where everyone gets to vote.",
-        keyPoints: ["elected by people", "voting", "citizens choose"],
-      },
-      {
-        question: "Can you name one key feature that makes a government truly democratic?",
-        expectedAnswer: "Elections must be free and fair, offering a real choice between parties, with one vote per adult citizen.",
-        keyPoints: ["free and fair elections", "equal vote", "real choice between parties"],
-      },
-      {
-        question: "Why did India's leaders choose democracy when we became independent?",
-        expectedAnswer: "Because they believed every citizen deserved an equal say in governing the country, regardless of background.",
-        keyPoints: ["equal say", "every citizen", "regardless of background"],
-      },
-      {
-        question: "What is one key difference between a democracy and a monarchy?",
-        expectedAnswer: "In a monarchy, one ruler holds power for life and passes it to their children; in a democracy, people choose and can remove their rulers.",
-        keyPoints: ["monarchy passes power by birth", "democracy people choose", "people can remove rulers"],
-      },
-      {
-        question: "Why does democracy matter? Give one reason.",
-        expectedAnswer: "It makes governments accountable — if they perform badly, people can vote them out, keeping leaders responsible.",
-        keyPoints: ["accountable", "vote out", "responsible to people"],
-      },
-    ],
-    wrapup: "Wonderful work today! You now understand what democracy means, its key features, why India chose it, how it's different from other governments, and why it matters. Want to try a few practice questions on this chapter, or move on to the next topic?",
-  },
-
-  'TN_9_Civics: Forms of Government and Democracy': {
-    title: 'அரசாங்க அமைப்புகள் மற்றும் மக்களாட்சி (Forms of Government and Democracy)',
-    lang: 'ta-en',
-    intro: "வணக்கம்! Today நாம் படிக்கப் போவது Forms of Government மற்றும் Democracy பற்றி — அதாவது, அரசாங்கம் எப்படி பல வகைகளில் இருக்கும், and ஏன் democracy ஒரு சிறந்த அமைப்பு என்று. Let's begin!",
-    chunks: [
-      {
-        title: "Forms of Government — அரசாங்க வகைகள்",
-        text: "அரசாங்கங்கள் (Governments) பல வகைகளில் இருக்கும். Monarchy-ல் ஒரு King அல்லது Queen ஆட்சி செய்வார். Dictatorship-ல் ஒரு நபர் அல்லது குழு, மக்களின் ஒப்புதல் இல்லாமல் ஆட்சி செய்வார். Democracy-ல், மக்களே தங்கள் தலைவர்களை தேர்தலின் மூலம் தேர்ந்தெடுக்கிறார்கள்.",
-      },
-      {
-        title: "Democracy என்றால் என்ன?",
-        text: "Democracy என்ற சொல் Greek மொழியில் இருந்து வந்தது — 'Demos' என்றால் மக்கள், 'Kratos' என்றால் ஆட்சி. அதாவது, மக்களே ஆட்சி செய்வது. Democracy-ல், இறுதி அதிகாரம் (final authority) மக்களிடம்தான் இருக்கும், ஒரு அரசரிடமோ அல்லது ஒரு சிறு குழுவிடமோ இல்லை.",
-      },
-      {
-        title: "Direct மற்றும் Indirect Democracy",
-        text: "Direct Democracy-ல், மக்கள் நேரடியாக முடிவுகளை எடுப்பார்கள் — Switzerland-ல் இது நடைமுறையில் உள்ளது. ஆனால் பெரிய நாடுகளில் இது சாத்தியமில்லை, அதனால் Indirect Democracy பின்பற்றப்படுகிறது — மக்கள் தங்களுக்காக பிரதிநிதிகளை (representatives) தேர்ந்தெடுப்பார்கள். India ஒரு Indirect Democracy நாடு.",
-      },
-      {
-        title: "Why India is the Largest Democracy",
-        text: "India உலகின் மிகப்பெரிய democracy நாடு, ஏனென்றால் இங்கு 90 கோடிக்கும் மேற்பட்ட மக்கள் வாக்களிக்கும் உரிமை பெற்றுள்ளனர். Caste, religion, gender எதுவாக இருந்தாலும், ஒவ்வொரு adult citizen-க்கும் ஒரு vote, அந்த vote-ன் மதிப்பு சமமானது.",
-      },
-      {
-        title: "Democracy-ன் முக்கியத்துவம்",
-        text: "Democracy முக்கியமானது, ஏனென்றால் இது அரசாங்கத்தை மக்களுக்கு பொறுப்புடையதாக (accountable) ஆக்குகிறது. அரசாங்கம் சரியாக செயல்படவில்லை என்றால், மக்கள் அடுத்த தேர்தலில் அவர்களை வீழ்த்தலாம் (vote out). இது ஒவ்வொரு குடிமகனின் (citizen) உரிமைகளையும் காப்பாற்றுகிறது.",
-      },
-    ],
-    checkpoints: [
-      {
-        question: "Democracy என்ற வார்த்தை எந்த மொழியில் இருந்து வந்தது, அதன் பொருள் என்ன?",
-        expectedAnswer: "Greek மொழியில் இருந்து வந்தது — Demos means people, Kratos means rule. So it means rule by the people.",
-        keyPoints: ["Greek", "Demos people", "Kratos rule"],
-      },
-      {
-        question: "Monarchy மற்றும் Democracy-க்கு உள்ள ஒரு வித்தியாசத்தை சொல்லுங்கள்?",
-        expectedAnswer: "Monarchy-ல் ஒரு king ஆட்சி செய்வார், அதிகாரம் family-க்குள் இருக்கும். Democracy-ல் மக்கள் தங்கள் தலைவர்களை தேர்ந்தெடுப்பார்கள்.",
-        keyPoints: ["monarchy king family", "democracy people elect"],
-      },
-      {
-        question: "India ஏன் Indirect Democracy-யை பின்பற்றுகிறது?",
-        expectedAnswer: "ஏனெனில் India ஒரு பெரிய நாடு, எல்லா மக்களும் நேரடியாக முடிவெடுக்க முடியாது, so மக்கள் representatives-ஐ தேர்ந்தெடுக்கிறார்கள்.",
-        keyPoints: ["large country", "representatives", "cannot decide directly"],
-      },
-      {
-        question: "India ஏன் உலகின் மிகப்பெரிய democracy நாடு என்று அழைக்கப்படுகிறது?",
-        expectedAnswer: "ஏனெனில் 90 கோடிக்கும் மேற்பட்ட மக்கள் வாக்களிக்கும் உரிமை பெற்றுள்ளனர், caste, religion, gender வேறுபாடு இல்லாமல்.",
-        keyPoints: ["90 crore voters", "no caste religion gender difference", "equal vote"],
-      },
-      {
-        question: "Democracy ஏன் முக்கியம்? ஒரு காரணம் சொல்லுங்கள்.",
-        expectedAnswer: "அரசாங்கத்தை மக்களுக்கு பொறுப்புடையதாக ஆக்குகிறது — சரியாக செயல்படவில்லை என்றால் மக்கள் vote out செய்யலாம்.",
-        keyPoints: ["accountable", "vote out", "responsible"],
-      },
-    ],
-    wrapup: "Semma work today! நீங்கள் இப்போது அரசாங்க வகைகள் பற்றியும், democracy-ன் meaning, India ஏன் largest democracy என்றும் புரிந்துகொண்டீர்கள். Practice questions try பண்ணலாமா, அல்லது next chapter-க்கு செல்லலாமா?",
-  },
-};
-
 // Topics for each chapter (AI generates these dynamically, but we seed common ones)
 const CHAPTER_TOPICS={
   'Quadratic Equations':['Standard Form ax²+bx+c=0','Factorisation Method','Completing the Square','Quadratic Formula','Nature of Roots (Discriminant)','Sum and Product of Roots','Word Problems'],
@@ -2757,15 +2638,36 @@ function renderSyllabusStep(){
       </div>`;
     document.getElementById('syl-start-btn').style.display='block';
 
-    // Show the Interactive Lesson button only if we have pre-written content for this exact chapter
-    const lessonKey = SYL.board+'_'+SYL.cls+'_'+SYL.chapter;
+    // Show the Interactive Lesson button only if a lesson exists in the database for this exact chapter
     const lessonBtn = document.getElementById('syl-lesson-btn');
-    if(lessonBtn) lessonBtn.style.display = LESSON_DATA[lessonKey] ? 'block' : 'none';
+    if(lessonBtn){
+      lessonBtn.style.display='none'; // hide by default until we confirm
+      checkLessonAvailable(SYL.board, SYL.cls, SYL.subject, SYL.chapter).then(available=>{
+        lessonBtn.style.display = available ? 'block' : 'none';
+      });
+    }
+  }
+}
+
+// Cache of available lessons, fetched once per session, so we don't hit the API on every syllabus step
+let AVAILABLE_LESSONS_CACHE = null;
+async function checkLessonAvailable(board, cls, subject, chapter){
+  try{
+    if(!AVAILABLE_LESSONS_CACHE){
+      const r = await fetch(API_URL+'/api/lessons/available');
+      const d = await r.json();
+      AVAILABLE_LESSONS_CACHE = d.ok ? d.lessons : [];
+    }
+    return AVAILABLE_LESSONS_CACHE.some(l =>
+      l.board===board && String(l.class)===String(cls) && l.subject===subject && l.chapter===chapter
+    );
+  }catch(e){
+    return false;
   }
 }
 
 function startInteractiveLesson(){
-  openLesson(SYL.board, SYL.cls, SYL.chapter);
+  openLesson(SYL.board, SYL.cls, SYL.subject, SYL.chapter);
 }
 
 function selSubject(name){SYL.subject=name;SYL.step=2;renderSyllabusStep();}
@@ -2872,20 +2774,35 @@ let bbCurrentMode='solve', bbAllSteps=[], bbCurrentStep=0, bbWriting=false;
 // ══════════════════════════════════════════════════════════════
 let LESSON = {key:null, data:null, partIndex:0, mode:'chunk', checkpointIndex:0, voiceOn:true, micRecognition:null};
 
-function openLesson(board, cls, chapterName){
-  const key = board+'_'+cls+'_'+chapterName;
-  const data = LESSON_DATA[key];
-  if(!data){
-    alert('This lesson is not ready yet. Please try the Blackboard for now — Miss BrightMind can still help you with this chapter there!');
-    return;
-  }
-  LESSON = {key, data, partIndex:0, mode:'intro', checkpointIndex:0, voiceOn:true, micRecognition:null};
+async function openLesson(board, cls, subject, chapterName){
   document.getElementById('lesson-overlay').style.display='flex';
-  document.getElementById('lesson-title').textContent=data.title;
+  document.getElementById('lesson-title').textContent='Loading lesson...';
   document.getElementById('lesson-mic-footer').style.display='none';
   const canvas=document.getElementById('lesson-canvas');
-  canvas.innerHTML='';
-  renderLessonIntro();
+  canvas.innerHTML='<div style="text-align:center;padding:40px;color:#a8d8a8;font-family:\'Courier New\',monospace;">📚 Loading your lesson...</div>';
+
+  try{
+    const url = API_URL+'/api/lessons/get?board='+encodeURIComponent(board)+'&class='+encodeURIComponent(cls)+'&subject='+encodeURIComponent(subject)+'&chapter='+encodeURIComponent(chapterName);
+    const r = await fetch(url);
+    const d = await r.json();
+
+    if(!d.ok || !d.lesson){
+      document.getElementById('lesson-overlay').style.display='none';
+      alert('This lesson is not ready yet. Please try the Blackboard for now — Miss BrightMind can still help you with this chapter there!');
+      return;
+    }
+
+    const data = d.lesson;
+    const key = board+'_'+cls+'_'+chapterName;
+    LESSON = {key, data, partIndex:0, mode:'intro', checkpointIndex:0, voiceOn:true, micRecognition:null};
+    document.getElementById('lesson-title').textContent=data.title;
+    canvas.innerHTML='';
+    renderLessonIntro();
+  }catch(e){
+    console.error('openLesson error:', e);
+    document.getElementById('lesson-overlay').style.display='none';
+    alert('Could not load this lesson right now. Please check your connection and try again.');
+  }
 }
 
 function closeLessonOverlay(){
