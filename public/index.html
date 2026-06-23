@@ -1843,8 +1843,9 @@ async function apiGet(endpoint) {
 }
 
 // Dynamic subjects based on class
-function getSubjectsForClass(cls, board){
+function getSubjectsForClass(cls, board, state){
   const c = parseInt(cls)||11;
+  state = state || '';
 
   // Class 9 & 10 — Core subjects
   if(c<=10){
@@ -1854,9 +1855,23 @@ function getSubjectsForClass(cls, board){
       {id:'english',   name:'English',         icon:'📖', qs:['How to write an essay?','Active and passive voice','Reading comprehension tips','Letter writing format']},
       {id:'socialsc',  name:'Social Science',  icon:'🌍', qs:['What is democracy?','Explain the French Revolution','What are natural resources?','Explain globalisation']},
     ];
-    // Board-specific language subjects
-    if(board==='TN'||board==='KL'||board==='KA'||board==='AP'||board==='TS'){
-      base.push({id:'tamil',name:board==='KL'?'Malayalam':board==='KA'?'Kannada':board==='AP'||board==='TS'?'Telugu':'Tamil',icon:'📜',qs:['Explain grammar rules','How to write essay?','Poem explanation','Language practice']});
+    // Regional language is decided by the student's STATE, not their board.
+    // A CBSE student living in Tamil Nadu still needs Tamil (Tamil Learning Act,
+    // 2006 — compulsory paper from Class 10 board exams), not generic Hindi.
+    // Same principle applies for Kerala/Karnataka/AP/Telangana students on CBSE.
+    const stateIsTN = board==='TN' || state.indexOf('Tamil')>-1;
+    const stateIsKL = board==='KL' || state.indexOf('Kerala')>-1;
+    const stateIsKA = board==='KA' || state.indexOf('Karnataka')>-1;
+    const stateIsAPTS = board==='AP' || board==='TS' || state.indexOf('Andhra')>-1 || state.indexOf('Telangana')>-1;
+
+    if(stateIsTN){
+      base.push({id:'tamil',name:'Tamil',icon:'📜',qs:['Explain grammar rules','How to write essay?','Poem explanation','Language practice']});
+    } else if(stateIsKL){
+      base.push({id:'tamil',name:'Malayalam',icon:'📜',qs:['Explain grammar rules','How to write essay?','Poem explanation','Language practice']});
+    } else if(stateIsKA){
+      base.push({id:'tamil',name:'Kannada',icon:'📜',qs:['Explain grammar rules','How to write essay?','Poem explanation','Language practice']});
+    } else if(stateIsAPTS){
+      base.push({id:'tamil',name:'Telugu',icon:'📜',qs:['Explain grammar rules','How to write essay?','Poem explanation','Language practice']});
     } else {
       base.push({id:'hindi',name:'Hindi',icon:'📜',qs:['संज्ञा क्या है?','निबंध कैसे लिखें?','व्याकरण समझाओ','समास की परिभाषा']});
     }
@@ -1929,13 +1944,14 @@ const SUBJECTS_STATIC=[
 function getSubjects(){
   var cls=S.user&&S.user.class?S.user.class:11;
   var board=S.user&&S.user.board?S.user.board:'CBSE';
+  var state=S.user&&S.user.state?S.user.state:'';
   // Normalize board: 'Tamil Nadu' → 'TN', 'Tamil Nadu Board' → 'TN'
   if(board.indexOf('Tamil')>-1)board='TN';
   else if(board.indexOf('Kerala')>-1)board='KL';
   else if(board.indexOf('Karnataka')>-1)board='KA';
   else if(board.indexOf('Andhra')>-1||board.indexOf('AP')===0)board='AP';
   else if(board.indexOf('Telangana')>-1||board.indexOf('TS')===0)board='TS';
-  return getSubjectsForClass(cls, board);
+  return getSubjectsForClass(cls, board, state);
 }
 
 const LANG_SYS={
@@ -2565,6 +2581,19 @@ const SOUTH_SYLLABUS={
 };
 // Merge into main SYLLABUS
 Object.assign(SYLLABUS, SOUTH_SYLLABUS);
+
+// CBSE students in Tamil Nadu/Kerala/Karnataka/AP/Telangana study the SAME physical
+// regional-language textbook as state board students in that state — confirmed: the
+// Tamil Nadu Class 9 Tamil textbook is officially common for CBSE and State Board
+// students alike. So CBSE's regional language chapters reuse the real state syllabus
+// data already defined above, rather than falling back to a generic placeholder.
+if(SYLLABUS.CBSE){
+  for(const cls of [9,10]){
+    if(SYLLABUS.CBSE[cls] && SYLLABUS.TN[cls] && SYLLABUS.TN[cls].Tamil){
+      SYLLABUS.CBSE[cls].Tamil = SYLLABUS.TN[cls].Tamil;
+    }
+  }
+}
 
 // ══════════════════════════════════════════════════════════════
 // Topics for each chapter (AI generates these dynamically, but we seed common ones)
