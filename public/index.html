@@ -1449,7 +1449,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
       </div>
       <input id="blank-subject" placeholder="Subject (e.g. Mathematics)" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:12px;margin-bottom:8px;box-sizing:border-box;"/>
       <input id="blank-chapter" placeholder="Chapter (optional, e.g. Real Numbers)" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:12px;margin-bottom:8px;box-sizing:border-box;"/>
-      <input id="blank-count" type="number" value="10" min="1" max="30" placeholder="How many questions (default 10)" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:12px;margin-bottom:10px;box-sizing:border-box;"/>
+      <input id="blank-count" type="number" value="10" min="1" max="50" placeholder="How many questions (default 10, max 50)" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:12px;margin-bottom:10px;box-sizing:border-box;"/>
       <button onclick="generateBlankQuestions()" style="width:100%;background:linear-gradient(135deg,#ff6f00,#ffa726);color:#1a1a1a;border:none;padding:12px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px;">✍️ Generate Fill-in-the-Blank</button>
       <div id="adm-blank-log" style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;font-size:11px;color:rgba(255,255,255,0.7);max-height:200px;overflow-y:auto;font-family:monospace;min-height:40px;"></div>
     </div>
@@ -4424,7 +4424,10 @@ async function generateBlankQuestions(){
     });
     const d = await res.json();
     if(d.ok){
-      log.innerHTML += `<span style="color:#00e676;">✅ Generated ${d.generated}, saved ${d.saved} (duplicates skipped) for ${d.board} Class ${d.class} ${d.subject}</span>`;
+      log.innerHTML += `<span style="color:#00e676;">✅ Saved ${d.saved} unique questions for ${d.board} Class ${d.class} ${d.subject}</span>`;
+      if(d.duplicatesSkipped>0){
+        log.innerHTML += `<br><span style="color:#ffd600;">♻️ Skipped ${d.duplicatesSkipped} duplicate(s) already in your bank, generated fresh replacements automatically (${d.attempts} round${d.attempts>1?'s':''})</span>`;
+      }
     } else {
       log.innerHTML += `<span style="color:#ff7043;">❌ Failed: ${d.msg||'unknown error'}</span>`;
     }
