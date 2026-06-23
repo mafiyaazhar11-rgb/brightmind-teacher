@@ -807,9 +807,9 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     <div id="upgrade-banner-home" onclick="showModal('sub-modal')" style="background:linear-gradient(135deg,#ffd600,#ff8f00,#ffd600);background-size:200%;animation:goldShimmer 3s ease infinite;border-radius:14px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 20px rgba(255,214,0,0.3);" id="upgrade-home-wrap">
       <div>
         <div style="font-size:13px;font-weight:800;color:#0a0c2e;">🎉 Launch Offer — Till Aug 31!</div>
-        <div style="font-size:10px;color:rgba(10,12,46,0.7);margin-top:2px;">All subjects · Unlimited · ₹399 → ₹199/mo</div>
+        <div style="font-size:10px;color:rgba(10,12,46,0.7);margin-top:2px;">All subjects · Unlimited · ₹399 → ₹249/mo</div>
       </div>
-      <div style="font-size:20px;font-weight:900;color:#0a0c2e;">₹199</div>
+      <div style="font-size:20px;font-weight:900;color:#0a0c2e;">₹249</div>
     </div>
 
     <!-- QUICK ACTIONS -->
@@ -1340,7 +1340,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     <div class="revenue-card">
       <div class="rc-label">💰 Total Monthly Revenue</div>
       <div class="rc-amount" id="adm-rev">₹0</div>
-      <div class="rc-sub" id="adm-rev-sub">0 paid × ₹199/month</div>
+      <div class="rc-sub" id="adm-rev-sub">0 paid × ₹249/month</div>
     </div>
     <div class="admin-stats">
       <div class="asc"><div class="asc-label">Total Students</div><div class="asc-val blue" id="adm-total">0</div></div>
@@ -1585,7 +1585,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
       </div>
       <div style="text-align:right;flex-shrink:0;margin-left:10px;">
         <div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹399</div>
-        <div style="font-size:22px;font-weight:900;color:#ffd600;">₹199<span style="font-size:10px;font-weight:500;">/mo</span></div>
+        <div style="font-size:22px;font-weight:900;color:#ffd600;">₹249<span style="font-size:10px;font-weight:500;">/mo</span></div>
       </div>
     </div>
 
@@ -1683,7 +1683,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
         </div>
         <div style="text-align:right;">
           <div style="font-size:12px;color:var(--gray-text);text-decoration:line-through;">₹399</div>
-          <div class="pp">₹199<small>/mo</small></div>
+          <div class="pp">₹249<small>/mo</small></div>
         </div>
       </div>
     </div>
@@ -1697,7 +1697,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
           <div class="pd">Pay every month · Cancel anytime</div>
         </div>
         <div style="text-align:right;">
-          <div class="pp" id="price-monthly">₹199<small>/mo</small></div>
+          <div class="pp" id="price-monthly">₹249<small>/mo</small></div>
         </div>
       </div>
       <div class="plan-opt" onclick="selDuration(this,'quarterly')" id="dur-quarterly">
@@ -1727,7 +1727,7 @@ body{font-family:'Poppins',sans-serif;background:#0a0f2e;font-size:16px;}
     <!-- TOTAL -->
     <div style="background:var(--gray-light);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
       <div style="font-size:13px;color:var(--gray-text);">Total to pay today</div>
-      <div style="font-size:22px;font-weight:900;color:var(--blue-mid);" id="modal-total">₹199</div>
+      <div style="font-size:22px;font-weight:900;color:var(--blue-mid);" id="modal-total">₹249</div>
     </div>
 
     <button class="btn-main" onclick="subscribePlan()">Pay with Razorpay →</button>
@@ -1981,7 +1981,7 @@ function renderTrialBanner(u){
   }else{
     wrap.innerHTML='<div class="trial-banner" onclick="document.getElementById(\'paywall-overlay\').classList.add(\'open\')" style="cursor:pointer;background:linear-gradient(135deg,#7f0000,#b71c1c);">'
       +'<div class="tl"><div class="tt" style="color:#fff;">⏰ Free Demo Ended!</div>'
-      +'<div class="ts" style="color:rgba(255,255,255,0.8);">Subscribe ₹199/mo — Unlimited access</div></div>'
+      +'<div class="ts" style="color:rgba(255,255,255,0.8);">Subscribe ₹249/mo — Unlimited access</div></div>'
       +'<div class="trial-timer" style="background:#ffd600;">'
       +'<div class="tv" style="color:#0a0f2e;font-size:12px;font-weight:900;">Subscribe</div>'
       +'<div class="tl2" style="color:#0a0f2e;">NOW</div></div></div>';
@@ -2118,7 +2118,7 @@ function downloadRankCard(){
 
 function shareRankCard(){
   const u=S.user;if(!u)return;
-  const text=`🧠 BrightMind Teacher\n\n👤 ${u.name}\n📚 Class ${u.class} · ${u.board||'CBSE'}\n\n🏆 GPA: ${computeGPA(u)}/10\n📍 ${u.state} Rank: #${computeStateRank(u)}\n🇮🇳 All India Rank: #${rank(u)}\n🔥 Streak: ${u.streak||0} days\n⭐ Stars: ${u.stars||0}\n\nJoin BrightMind Teacher — AI Tutor from ₹199/month!`;
+  const text=`🧠 BrightMind Teacher\n\n👤 ${u.name}\n📚 Class ${u.class} · ${u.board||'CBSE'}\n\n🏆 GPA: ${computeGPA(u)}/10\n📍 ${u.state} Rank: #${computeStateRank(u)}\n🇮🇳 All India Rank: #${rank(u)}\n🔥 Streak: ${u.streak||0} days\n⭐ Stars: ${u.stars||0}\n\nJoin BrightMind Teacher — AI Tutor from ₹249/month!`;
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
 
@@ -2293,7 +2293,7 @@ function loginUser(u){
             </div>
             <div onclick="selPaywallPlan(this,'all','monthly')" style="border:2px solid rgba(255,214,0,0.8);background:rgba(255,214,0,0.12);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
               <div><div style="font-size:14px;font-weight:800;color:#fff;">All Subjects <span style="background:#ffd600;color:#0a0f2e;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:4px;">BEST</span></div><div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">Unlimited · Exams · Leaderboard</div></div>
-              <div style="text-align:right;flex-shrink:0;margin-left:10px;"><div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹399</div><div style="font-size:22px;font-weight:900;color:#ffd600;">₹199<span style="font-size:10px;">/mo</span></div></div>
+              <div style="text-align:right;flex-shrink:0;margin-left:10px;"><div style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:line-through;">₹399</div><div style="font-size:22px;font-weight:900;color:#ffd600;">₹249<span style="font-size:10px;">/mo</span></div></div>
             </div>
             <div onclick="selPaywallPlan(this,'all','quarterly')" style="border:2px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
               <div><div style="font-size:14px;font-weight:800;color:#fff;">Quarterly <span style="background:#4caf50;color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;margin-left:4px;">5% OFF</span></div><div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:2px;">3 months · Save ₹30 · ₹189/mo</div></div>
@@ -3535,8 +3535,12 @@ async function sendMsg(){
     if(d.limit_reached){
       ty.classList.remove('show');
       S.chatHist.pop();
-      addMsg('ai','🌟 You have used all your free questions for today! Upgrade to ask unlimited questions and unlock full access.');
-      setTimeout(()=>showModal('sub-modal'),1200);
+      if(S.isPaid){
+        addMsg('ai','💛 You\'ve had a great study session today — '+(d.daily_limit||12)+' questions used! Your chat resets at midnight, but your Blackboard (3 solves) and unlimited practice exams are still open. Come back tomorrow for more! 🌙');
+      } else {
+        addMsg('ai','🌟 You\'ve used your free questions for today! Upgrade to ask more questions daily and unlock full Blackboard access.');
+        setTimeout(()=>showModal('sub-modal'),1200);
+      }
       return;
     }
     const rep=d.content?.[0]?.text||(d.error?.message)||'Sorry, please try again!';
@@ -3917,7 +3921,7 @@ function renderParentView(u){
   const passedExams=(u.examHist||[]).filter(e=>e.passed&&new Date(e.date)>thisWeek);
   if(passedExams.length>0)alerts.push({type:'good',icon:'🎉',title:'Exam Passed!',msg:`${u.name} passed ${passedExams.map(e=>e.subject).join(', ')}! Great progress this week.`});
   if(u.totalQ>10)alerts.push({type:'info',icon:'📖',title:'Active Learner',msg:`${u.name} has asked ${u.totalQ} questions to the AI teacher. They are studying regularly!`});
-  if(!u.isPaid)alerts.push({type:'info',icon:'🚀',title:'Upgrade Available',msg:`${u.name} is on the free plan (5 questions/day). Upgrade to Premium for ₹199/month to unlock unlimited access.`});
+  if(!u.isPaid)alerts.push({type:'info',icon:'🚀',title:'Upgrade Available',msg:`${u.name} is on the free plan (5 questions/day). Upgrade to Premium for ₹249/month to unlock unlimited access.`});
   if(alerts.length===0)alerts.push({type:'info',icon:'✅',title:'All Good!',msg:`No alerts right now. ${u.name} is doing well!`});
   document.getElementById('p-alerts').innerHTML=alerts.map(a=>`
     <div class="alert-card ${a.type}"><div class="alert-icon">${a.icon}</div>
@@ -4179,7 +4183,7 @@ async function renderAdmin(){
   const st=students; const paid=students.filter(x=>x.is_paid);
   const unused_rev=rev; // suppress lint
   document.getElementById('adm-rev').textContent='₹'+rev.toLocaleString('en-IN');
-  document.getElementById('adm-rev-sub').textContent=paid.length+' paid × ₹199/month';
+  document.getElementById('adm-rev-sub').textContent=paid.length+' paid × ₹249/month';
   document.getElementById('adm-total').textContent=st.length;
   document.getElementById('adm-paid').textContent=paid.length;
   document.getElementById('adm-free').textContent=st.length-paid.length;
@@ -4215,7 +4219,7 @@ async function renderAdmin(){
 let selectedPlanType='all', selectedDuration='monthly';
 
 // Base prices
-const BASE_PRICES={all:199,basic:199,premium:299};
+const BASE_PRICES={all:249,basic:249,premium:299};
 
 function showModal(id){
   document.getElementById(id).classList.add('show');
@@ -4238,7 +4242,7 @@ function selDuration(el, duration){
 }
 
 function updatePriceDisplay(){
-  const base=BASE_PRICES[selectedPlanType]||199;
+  const base=BASE_PRICES[selectedPlanType]||249;
   // Monthly prices
   const monthly=base;
   const quarterly=Math.round(base*3*0.90); // 5% off
@@ -4265,7 +4269,7 @@ function updatePriceDisplay(){
 }
 
 function subscribePlan(){
-  const base=BASE_PRICES[selectedPlanType]||199;
+  const base=BASE_PRICES[selectedPlanType]||249;
   let amount=base;
   if(selectedDuration==='quarterly') amount=Math.round(base*3*0.90);
   else if(selectedDuration==='annual') amount=Math.round(base*12*0.80);
@@ -4860,7 +4864,7 @@ function showCorrectedPaper(score, corr, tot, timeTaken){
     <div style="background:linear-gradient(135deg,var(--blue-dark),var(--blue-bright));border-radius:14px;padding:14px 16px;text-align:center;margin-bottom:16px;">
       <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:3px;">🧠 BrightMind Teacher</div>
       <div style="font-size:11px;color:rgba(255,255,255,.8);">Your AI Teacher — brightmindteacher.com</div>
-      <div style="font-size:11px;color:var(--gold);margin-top:4px;">South India's Most Affordable AI Tutor · ₹199/month</div>
+      <div style="font-size:11px;color:var(--gold);margin-top:4px;">South India's Most Affordable AI Tutor · ₹249/month</div>
     </div>`;
 
   document.getElementById('corrected-paper-body').innerHTML = paperHTML;
@@ -4994,7 +4998,7 @@ ${IE.questions.map((q,i)=>{
   </div>`;}).join('')}
 <div class="footer">
   <div style="font-size:13pt;font-weight:bold;">🧠 BrightMind Teacher</div>
-  <div style="font-size:11pt;opacity:.9;">brightmindteacher.com · South India's AI Tutor · ₹199/month</div>
+  <div style="font-size:11pt;opacity:.9;">brightmindteacher.com · South India's AI Tutor · ₹249/month</div>
 </div>
 
 
@@ -6064,11 +6068,11 @@ function save(){} // no-op — using API now
         <div style="display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:10px;">
           <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:5px 10px;font-size:10px;color:rgba(255,255,255,0.55);">Vedantu ₹3,000+</div>
           <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:5px 10px;font-size:10px;color:rgba(255,255,255,0.55);">PhysicsWallah ₹1,250</div>
-          <div style="background:rgba(0,200,100,0.15);border:1px solid rgba(0,200,100,0.4);border-radius:8px;padding:5px 10px;font-size:10px;color:#4caf50;font-weight:700;">BrightMind ₹199 ✓</div>
+          <div style="background:rgba(0,200,100,0.15);border:1px solid rgba(0,200,100,0.4);border-radius:8px;padding:5px 10px;font-size:10px;color:#4caf50;font-weight:700;">BrightMind ₹249 ✓</div>
         </div>
         <div style="background:rgba(255,214,0,0.1);border:1px solid rgba(255,214,0,0.3);border-radius:12px;padding:11px 18px;margin-top:12px;">
           <div style="font-size:10px;color:rgba(255,214,0,0.7);font-weight:700;letter-spacing:1px;margin-bottom:3px;">LAUNCH OFFER — TILL 31 AUG</div>
-          <div style="font-size:14px;font-weight:800;color:#ffd600;">All Subjects · Unlimited · ₹199/month</div>
+          <div style="font-size:14px;font-weight:800;color:#ffd600;">All Subjects · Unlimited · ₹249/month</div>
         </div>
         <div style="margin-top:10px;text-align:left;display:inline-block;">
           <div style="font-size:12px;color:rgba(255,255,255,0.75);padding:2px 0;">✅ Blackboard step by step</div>
