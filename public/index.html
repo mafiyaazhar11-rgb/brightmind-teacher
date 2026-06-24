@@ -2339,6 +2339,15 @@ function mapStudent(s){
 function loginUser(u){
   S.user=u;S.isPaid=u.isPaid||false;if(!u.subjects)u.subjects={};S.qToday=u.qToday||0;S.freeLimit=5;S.photoUsed=parseInt(localStorage.getItem('bmt_photo_'+u.id)||'0');S.photoLimit=u.isPaid?(u.plan==='premium'?4:2):1;S.papersDownloaded=parseInt(localStorage.getItem('bmt_papers_'+u.id)||'0');S.papersLimit=u.isPaid?999:1;
   if(!u.creditBalance)u.creditBalance=0;
+  // Auto-set teaching language from the student's saved medium — Tamil-medium
+  // students get Tamil-language Blackboard/Chat teaching automatically, no
+  // manual splash-screen toggle required. Falls back to board-based language
+  // (existing behavior) for non-Tamil-medium students.
+  if(u.medium==='tamil'){
+    S.lang='ta';
+    const sel=document.getElementById('lang-sel');if(sel)sel.value='ta';
+    const bbSel=document.getElementById('bb-lang-sel');if(bbSel)bbSel.value='ta';
+  }
   document.getElementById('nav-av').textContent=u.name[0].toUpperCase();
   document.getElementById('nav-uname').textContent=u.name;
   document.getElementById('hero-name').textContent='Hello, '+u.name+'! 👋';
@@ -2609,6 +2618,10 @@ const SYLLABUS_TAMIL_MEDIUM = {
     Mathematics: {icon:'📐', chapters:['உறவுகளும் சார்புகளும்','எண்களும் தொடர்வரிசைகளும்','இயற்கணிதம்','வடிவியல்','ஆயத்தொலை வடிவியல்','முக்கோணவியல்','அளவியல்','புள்ளியியலும் நிகழ்தகவும்']},
     Science: {icon:'🔬', chapters:['இயக்க விதிகள்','ஒளியியல்','வெப்ப இயற்பியல்','மின்னோட்டவியல்','ஒலியியல்','அணுக்கரு இயற்பியல்','அணுக்களும் மூலக்கூறுகளும்','தனிமங்களின் ஆவர்த்தன வகைப்பாடு','கரைசல்கள்','வேதிவினைகளின் வகைகள்','கார்பனும் அதன் சேர்மங்களும்','தாவர உள்ளமைப்பியல் மற்றும் தாவர செயலியல்','உயிரினங்களின் அமைப்பு நிலைகள்','தாவரங்களின் கடத்துதல் மற்றும் விலங்குகளின் சுற்றோட்டம்','நரம்பு மண்டலம்','தாவர மற்றும் விலங்கு ஹார்மோன்கள்','தாவரங்கள் மற்றும் விலங்குகளில் இனப்பெருக்கம்','மரபியல்','உயிரின் தோற்றமும் பரிணாமமும்','இனக்கலப்பு மற்றும் உயிரித்தொழில்நுட்பவியல்','உடல் நலம் மற்றும் நோய்கள்','சுற்றுச்சூழல் மேலாண்மை','காட்சித் தொடர்பு']},
     'Social Science': {icon:'🌍', chapters:['வரலாறு: முதல் உலகப்போரின் வெடிப்பும் அதன் பின்விளைவுகளும்','வரலாறு: இரு உலகப்போர்களுக்கு இடையில் உலகம்','வரலாறு: இரண்டாம் உலகப்போர்','வரலாறு: இரண்டாம் உலகப்போருக்குப் பிந்தைய உலகம்','வரலாறு: 19ஆம் நூற்றாண்டில் சமூக, சமய சீர்திருத்த இயக்கங்கள்','வரலாறு: ஆங்கிலேய ஆட்சிக்கு எதிராக தமிழகத்தில் நிகழ்ந்த தொடக்ககால கிளர்ச்சிகள்','வரலாறு: காலனிய எதிர்ப்பு இயக்கங்களும் தேசியத்தின் பிறப்பும்','வரலாறு: தேசியம்: காந்திய காலகட்டம்','வரலாறு: தமிழ்நாட்டில் விடுதலைப் போராட்டம்','வரலாறு: தமிழ்நாட்டில் சமூக மாற்றங்கள்','புவியியல்: இந்தியா – அமைவிடம், நிலத்தோற்றம் மற்றும் வடிகாலமைப்பு','புவியியல்: இந்தியா – காலநிலை மற்றும் இயற்கைத் தாவரங்கள்','புவியியல்: இந்தியா – வேளாண்மை','புவியியல்: இந்தியா – வளங்கள் மற்றும் தொழிலகங்கள்','புவியியல்: இந்தியா – மக்கள் தொகை, போக்குவரத்து, தகவல் தொடர்பு மற்றும் வணிகம்','புவியியல்: தமிழ்நாட்டின் இயற்புவியியல்','புவியியல்: தமிழ்நாட்டின் மனித புவியியல்','குடிமையியல்: இந்திய அரசியலமைப்பு','குடிமையியல்: மத்திய அரசு','குடிமையியல்: மாநில அரசு','குடிமையியல்: இந்தியாவின் வெளியுறவுக் கொள்கை','குடிமையியல்: இந்தியாவின் சர்வதேச உறவுகள்','பொருளியல்: மொத்த உள்நாட்டு உற்பத்தி மற்றும் அதன் வளர்ச்சி','பொருளியல்: உலகமயமாக்கல் மற்றும் வணிகம்','பொருளியல்: உணவுப் பாதுகாப்பு மற்றும் ஊட்டச்சத்து','பொருளியல்: அரசும் வரியும்','பொருளியல்: தமிழ்நாட்டில் தொழில்துறை தொகுப்புகள்']},
+  },
+  11: {
+    Mathematics: {icon:'📐', chapters:['கணங்கள், தொடர்புகள் மற்றும் சார்புகள்','அடிப்படை இயற்கணிதம்','முக்கோணவியல்','சேர்ப்பியல் மற்றும் கணிதத் தொகுத்தறிதல்','ஈருறுப்புத் தேற்றம், தொடர்முறைகள் மற்றும் தொடர்கள்','இருபரிமாண பகுமுறை வடிவியல்','அணிகளும் அணிக்கோவைகளும்','வெக்டர் இயற்கணிதம் – I','வகை நுண்கணிதம் – எல்லைகள் மற்றும் தொடர்ச்சித் தன்மை','வகை நுண்கணிதம் – வகையிடுதலும் வகையிடல் முறைகளும்','தொகை நுண்கணிதம்','நிகழ்தகவு கோட்பாடு – ஓர் அறிமுகம்']},
+    Physics: {icon:'⚛️', chapters:['இயல் உலகத்தின் தன்மையும் அளவீடடியலும்','இயக்கவியல்','இயக்க விதிகள்','வேலை, ஆற்றல் மற்றும் திறன்','துகள்களாலான அமைப்பு மற்றும் திண்மப்பொருட்களின் இயக்கம்','ஈர்ப்பியல்','பருப்பொருளின் பண்புகள்','வெப்பமும் வெப்ப இயக்கவியலும்','வாயுக்களின் இயக்கவியற் கொள்கை','அலைவுகள்','அலைகள்']},
   },
 };
 
@@ -4025,7 +4038,7 @@ async function startExam(){
   document.getElementById('exam-title').textContent=S.examSub.name+' — Chapter Exam';
   document.getElementById('exam-body').innerHTML='<div style="text-align:center;padding:40px;font-size:15px;color:var(--gray-text);">📚 Loading questions from question bank...<br><br>Please wait...</div>';
   try{
-    const dbRes=await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(S.examSub.name)+'&count=15&student_id='+encodeURIComponent(S.user?.id||''));
+    const dbRes=await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(S.examSub.name)+'&count=15&qtype=mcq&student_id='+encodeURIComponent(S.user?.id||''));
     const dbData=await dbRes.json();
     if(dbData.msg==='exam_limit_reached'){
       document.getElementById('exam-overlay').classList.remove('open');
@@ -5171,7 +5184,7 @@ async function openInstantExam(subjectId, subjectName, icon){
     </div>`;
   document.getElementById('instant-exam-overlay').style.display='flex';
   try{
-    const dbRes = await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(subjectName)+'&count=15&student_id='+encodeURIComponent(S.user?.id||''));
+    const dbRes = await fetch(API_URL+'/api/qbank/exam?board='+(S.user?.board||'CBSE')+'&class='+(S.user?.class||9)+'&subject='+encodeURIComponent(subjectName)+'&count=15&qtype=mcq&student_id='+encodeURIComponent(S.user?.id||''));
     const dbData = await dbRes.json();
     if(dbData.msg==='exam_limit_reached'){
       document.getElementById('instant-exam-overlay').style.display='none';
