@@ -4081,9 +4081,14 @@ function renderExamQ(){
       <div class="exam-q-card">
         <div class="exam-qnum">QUESTION ${S.examIdx+1} OF ${tot} · ✍️ FILL IN THE BLANK</div>
         <div class="exam-qtext">${q.q}</div>
-        <input type="text" id="blank-inp-${S.examIdx}" placeholder="Type your answer..." value="${gradedResult?gradedResult.typed:''}" ${gradedResult?'disabled':''}
-          style="width:100%;padding:14px 16px;border-radius:12px;border:2px solid ${gradedResult?(gradedResult.correct?'#4caf50':'#f44336'):'var(--gray-mid)'};font-size:16px;font-family:Arial,sans-serif;margin-top:12px;box-sizing:border-box;"
-          onkeydown="if(event.key==='Enter')submitBlankAnswer(${S.examIdx})"/>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:12px;">
+          <input type="text" id="blank-inp-${S.examIdx}" placeholder="Type or speak your answer..." value="${gradedResult?gradedResult.typed:''}" ${gradedResult?'disabled':''}
+            style="flex:1;padding:14px 16px;border-radius:12px;border:2px solid ${gradedResult?(gradedResult.correct?'#4caf50':'#f44336'):'var(--gray-mid)'};font-size:16px;font-family:Arial,sans-serif;box-sizing:border-box;"
+            onkeydown="if(event.key==='Enter')submitBlankAnswer(${S.examIdx})"/>
+          ${!gradedResult?`
+          <button id="blank-mic-${S.examIdx}" onclick="blankAnswerStartMic('blank-inp-${S.examIdx}','blank-mic-${S.examIdx}')" style="background:linear-gradient(135deg,#ffd600,#ff8f00);border:none;width:48px;height:48px;border-radius:10px;font-size:20px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">🎤</button>
+          <button onclick="document.getElementById('blank-inp-${S.examIdx}').value=''" style="background:#eee;border:none;width:40px;height:48px;border-radius:10px;font-size:16px;cursor:pointer;flex-shrink:0;color:#777;">✕</button>`:''}
+        </div>
         ${!gradedResult?`<button onclick="submitBlankAnswer(${S.examIdx})" style="margin-top:10px;width:100%;background:var(--blue-mid);color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Check Answer ✓</button>`:''}
         ${gradedResult?`<div style="margin-top:12px;padding:12px 14px;background:${gradedResult.correct?'#e8f5e9':'#ffebee'};border-radius:10px;">
           <div style="font-weight:700;color:${gradedResult.correct?'#2e7d32':'#c62828'};">${gradedResult.correct?'✅ Correct!':'❌ Not quite'} — Answer: <span style="text-decoration:underline;">${q.blank_answer}</span></div>
@@ -4114,6 +4119,46 @@ function renderExamQ(){
       <button class="btn-main" onclick="nextQ()" style="flex:1;">Next →</button>
       <button onclick="submitExam()" style="flex:1;background:var(--gold);color:var(--blue-dark);font-size:15px;font-weight:700;padding:14px;border-radius:12px;border:none;cursor:pointer;">Submit ✓</button>
     </div>`;
+}
+
+// Shared mic-to-textbox for fill-in-the-blank answers (Chapter Exam + Quick Exam).
+// Fills the text input so the student can review/edit/delete before submitting —
+// does NOT auto-submit, unlike the lesson checkpoint mic which speaks and grades
+// immediately. Supports Tamil speech (ta-IN) for Tamil-medium students who may
+// not have a Tamil keyboard on their phone.
+function blankAnswerStartMic(inputId, micBtnId){
+  const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRec){alert('Sorry! Your browser does not support voice input. Please type your answer instead, or try Chrome on Android.');return;}
+  const recognition=new SpeechRec();
+  recognition.continuous=false; recognition.interimResults=false;
+  // Use the student's medium to pick the right speech language — Tamil medium
+  // students get real Tamil speech recognition, not just English/Tanglish.
+  recognition.lang = (S.user?.medium==='tamil') ? 'ta-IN' : 'en-IN';
+
+  const btn=document.getElementById(micBtnId);
+  const inp=document.getElementById(inputId);
+  if(!btn||!inp)return;
+  const origBg=btn.style.background;
+
+  recognition.onstart=()=>{
+    btn.style.background='linear-gradient(135deg,#e53935,#b71c1c)';
+    btn.textContent='🔴';
+  };
+  recognition.onresult=(e)=>{
+    const transcript=Array.from(e.results).map(r=>r[0].transcript).join('');
+    inp.value = transcript; // fills the box — student can still edit or delete before submitting
+    inp.focus();
+  };
+  recognition.onerror=(e)=>{
+    btn.style.background=origBg;
+    btn.textContent='🎤';
+    if(e.error==='not-allowed'){alert('Microphone access denied. Please allow microphone in browser settings, or type your answer.');}
+  };
+  recognition.onend=()=>{
+    btn.style.background=origBg;
+    btn.textContent='🎤';
+  };
+  recognition.start();
 }
 
 async function submitBlankAnswer(idx){
@@ -5288,9 +5333,14 @@ function ieRenderQuestion(){
       <div style="background:#fff;border-radius:16px;padding:18px;box-shadow:0 2px 12px rgba(13,27,75,.08);">
         <div style="font-size:11px;font-weight:700;color:#e53935;letter-spacing:1px;margin-bottom:8px;">QUESTION ${IE.currentQ+1} OF ${tot} · ✍️ FILL IN THE BLANK</div>
         <div style="font-size:16px;font-weight:600;color:var(--blue-dark);line-height:1.6;margin-bottom:16px;">${q.q}</div>
-        <input type="text" id="ie-blank-inp-${IE.currentQ}" placeholder="Type your answer..." value="${graded?graded.typed:''}" ${graded?'disabled':''}
-          style="width:100%;padding:14px 16px;border-radius:12px;border:2px solid ${graded?(graded.correct?'#4caf50':'#f44336'):'var(--gray-mid)'};font-size:16px;font-family:Arial,sans-serif;box-sizing:border-box;"
-          onkeydown="if(event.key==='Enter')ieSubmitBlankAnswer(${IE.currentQ})"/>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="ie-blank-inp-${IE.currentQ}" placeholder="Type or speak your answer..." value="${graded?graded.typed:''}" ${graded?'disabled':''}
+            style="flex:1;padding:14px 16px;border-radius:12px;border:2px solid ${graded?(graded.correct?'#4caf50':'#f44336'):'var(--gray-mid)'};font-size:16px;font-family:Arial,sans-serif;box-sizing:border-box;"
+            onkeydown="if(event.key==='Enter')ieSubmitBlankAnswer(${IE.currentQ})"/>
+          ${!graded?`
+          <button id="ie-blank-mic-${IE.currentQ}" onclick="blankAnswerStartMic('ie-blank-inp-${IE.currentQ}','ie-blank-mic-${IE.currentQ}')" style="background:linear-gradient(135deg,#ffd600,#ff8f00);border:none;width:48px;height:48px;border-radius:10px;font-size:20px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">🎤</button>
+          <button onclick="document.getElementById('ie-blank-inp-${IE.currentQ}').value=''" style="background:#eee;border:none;width:40px;height:48px;border-radius:10px;font-size:16px;cursor:pointer;flex-shrink:0;color:#777;">✕</button>`:''}
+        </div>
         ${!graded?`<button onclick="ieSubmitBlankAnswer(${IE.currentQ})" style="margin-top:10px;width:100%;background:#e53935;color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Check Answer ✓</button>`:''}
         ${graded?`<div style="margin-top:12px;padding:12px;background:${graded.correct?'#e8f5e9':'#ffebee'};border-radius:10px;font-size:13px;line-height:1.5;">
           <div style="font-weight:700;color:${graded.correct?'#1b5e20':'#b71c1c'};">${graded.correct?'✅ Correct!':'❌ Not quite'} — Answer: <span style="text-decoration:underline;">${q.blank_answer}</span></div>
