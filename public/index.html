@@ -2350,6 +2350,7 @@ function mapStudent(s){
   // Map server fields to app fields
   return {
     id:s.id, name:s.name, board:s.board||'CBSE', class:s.class, state:s.state,
+    medium:s.medium||'english',
     password:s.password, isPaid:s.is_paid||false, plan:s.plan||'free',
     xp:s.xp||0, streak:s.streak||0, stars:s.stars||0,
     totalQ:s.total_questions||0, qToday:s.questions_today||0,
