@@ -6042,9 +6042,14 @@ Return ONLY this JSON:
 }`;
 
     const r = await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:3000,
+      body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,request_type:'paper',max_tokens:3000,
         messages:[{role:'user',content:prompt}]})});
     const d = await r.json();
+
+    if(d.limit_reached){
+      alert(`📚 You've used today's ${d.daily_limit} questions! Question papers also count toward your daily limit. Come back tomorrow, or upgrade for a higher daily limit.`);
+      return;
+    }
     let raw = d.content?.[0]?.text||'{}';
     raw = raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
     const paperData = JSON.parse(raw);
@@ -6139,9 +6144,14 @@ Return ONLY a JSON object:
 Make questions exam-realistic and curriculum-appropriate. Return ONLY JSON.`;
 
     const r = await fetch(API_URL+'/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,max_tokens:3000,
+      body:JSON.stringify({model:'claude-sonnet-4-6',student_id:S.user?.id,request_type:'paper',max_tokens:3000,
         messages:[{role:'user',content:prompt}]})});
     const d = await r.json();
+
+    if(d.limit_reached){
+      alert(`📚 You've used today's ${d.daily_limit} questions! Question papers also count toward your daily limit. Come back tomorrow, or upgrade for a higher daily limit.`);
+      return;
+    }
     let raw = d.content?.[0]?.text||'{}';
     raw = raw.replace(/[\x60]{3}json|[\x60]{3}/g,'').trim();
     const paper = JSON.parse(raw);
