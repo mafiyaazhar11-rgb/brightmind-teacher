@@ -178,6 +178,23 @@ async function initDB() {
       UNIQUE(board, class, subject, chapter)
     );
     CREATE INDEX IF NOT EXISTS idx_lessons_lookup ON bmt_lessons(board, class, subject, chapter);
+
+    CREATE TABLE IF NOT EXISTS bmt_papers (
+      id BIGSERIAL PRIMARY KEY,
+      board VARCHAR(20) NOT NULL,
+      class VARCHAR(5) NOT NULL,
+      subject VARCHAR(100) NOT NULL,
+      paper_type VARCHAR(20) NOT NULL,
+      title VARCHAR(255) NOT NULL,
+      marks INTEGER,
+      time_allowed VARCHAR(50),
+      chapters_covered VARCHAR(255),
+      paper_data JSONB NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE(board, class, subject, paper_type)
+    );
+    CREATE INDEX IF NOT EXISTS idx_papers_lookup ON bmt_papers(board, class, subject, paper_type);
   `);
   console.log('✅ BrightMind DB tables ready');
 }
@@ -1551,6 +1568,209 @@ Return ONLY valid JSON array: [{"q":"...___...","answer":"...","explanation":"..
 
   } catch(e) {
     console.error('Auto-bulk blanks error:', e.message);
+    res.json({ ok: false, msg: e.message });
+  }
+});
+
+// ── MODEL PAPERS — pre-generated, served from the database ──────────────
+
+// STUDENT — Fetch a saved paper (zero AI cost). Falls through to live
+// generation on the frontend if nothing is found here.
+app.get('/api/papers/get', async (req, res) => {
+  try {
+    const { board, class: cls, subject, paper_type } = req.query;
+    if (!board || !cls || !subject || !paper_type) {
+      return res.json({ ok: false, msg: 'Missing board/class/subject/paper_type' });
+    }
+    const result = await pool.query(
+      `SELECT * FROM bmt_papers WHERE board=$1 AND class=$2 AND LOWER(subject)=LOWER($3) AND paper_type=$4`,
+      [board, cls, subject, paper_type]
+    );
+    if (!result.rows.length) return res.json({ ok: false, msg: 'Paper not found' });
+    const row = result.rows[0];
+    res.json({
+      ok: true,
+      paper: { title: row.title, marks: row.marks, time: row.time_allowed, chapters: row.chapters_covered, ...row.paper_data }
+    });
+  } catch (e) {
+    res.json({ ok: false, msg: e.message });
+  }
+});
+
+// List which board/class/subject/paper_type combos have a saved paper —
+// used by the frontend to decide whether to fetch from DB or generate live.
+app.get('/api/papers/available', async (req, res) => {
+  try {
+    const result = await pool.query(`SELECT board, class, subject, paper_type FROM bmt_papers`);
+    res.json({ ok: true, papers: result.rows });
+  } catch (e) {
+    res.json({ ok: false, papers: [] });
+  }
+});
+
+// ADMIN — Bulk generate Model Papers for EVERY subject, Class 9-12, for a
+// board, one paper_type at a time. Same architecture as auto-bulk-blanks:
+// runs in the background, skips subjects that already have a saved paper,
+// rate-limited between calls.
+app.post('/api/admin/papers/auto-bulk', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
+
+    const { board, paper_type = 'quarterly' } = req.body;
+    if (!board) return res.status(400).json({ ok: false, msg: 'Board required' });
+
+    const SYLLABUS_SUBJECTS = {
+      TN: {
+        '9':  ['Tamil','English','Mathematics','Science','Social Science'],
+        '10': ['Tamil','English','Mathematics','Science','Social Science'],
+        '11': ['Tamil','English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','Accountancy','History','Geography'],
+        '12': ['Tamil','English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','Accountancy','History','Geography']
+      },
+      CBSE: {
+        '9':  ['English','Mathematics','Science','Social Science','Hindi'],
+        '10': ['English','Mathematics','Science','Social Science','Hindi'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Accountancy','Business Studies','Economics','History','Geography'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Accountancy','Business Studies','Economics','History','Geography']
+      },
+      KL: {
+        '9':  ['Malayalam','English','Mathematics','Physics','Chemistry','Biology','Social Science'],
+        '10': ['Malayalam','English','Mathematics','Physics','Chemistry','Biology','Social Science'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
+      },
+      KA: {
+        '9':  ['Kannada','English','Mathematics','Science','Social Science'],
+        '10': ['Kannada','English','Mathematics','Science','Social Science'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
+      },
+      AP: {
+        '9':  ['Telugu','English','Mathematics','Physical Science','Biological Science','Social Studies'],
+        '10': ['Telugu','English','Mathematics','Physical Science','Biological Science','Social Studies'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
+      },
+      TS: {
+        '9':  ['Telugu','English','Mathematics','Physical Science','Biological Science','Social Studies'],
+        '10': ['Telugu','English','Mathematics','Physical Science','Biological Science','Social Studies'],
+        '11': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History'],
+        '12': ['English','Mathematics','Physics','Chemistry','Biology','Commerce','Economics','History']
+      }
+    };
+    const boardMap = {
+      TN:'Tamil Nadu State Board', CBSE:'CBSE',
+      KL:'Kerala Board (SCERT)', KA:'Karnataka Board (KSEEB)',
+      AP:'Andhra Pradesh State Board', TS:'Telangana State Board'
+    };
+    const boardFull = boardMap[board] || board;
+    const classes = SYLLABUS_SUBJECTS[board];
+    if (!classes) return res.json({ ok: false, msg: 'Board not in syllabus map' });
+
+    const typeConfig = {
+      unit:       { label: 'UNIT TEST', marks: 25, time: '1 Hour' },
+      midterm:    { label: 'MID TERM EXAM', marks: 50, time: '2 Hours' },
+      quarterly:  { label: '1ST QUARTERLY EXAM', marks: 100, time: '2.5 Hours' },
+      halfyearly: { label: 'HALF YEARLY EXAM', marks: 90, time: '3 Hours' },
+      annual:     { label: 'ANNUAL EXAM', marks: 80, time: '3 Hours' },
+      board:      { label: `${board} BOARD EXAM PATTERN`, marks: 80, time: '3 Hours' }
+    };
+    const cfg = typeConfig[paper_type] || typeConfig.quarterly;
+
+    res.json({ ok: true, msg: 'Bulk paper generation started in background', board, boardFull, paper_type });
+
+    (async () => {
+      let totalSaved = 0;
+      let errors = [];
+      const allCombos = [];
+      for (const [cls, subjects] of Object.entries(classes)) {
+        for (const subject of subjects) allCombos.push({ cls, subject });
+      }
+      console.log(`🚀 Auto-bulk PAPERS started: ${board} ${paper_type} — ${allCombos.length} combos`);
+
+      for (const { cls, subject } of allCombos) {
+        try {
+          const existing = await pool.query(
+            `SELECT id FROM bmt_papers WHERE board=$1 AND class=$2 AND LOWER(subject)=LOWER($3) AND paper_type=$4`,
+            [board, cls, subject, paper_type]
+          );
+          if (existing.rows.length) {
+            console.log(`⏭️ Skip ${board} Cl${cls} ${subject} ${paper_type} — already exists`);
+            continue;
+          }
+
+          const prompt = `Create a realistic ${cfg.label} question paper for ${boardFull} Class ${cls} ${subject}.
+Total marks: ${cfg.marks}. Time: ${cfg.time}.
+Return ONLY this JSON:
+{
+  "instructions": ["All questions are compulsory", "...5 instructions total"],
+  "sections": [
+    {"name": "SECTION A", "type": "Multiple Choice Questions", "marks_per_q": 1, "total_marks": 20,
+     "questions": [{"no":1,"q":"question","options":["A) ","B) ","C) ","D) "],"marks":1}]},
+    {"name": "SECTION B", "type": "Short Answer Questions", "marks_per_q": 2, "total_marks": 20,
+     "questions": [{"no":6,"q":"question","marks":2}]},
+    {"name": "SECTION C", "type": "Long Answer Questions", "marks_per_q": 5, "total_marks": 30,
+     "questions": [{"no":16,"q":"question","marks":5}]}
+  ]
+}`;
+          const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+            body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] })
+          });
+          const aiData = await aiRes.json();
+          if (aiData.error) throw new Error(aiData.error.message);
+          let raw = (aiData.content?.[0]?.text || '{}').replace(/```json|```/g, '').trim();
+          const paperJson = JSON.parse(raw);
+
+          await pool.query(
+            `INSERT INTO bmt_papers (board, class, subject, paper_type, title, marks, time_allowed, chapters_covered, paper_data, updated_at)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW())
+             ON CONFLICT (board, class, subject, paper_type)
+             DO UPDATE SET title=$5, marks=$6, time_allowed=$7, chapters_covered=$8, paper_data=$9, updated_at=NOW()`,
+            [board, cls, subject, paper_type, `${cfg.label} — ${subject}`, cfg.marks, cfg.time, `Full ${subject} Syllabus`, JSON.stringify(paperJson)]
+          );
+          totalSaved++;
+          console.log(`✅ ${board} Cl${cls} ${subject} ${paper_type}: saved`);
+
+          await new Promise(r => setTimeout(r, 1200)); // rate limit between calls
+        } catch (e) {
+          errors.push(`${cls} ${subject}: ${e.message}`);
+          console.error(`❌ ${cls} ${subject} ${paper_type}:`, e.message);
+        }
+      }
+      console.log(`🎉 Auto-bulk PAPERS complete: ${totalSaved} saved. Errors: ${errors.length}`);
+      if (errors.length) console.log('Errors:', errors);
+    })();
+
+  } catch (e) {
+    console.error('Auto-bulk papers error:', e.message);
+    res.json({ ok: false, msg: e.message });
+  }
+});
+
+// ADMIN — List all saved papers
+app.get('/api/admin/papers/list', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
+    const result = await pool.query(`SELECT id, board, class, subject, paper_type, title, created_at, updated_at FROM bmt_papers ORDER BY updated_at DESC`);
+    res.json({ ok: true, papers: result.rows });
+  } catch (e) {
+    res.json({ ok: false, papers: [] });
+  }
+});
+
+// ADMIN — Delete a saved paper
+app.post('/api/admin/papers/delete', async (req, res) => {
+  try {
+    const key = req.headers['x-admin-key'];
+    if (key !== (process.env.ADMIN_KEY || 'azhar2026')) return res.status(401).json({ ok: false });
+    const { id } = req.body;
+    if (!id) return res.json({ ok: false, msg: 'Missing paper id' });
+    await pool.query(`DELETE FROM bmt_papers WHERE id=$1`, [id]);
+    res.json({ ok: true, msg: 'Paper deleted' });
+  } catch (e) {
     res.json({ ok: false, msg: e.message });
   }
 });
