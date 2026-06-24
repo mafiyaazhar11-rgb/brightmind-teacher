@@ -907,15 +907,15 @@ app.post('/api/admin/lessons/delete', async (req, res) => {
 
 app.get('/api/qbank/exam', async (req, res) => {
   try {
-    const { board, class: cls, subject, count = 15, student_id, qtype = 'any' } = req.query;
+    const { board, class: cls, subject, count = 15, student_id, qtype = 'mcq' } = req.query;
     if (!board || !cls || !subject) return res.json({ ok: false, msg: 'Missing params' });
 
-    // qtype: 'any' (default, existing behavior — MCQ + blank mixed),
+    // qtype: 'mcq' (DEFAULT — Exam button, never mixed with fill-in-the-blank),
     // 'blank' (Fill in the Blanks button — typing-only, no MCQ),
-    // 'mcq' (reserved for future use)
+    // 'any' (explicit opt-in only, mixes both — not currently used by any button)
     const typeFilter = qtype === 'blank' ? `AND question_type='blank'`
-                      : qtype === 'mcq' ? `AND (question_type='mcq' OR question_type IS NULL)`
-                      : ''; // 'any' — no filter, existing mixed behavior unchanged
+                      : qtype === 'any' ? '' // explicit opt-in to mixed pool — no caller currently does this
+                      : `AND (question_type='mcq' OR question_type IS NULL)`; // mcq is the safe default
 
     // Enforce free-tier exam cap server-side (cannot be bypassed from frontend)
     if (student_id) {
